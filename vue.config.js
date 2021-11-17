@@ -52,7 +52,7 @@ module.exports = {
 	transpileDependencies: ['ant-design-vue'],
 	devServer: {
 		proxy: {
-			'/ocloudware': {
+			'/rdexpense': {
 				// target: 'http://192.168.41.180:8888',
 				// target: 'http://192.168.41.202:8888',
 				target: 'http://192.168.40.236:1001',//鲁
