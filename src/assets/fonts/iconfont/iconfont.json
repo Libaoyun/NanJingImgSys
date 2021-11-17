@@ -1,0 +1,44 @@
+{
+  "id": "2933484",
+  "name": "研究开发费用管理",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "10156303",
+      "name": "搜索",
+      "font_class": "sousuo",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "281250",
+      "name": "iconEdit1",
+      "font_class": "bianji1",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "7040435",
+      "name": "icon-delete1",
+      "font_class": "icon-delete",
+      "unicode": "ecba",
+      "unicode_decimal": 60602
+    },
+    {
+      "icon_id": "10822836",
+      "name": "icon_add1",
+      "font_class": "icon_add",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "23185145",
+      "name": "icon_refresh",
+      "font_class": "icon_refresh",
+      "unicode": "e67b",
+      "unicode_decimal": 59003
+    }
+  ]
+}
