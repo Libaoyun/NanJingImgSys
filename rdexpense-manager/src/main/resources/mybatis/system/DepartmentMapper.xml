@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DepartmentMapper">
+
+    <select id="queryAllData" parameterType="pd" resultType="pd">
+        select id,
+               parent_id    as parentId,
+               org_id       as orgId,
+               org_name     as orgName,
+               order_number as orderNumber,
+               org_type as orgType,
+               status
+        from sys_department_tree
+        <where>
+            <if test="companyId!=null and companyId!=''">
+                org_id not in (select org_id
+                from sys_department_tree
+                where org_id != #{companyId} and org_type = 0)
+            </if>
+        </where>
+    </select>
+
+
+    <!--    查询项目最大的排序数值，和 编码 -->
+    <select id="selectOrgMaxOrderNumber" parameterType="pd" resultType="pd">
+        select max(order_number) as orderNumber,
+               max(org_id)       as orgId
+        from sys_department_tree
+        where 1 = 1
+    </select>
+
+
+    <!--    新增主表节点-->
+    <insert id="insertTreeData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_department_tree(parent_id,org_id,org_name,status,create_time,org_type,order_number)
+        values (#{parentId},#{orgId},#{orgName},#{status},getDate(),#{orgType},#{orderNumber})
+    </insert>
+
+
+    <!--    新增部门表节点-->
+    <insert id="insertDepartmentData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_department_info(org_id,department_code,org_name,status,create_time,department_simple_name,
+                                        department_level,department_type,fax,in_telephone,out_telephone,department_remark,
+                                          department_duty,department_people,department_level_code,department_type_code)
+        values (#{orgId},#{departmentCode},#{orgName},#{status},getDate(),#{departmentSimpleName},#{departmentLevel},#{departmentType},
+                #{fax},#{inTelephone},#{outTelephone},#{departmentRemark},#{departmentDuty},#{departmentPeople},
+                #{departmentLevelCode},#{departmentTypeCode})
+    </insert>
+
+    <!--    修改主表状态-->
+    <update id="updateNodeStatus" parameterType="pd">
+        update sys_department_tree
+        set status = #{status},
+            create_time = getDate()
+        where org_id = #{item.orgId}
+    </update>
+
+    <!--    修改部门表状态-->
+    <update id="updateDepartmentStatus" parameterType="pd">
+        update sys_department_info
+        set status = #{status},
+            create_time = getDate()
+        where org_id = #{item.orgId}
+    </update>
+
+    <!--    修改主表数据-->
+    <update id="updateNodeData" parameterType="pd">
+        update sys_department_tree
+        set status = #{status},
+            org_name = #{orgName},
+            create_time = getDate()
+        where org_id = #{orgId}
+    </update>
+
+    <!--    修改部门表数据-->
+    <update id="updateDepartmentData" parameterType="pd">
+        update sys_department_info
+        set department_code = #{departmentCode},
+            org_name = #{orgName},
+            status = #{status},
+            create_time = getDate(),
+            department_simple_name = #{departmentSimpleName},
+            department_level = #{departmentLevel},
+            department_level_code = #{departmentLevelCode},
+            department_type = #{departmentType},
+            department_type_code = #{departmentTypeCode},
+            fax = #{fax},
+            in_telephone = #{inTelephone},
+            out_telephone = #{outTelephone},
+            department_remark = #{departmentRemark},
+            department_duty = #{departmentDuty},
+            department_people = #{departmentPeople}
+        where org_id = #{orgId}
+    </update>
+
+
+    <!--    新增职务表节点-->
+    <insert id="insertPostData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_post_info(org_id,post_code,org_name,status,create_time,
+                                  post_level,post_type,remark,post_level_code,post_type_code)
+        values (#{orgId},#{postCode},#{orgName},#{status},getDate(),#{postLevel},#{postType},
+                #{remark},#{postLevelCode},#{postTypeCode})
+    </insert>
+
+    <!--    修改职务表状态-->
+    <update id="updatePostStatus" parameterType="pd">
+        update sys_post_info
+        set status = #{status},
+            create_time = getDate()
+        where org_id = #{item.orgId}
+    </update>
+
+    <!--    修改职务表数据-->
+    <update id="updatePostData" parameterType="pd">
+        update sys_post_info
+        set status = #{status},
+            org_name = #{orgName},
+            remark = #{remark},
+            create_time = getDate(),
+            post_level = #{postLevel},
+            post_level_code = #{postLevelCode},
+            post_type = #{postType},
+            post_type_code = #{postTypeCode},
+            post_code = #{postCode}
+        where org_id = #{orgId}
+    </update>
+
+    <!--    修改主表数据-->
+    <delete id="deleteOrgData" parameterType="java.util.List">
+        delete from sys_department_tree
+        where org_id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.orgId}
+        </foreach>
+    </delete>
+
+    <!--    修改部门表数据-->
+    <delete id="deleteDepartmentData" parameterType="java.util.List">
+        delete from sys_department_info
+        where org_id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.orgId}
+        </foreach>
+    </delete>
+
+
+    <!--    修改职务表数据-->
+    <delete id="deletePostData" parameterType="java.util.List">
+        delete from sys_post_info
+        where org_id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.orgId}
+        </foreach>
+    </delete>
+
+
+    <!--    修改权限表数据-->
+    <delete id="sys_department_info" parameterType="java.util.List">
+        delete from uq_authority_menu
+        where scope_code in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.orgId}
+        </foreach>
+    </delete>
+
+
+    <select id="getDepartment" parameterType="pd" resultType="pd">
+        select
+            id,
+            org_id as orgId,
+            department_code as departmentCode,
+            org_name as orgName,
+            status,
+            department_simple_name as departmentSimpleName,
+            department_level as departmentLevel,
+            department_type as departmentType,
+            fax,
+            in_telephone as inTelephone,
+            out_telephone as outTelephone,
+            department_remark as departmentRemark,
+            department_duty as departmentSuty,
+            department_people as departmentPeople,
+            department_level_code as departmentLevelCode,
+            department_type_code as departmentTypeCode
+        from sys_department_info
+        where org_id = #{orgId}
+    </select>
+
+
+    <select id="getPost" parameterType="pd" resultType="pd">
+        select
+            id,
+            org_id as orgId,
+            post_code as postCode,
+            org_name as orgName,
+            status,
+            post_level as postLevel,
+            post_type as postType,
+            remark,
+            post_level_code as postLevelCode,
+            post_type_code as postTypeCode
+        from sys_post_info
+        where org_id = #{orgId}
+    </select>
+
+</mapper>

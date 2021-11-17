@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RouteMenuMapper">
+
+
+    <select id="queryMenuList" parameterType="java.lang.String" resultType="pd">
+        SELECT
+        id,menu_code,title,path,parent_code,menu_type,order_number,
+        level_number,icon,name,redirect,component,is_valid,relate_flow
+        FROM uq_function_menu
+        where is_valid = '1'
+        and path_routing = '0'
+        <if test="relateFlow != null and relateFlow != ''">
+            and relate_flow = #{relateFlow,jdbcType=VARCHAR}
+        </if>
+        order by order_number asc
+    </select>
+
+
+    <select id="queryAuthMenuCode" resultType="java.lang.String">
+        SELECT
+        authority_button_code
+        FROM
+        uq_authority_menu
+        where scope_code = #{scopeCode,jdbcType=VARCHAR}
+        and user_id = #{userId,jdbcType=VARCHAR}
+        and user_flag in (#{userFlag,jdbcType=VARCHAR})
+        and menu_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryAuthMenuList" parameterType="pd" resultType="pd">
+        SELECT
+           menu_code,authority_button_code
+        FROM
+            uq_authority_menu
+        where user_id = #{userId,jdbcType=VARCHAR}
+        and scope_code = #{organizationId,jdbcType=VARCHAR}
+    </select>
+
+
+    <select id="selectButton" resultType="pd">
+        SELECT a.menu_code as menuCode,
+	        b.authority_button_code as authorityButtonCode,
+	        b.authority_button_name as authorityButtonName,
+	        b.menu_button_code as menuButtonCode,
+	        b.menu_button_name as menuButtonName
+        from uq_function_menu_button a
+        LEFT JOIN uq_authority_combinate_button b on  a.authority_button_code = b.authority_button_code
+    </select>
+
+    <select id="selectMenuButton" resultType="pd">
+        select id,menu_code as menuCode,title,path,parent_code as parentCode,menu_type as menuType,order_number as orderNumber,
+                level_number as levelNumber,icon,name,redirect,component,is_valid as isValid,relate_flow as relateFlow,no_drop_down as noDropdownVal,keep_alive as keepAliveVal,hidden as hiddenVal,is_home as isHome,path_routing as pathRouting
+        from uq_function_menu a
+        where is_valid = 1
+        order by order_number
+    </select>
+
+    <select id="queryMenuByUserId" resultType="java.util.Map">
+        SELECT
+        menu_code,authority_button_code
+        FROM uq_authority_menu am
+        where am.user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryMenuComBtnByUserId" resultType="string">
+        SELECT
+        authority_button_code
+        FROM
+        uq_authority_menu
+        where user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and menu_code in
+        <foreach item="item" index="index" collection="menuList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryMenuButton" parameterType="java.util.List" resultType="pd">
+        SELECT
+        menu_code as menuCode,authority_button_code as authorityButtonCode,detail_button as detailMenuCode
+        FROM uq_authority_menu am
+        where am.user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY am.create_time DESC
+    </select>
+
+    <select id="queryMenuListMap" resultType="pd">
+        SELECT
+        id,
+        menu_code as menuCode,
+        title,
+        path,
+        parent_code as parentCode,
+        menu_type as menuType,
+        order_number as orderNumber,
+        level_number as levelNumber,
+        icon,
+        name,
+        redirect,
+        component,
+        is_valid as isValid,
+        relate_flow as relateFlow
+        FROM uq_function_menu
+        where is_valid = '1'
+        and path_routing = '0'
+        and is_able = '0'
+        and menu_type = '1'
+        <if test="relateFlow != null and relateFlow != ''">
+            and relate_flow = #{relateFlow,jdbcType=VARCHAR}
+        </if>
+        order by order_number asc
+    </select>
+
+    <select id="queryAuthBtnCodeMap" resultType="pd">
+        select
+        a.id as menuCode,
+        a.id,
+        a.menu_code as parentCode,
+        b.authority_button_code as authorityButtonCode,
+        b.authority_button_name as title
+        from uq_function_menu_button a
+        INNER JOIN (
+        select authority_button_code, authority_button_name
+        from uq_authority_combinate_button
+        GROUP BY authority_button_code, authority_button_name
+        ) b
+        on a.authority_button_code=b.authority_button_code
+    </select>
+    <select id="selecButtonRouting" parameterType="map" resultType="string">
+        select menu_code
+        from uq_button_routing
+        <where>
+            <if test="authMenuCode != null and authMenuCode != ''">
+                and auth_menu_code = #{authMenuCode,jdbcType=VARCHAR}
+            </if>
+            <if test="list != null and list.size() > 0">
+                and com_button in
+                <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="queryMenuInfo" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+        id,menu_code as menuCode,title
+        FROM uq_function_menu
+        where is_valid = '1'
+        and path_routing = '0'
+        and menu_code = #{menuId}
+    </select>
+
+    <!--    查询路由表全部数据-->
+    <select id="queryAllButtonRoutingList" resultType="java.util.Map">
+        select menu_code as menuCode,
+            auth_menu_code as authMenuCode,
+            com_button as comButton,
+            detail_button as detailButton
+        from uq_button_routing
+    </select>
+
+
+
+    <select id="queryMenuButtons" parameterType="pd"
+            resultType="pd">
+        SELECT
+        menu_code as menuCode,authority_button_code as authorityButtonCode,detail_button as detailMenuCode
+        FROM uq_authority_menu am
+        where am.scope_code = #{scopeCode,jdbcType=VARCHAR}
+        and am.user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY am.create_time DESC
+    </select>
+
+    <select id="queryMenuByUserIds" parameterType="pd" resultType="java.util.Map">
+        SELECT
+        menu_code,authority_button_code
+        FROM uq_authority_menu am
+        where am.scope_code = #{scopeCode,jdbcType=VARCHAR}
+        and am.user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

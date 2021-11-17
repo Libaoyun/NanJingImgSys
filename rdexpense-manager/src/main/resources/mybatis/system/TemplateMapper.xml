@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TemplateMapper">
+
+
+    <sql id="baseRecord">
+        id,business_id as businessId,creator_user_id as creatorUserId,node_id as nodeId,
+        file_type as fileType, file_name as fileName, remark,creator_user_name as creatorUserName,create_time as createTime,
+        update_time as updateTime
+    </sql>
+
+
+    <insert id="insertRecord" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_hand_book(
+          business_id,creator_user_id,creator_user_name,node_id,file_type,file_name,remark,create_time,update_time)
+        values(#{businessId},#{creatorUserId},#{creatorUserName},#{nodeId},#{fileType},#{fileName},#{remark},getDate(),getDate()
+        )
+    </insert>
+
+    <select id="queryRecordByParams" parameterType="pd" resultType="pd">
+        select
+        <include refid="baseRecord"></include>
+        from uq_hand_book
+        where node_id = #{nodeId}
+    </select>
+
+
+    <select id="queryOneRecord" parameterType="pd" resultType="pd">
+        select
+        <include refid="baseRecord"></include>
+        from uq_hand_book
+        where business_id = #{businessId}
+    </select>
+
+
+    <update id="updateRecord" parameterType="pd">
+        update uq_hand_book
+        set creator_user_id = #{creatorUserId},
+            creator_user_name = #{creatorUserName},
+            file_type = #{fileType},
+            file_name = #{fileName},
+            remark = #{remark},
+            update_time = getdate()
+        where business_id = #{businessId}
+    </update>
+
+
+
+    <delete id="bacthDeleteRecord" parameterType="java.util.List">
+        delete from uq_hand_book
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="queryMaxCode" parameterType="pd" resultType="pd">
+        SELECT MAX(code) as code from (
+            SELECT MAX(menu_code) as code from uq_function_menu where 1=1
+            UNION ALL
+            SELECT MAX(node_id) as code from uq_hand_book_tree where 1=1 ) a
+    </select>
+
+
+    <insert id="insertNode" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_hand_book_tree(
+            node_id,node_name,create_time,update_time)
+        values(#{nodeId},#{nodeName},getDate(),getDate()
+              )
+    </insert>
+
+    <select id="queryByName" parameterType="pd" resultType="pd">
+        select id
+        from uq_hand_book_tree
+        where node_name = #{nodeName}
+    </select>
+
+    <update id="updateNode" parameterType="pd">
+        update uq_hand_book_tree
+        set node_name = #{nodeName},
+            update_time = getdate()
+        where node_id = #{nodeId}
+    </update>
+
+    <select id="queryBookById" parameterType="pd" resultType="pd">
+        select id
+        from uq_hand_book
+        where node_id = #{nodeId}
+    </select>
+
+    <delete id="deleteNode" parameterType="pd">
+        delete from uq_hand_book_tree
+        where node_id = #{nodeId}
+    </delete>
+
+    <select id="queryAllMenu" parameterType="pd" resultType="pd">
+        select
+            um.menu_code as nodeId,um.title as nodeName,um.parent_code as parentCode,
+            ur.auth_menu_code as authMenuCode
+
+        from uq_function_menu um left join uq_button_routing  ur on um.menu_code = ur.menu_code
+        where 1=1 and um.menu_code not in (0,-2,-1,22,2) and is_valid = 1
+        and um.menu_code not in (select menu_code from uq_button_routing where 1=1)
+        order by um.order_number
+    </select>
+
+    <select id="queryAllNode" parameterType="pd" resultType="pd">
+        select
+            node_id as nodeId,node_name as  nodeName,2 as nodeType
+
+        from uq_hand_book_tree
+        where 1=1
+    </select>
+
+    <select id="queryAllBook" parameterType="pd" resultType="pd">
+        select
+            t.node_id,b.node_id
+        from uq_hand_book_tree t,uq_hand_book  b
+        where t.node_id = b.node_id
+    </select>
+
+    <delete id="deleteAllNode" parameterType="pd">
+        delete from uq_hand_book_tree
+        where 1=1
+    </delete>
+
+    <select id="queryNewData" parameterType="pd" resultType="pd">
+        select top 1
+            id
+        from uq_hand_book_tree
+        where 1=1 order by id desc
+    </select>
+
+
+</mapper>
+
+

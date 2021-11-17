@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AuthorityUserMapper">
+	<sql id="authority_user">
+		id,
+		user_id as userId,
+		user_flag as userFlag,
+		auth_name as authName,
+		department_code as departmentCode,
+		department_name as departmentName,
+        auth_status as authStatus,
+        scope_code as scopeCode,
+        create_user as createUser,
+        create_user_id as createUserId,
+        create_time as createTime
+	</sql>
+
+	<sql id="Base_Column">
+		id, user_code as userCode,user_name as userName,english_user_name as englishUserName,
+        gender,gender_code as genderCode,birth_date as birthDate,height,education,education_code as educationCode,
+        marital_status as maritalStatus,blood_type as bloodType,blood_type_code as bloodTypeCode,mobile_phone as mobilePhone,
+        office_telephone as officeTelephone,email,fax,employee_status as employeeStatus,employee_status_code as employeeStatusCode,
+        employee_type as employeeType,employee_type_code as employeeTypeCode,participation_date as participationDate,entry_date as entryDate,
+        confirmation_date as confirmationDate,leave_date as leaveDate,nationality,native_place as nativePlace,nation,religion,
+        create_user as createUser,create_user_id as createUserId,create_time as createTime,update_user as updateUser,update_user_id as updateUserId,
+            update_time as updateTime,password,version
+
+	</sql>
+
+	<select id="queryDeptTree" resultType="pd">
+		select id,dept_name as deptName,dept_code as deptCode,parent_code as parentCode,dept_type as deptType,
+          order_number as orderNumber,level_number as levelNumber,is_valid as isValid
+		from uq_department_station where is_valid = 1
+		order by order_number
+	</select>
+
+
+	<!-- 增加用户授权 多对一-->
+	<insert id="saveUser" parameterType="java.util.List">
+		insert into uq_authority_user(user_id,user_flag,auth_name,department_code,department_name,
+		                              create_time,create_user,create_user_id,scope_code,auth_status)
+		values
+		<foreach collection ="list" item="item" index= "index" separator =",">
+			(
+			#{item.userId},
+			#{item.userFlag},
+			#{item.authName},
+			#{item.departmentCode},
+			#{item.departmentName},
+			getdate(),
+			#{item.createUser},
+			#{item.createUserId},
+			#{item.scopeCode},
+			#{item.authStatus}
+			)
+		</foreach >
+	</insert>
+
+	<!-- 增加菜单权限 -->
+	<insert id="batchInsertMenu" parameterType="java.util.List">
+		insert into uq_authority_menu(user_id,menu_code,authority_button_code,user_flag,
+		                              create_time,update_time,create_user,create_user_id,scope_code)
+		values
+		<foreach item="item" collection="list" index= "index" separator =",">
+			(
+			#{item.userId,jdbcType=VARCHAR},
+			#{item.menuCode,jdbcType=VARCHAR},
+			#{item.authorityButtonCode,jdbcType=VARCHAR},
+			#{item.userFlag,jdbcType=VARCHAR},
+			getdate(),
+			getdate(),
+			#{item.createUser,jdbcType=VARCHAR},
+			#{item.createUserId,jdbcType=VARCHAR},
+			#{item.organizationId,jdbcType=VARCHAR}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 删除用户或者岗位的菜单权限 -->
+	<delete id="batchDeleteMenu" parameterType="pd">
+		delete from uq_authority_menu
+		where user_id in
+		<foreach collection="userList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		and scope_code = #{organizationId}
+	</delete>
+
+	<delete id="deleteUser" parameterType="java.util.List">
+		<foreach collection="list" item="item" separator=";" >
+			delete from uq_authority_user
+			where user_id=#{item.userId}
+		</foreach>
+	</delete>
+
+
+	<!--批量删除授权用户-->
+	<delete id="batchDeleteUser" parameterType="pd">
+		delete from uq_authority_user
+		where user_id in
+		<foreach collection="userList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+        and scope_code = #{organizationId}
+	</delete>
+
+	<select id="findAuthUser" resultType="pd" parameterType="pd">
+		select <include refid="authority_user"/>
+		from uq_authority_user
+		<where>
+			<if test="organizationId!=null and organizationId!=''">
+				and scope_code = #{organizationId}
+			</if>
+			<if test="authName!=null and authName!=''">
+				and auth_name LIKE concat('%',#{authName},'%')
+			</if>
+
+		</where>
+	</select>
+
+	<select id="findMenuCodeByUserId" resultType="java.lang.String" parameterType="pd">
+		select menu_code from uq_authority_menu
+		where user_id=#{userId,jdbcType=VARCHAR} and scope_code = #{organizationId,jdbcType=VARCHAR}
+	</select>
+
+    <delete id="batchDeleteMenuByCode" parameterType="pd">
+		delete from uq_authority_menu
+		where  user_id=#{userId,jdbcType=VARCHAR} and scope_code = #{organizationId,jdbcType=VARCHAR}
+        and menu_code in
+		<foreach item="item" index="index" collection="deleteList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+
+	<update id="updateMenu"  parameterType="pd">
+		update uq_authority_menu
+		set authority_button_code=#{authorityButtonCode},
+			update_time = getdate()
+		where user_id =#{userId}
+		and menu_code = #{menuCode} and scope_code = #{organizationId,jdbcType=VARCHAR}
+	</update>
+
+
+	<select id="queryUser" resultType="pd">
+		select
+		<include refid="Base_Column"/>
+		from sys_user_info
+		<where>
+			<if test="userCode!=null and userCode!=''">
+				and user_code LIKE concat('%',#{userCode},'%')
+			</if>
+			<if test="userName!=null and userName!=''">
+				and user_name LIKE concat('%',#{userName},'%')
+			</if>
+			<if test="englishUseName!=null and englishUseName!=''">
+				and english_user_name LIKE concat ('%',#{englishUseName},'%')
+			</if>
+			<if test="organizationId!=null and organizationId!=''">
+				and user_code not in (select user_id from uq_authority_user where scope_code = #{organizationId} and user_flag = 0)
+			</if>
+		</where>
+		ORDER BY update_time DESC;
+	</select>
+
+	<select id="getUserById" resultType="pd">
+		select id,user_name as name,dept_code as deptCode,dept_name as deptName,station_code as stationCode,station_name as stationName
+		from sys_user_info
+		<where>
+			<if test="userId!=null and userId!=''">
+				and id = #{userId}
+			</if>
+			and user_flag = 1
+		</where>
+	</select>
+
+
+	<select id="selectUserInfo"  resultType="pd">
+		select id,contact_number as contactNumber,identity_number as identityNumber
+		from sys_user_info
+		where id in
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+
+	<select id="queryOrganization"  resultType="pd">
+		select id as organizationId,org_name as organizationName
+		from sys_organization_info
+		<where>
+			status = 1
+			<if test="companyId!=null and companyId!=''">
+				and company_id=#{companyId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+
+	<select id="queryDataById" parameterType="pd" resultType="pd">
+		select
+		user_code as userCode,
+		department_name as departmentName,
+		post_name as postName,
+		department_code as departmentCode,
+		post_code as postCode
+		from sys_user_department_info
+		where user_code = #{userId}
+	</select>
+
+
+</mapper>

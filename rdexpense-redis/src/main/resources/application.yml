@@ -1,0 +1,16 @@
+#redis数据源配置
+#spring:
+#  redis:
+#    database: 0
+#    host: develop.upload.shujiajia.com
+#    port: 6379
+#    password: sjtabc123
+#    ssl: false
+#    timeout: 1000
+#    jedis:
+#      pool:
+#        max-active: 8
+#        max-wait: -1
+#        max-idle: 8
+#        min-idle: 0
+          
