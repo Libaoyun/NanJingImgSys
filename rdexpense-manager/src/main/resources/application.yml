@@ -1,5 +1,5 @@
 server:
-  port: 1002              #tomcat服务端口号      默认是8080
+  port: 1001              #tomcat服务端口号      默认是8080
   max-threads: 2000       #tomcat最大线程数
   accept-count: 1000       #tomcat最大等待数
   servlet:
