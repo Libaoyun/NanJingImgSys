@@ -1,4 +1,7 @@
 import fetch from '../request'
+import axios from 'axios'
+import Vue from 'vue'
+import { ACCESS_TOKEN } from '@/utils/storage'
 
 
 // 用户登录
@@ -25,5 +28,18 @@ export function apiGenerateRoute (params) {
       url: '/rdexpense/menu/queryRoutingMenuTree',
       method: 'get',
       params
+  })
+}
+
+// 导出excel，pdf,合同
+export function apiExportFile ({ url, data}) {
+  return axios({
+      headers:{
+          token:Vue.ls.get(ACCESS_TOKEN)
+      },
+      responseType:'blob',
+      url: url,
+      method: 'post',
+      data
   })
 }

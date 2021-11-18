@@ -63,7 +63,7 @@
                             <el-divider direction="vertical"></el-divider>
                             <el-link type="primary" :underline="false" @click="clickCurrentRow(scope.row,'edit')">编辑</el-link>
                             <el-divider direction="vertical"></el-divider>
-                            <el-popconfirm title="是否要删除此文件？" @onConfirm="deleteFile(scope)" placement="top" cancelButtonType="plain">
+                            <el-popconfirm title="是否要删除此文件？" @confirm="deleteFile(scope)" placement="top" cancelButtonType="plain">
                                 <el-link type="danger" :underline="false" slot="reference">删除</el-link>
                             </el-popconfirm>
                         </span>

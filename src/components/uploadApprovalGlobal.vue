@@ -33,7 +33,7 @@
                         <template slot-scope="props">{{props.row.fileSize | formatSize}}</template>
                     </el-table-column>
                     <el-table-column prop="uploadUserName" label="上传人" align="center" :show-overflow-tooltip="true">
-                        <template slot-scope="props">{{ props.row.uploadUserName ? props.row.uploadUserName : $store.getters.userInfo.name}}</template>
+                        <template slot-scope="props">{{ props.row.uploadUserName ? props.row.uploadUserName : $store.getters.userInfo.userName}}</template>
                     </el-table-column>
                     <el-table-column prop="uploadProgress" label="上传进度" align="center" :show-overflow-tooltip="true" width="200px" v-if="isAdd">
                         <template slot-scope="props">
@@ -45,8 +45,8 @@
                         <template slot-scope="scope">
                             <template v-if="scope.row.uploadProgress === undefined">
                                 <!-- <i class="iconfont iconbrowse previewBtn" @click="previewFile"></i> -->
-                                <i class="iconfont iconicondownload downloadBtn" @click="downloadFile(scope)"></i>
-                                <el-popconfirm title="是否要删除此行？" @onConfirm="deleteDetail(scope)" placement="top" cancelButtonType="plain"  v-if="isAdd">
+                                <i class="el-icon-download downloadBtn" @click="downloadFile(scope)"></i>
+                                <el-popconfirm title="是否要删除此行？" @confirm="deleteDetail(scope)" placement="top" cancelButtonType="plain"  v-if="isAdd">
                                     <i slot="reference" class="el-icon-delete deleteBtn"></i>
                                 </el-popconfirm>
                             </template>
@@ -123,6 +123,7 @@ export default class extends tableMixin {
         })
     }
     deleteDetail(scope){
+        console.log(scope)
         if(scope.row.businessId){
             this.$API.apiDeleteFile({businessId:scope.row.businessId,id:scope.row.id}).then(res=>{
                 this.fileList.splice(scope.$index,1);

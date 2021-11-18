@@ -1,7 +1,7 @@
 <template>
     <div style="padding-bottom: 46px">
-        <card-global class="user-card">
-            <div style="width:calc(100% - 140px)">
+        <card-global>
+            <div>
                 <el-form ref="doForm" :inline="true" :rules="formRules" :model="baseInfo" size="mini" label-position="right" label-width="80px">
                     <el-form-item label="编号:" prop="userCode">
                         <el-input v-model="baseInfo.userCode" placeholder="请输入编号"></el-input>
@@ -38,7 +38,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="婚姻状况:" prop="maritalStatus">
-                        <el-switch v-model="baseInfo.maritalStatus"></el-switch>
+                        <el-switch v-model="baseInfo.maritalStatus" active-value="1" inactive-value="0"></el-switch>
                     </el-form-item>
                     <el-form-item label="血型:" prop="bloodType">
                         <el-select v-model="baseInfo.bloodType" placeholder="请选择血型">
@@ -50,39 +50,6 @@
                         </el-select>
                     </el-form-item>
                 </el-form>
-            </div>
-            <div class="my-upload">
-                <el-upload
-                ref="my-upload"
-                :on-change="changeFile"
-                :class="{'isShow':!isShow}"
-                action="#"
-                list-type="picture-card"
-                :limit="1"
-                :auto-upload="false">
-                    <i slot="default" class="el-icon-plus"></i>
-                    <div slot="file" slot-scope="{file}">
-                        <img
-                            class="el-upload-list__item-thumbnail"
-                            :src="file.url" alt=""
-                        >
-                        <span class="el-upload-list__item-actions">
-                            <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
-                                <i class="el-icon-zoom-in"></i>
-                            </span>
-                            <span
-                            v-if="!disabled"
-                            class="el-upload-list__item-delete"
-                            @click="handleRemove(file)"
-                            >
-                                <i class="el-icon-delete"></i>
-                            </span>
-                        </span>
-                    </div>
-                </el-upload>
-                <el-dialog :visible.sync="dialogVisible">
-                    <img width="100%" :src="dialogImageUrl" alt="">
-                </el-dialog>
             </div>
         </card-global>
         <!-- 所属部门版块 -->
@@ -106,18 +73,14 @@
                     <el-table-column prop="departmentCode" label="部门" width="120" align="center">
                         <template slot-scope="scope">
                             <el-form-item :prop="'departmentList.'+scope.$index+'.departmentCode'" :rules="formRules['departmentCode']">
-                                <el-select v-model="scope.row.departmentCode">
-                                    <el-option value="1"></el-option>
-                                </el-select>
+                                <el-input readonly v-model="scope.row.departmentName" @focus="chooseDepartment(scope)"></el-input>
                             </el-form-item>
                         </template>
                     </el-table-column>
                     <el-table-column prop="postCode" label="职务" width="120" align="center">
                         <template slot-scope="scope">
                             <el-form-item :prop="'departmentList.'+scope.$index+'.postCode'" :rules="formRules['postCode']">
-                                <el-select v-model="scope.row.postCode">
-                                    <el-option value="2"></el-option>
-                                </el-select>
+                                <el-input readonly v-model="scope.row.postName" @focus="choosePosition(scope)"></el-input>
                             </el-form-item>
                         </template>
                     </el-table-column>
@@ -145,19 +108,19 @@
                 <el-form-item label="传真:" prop="fax">
                     <el-input  v-model="baseInfo.fax" placeholder="请输入传真"></el-input>
                 </el-form-item>
-                <el-form-item label="员工状态:" prop="employeeStatus">
-                    <el-select v-model="baseInfo.employeeStatus" placeholder="请选择员工状态">
+                <el-form-item label="用户状态:" prop="employeeStatus">
+                    <el-select v-model="baseInfo.employeeStatus" placeholder="请选择用户状态">
                         <el-option value="在职"></el-option>
                         <el-option value="离职"></el-option>
                         <el-option value="退休"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="员工类型:" prop="employeeType">
-                    <el-select v-model="baseInfo.employeeType" placeholder="请选择员工类型">
+                <el-form-item label="用户类型:" prop="employeeType">
+                    <el-select v-model="baseInfo.employeeType" placeholder="请选择用户类型">
                         <el-option value="正式"></el-option>
                         <el-option value="试用期"></el-option>
                         <el-option value="实习生"></el-option>
-                        <el-option value="临时员工"></el-option>
+                        <el-option value="临时用户"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="参工日期:" prop="participationDate">
@@ -186,6 +149,8 @@
                 </el-form-item>
             </el-form>
         </card-global>
+        <!-- 附件版块 -->
+        <upload-approval-global type="create" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
             <loading-btn size="mini" type="primary" @click="saveBtn" :loading="loadingBtn">保存</loading-btn>
@@ -197,6 +162,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
 import { checkForm } from '@/utils/index'
+import $alert from '../alert'
 
 @Component({
     name: 'create',
@@ -227,7 +193,7 @@ export default class extends tableMixin {
             birthDate: '',
             height: '',
             education: '',
-            maritalStatus: '',
+            maritalStatus: '0',
             bloodType: '',
             mobilePhone: '',
             officeTelephone: '',
@@ -246,11 +212,14 @@ export default class extends tableMixin {
             detailForm:{
                 departmentList:[
                     {
+                        departmentName:'',
                         departmentCode:'',
+                        postName:'',
                         postCode:''
                     }
                 ]
-            }
+            },
+            attachmentList: []
         } 
     }
     activated() {
@@ -272,7 +241,9 @@ export default class extends tableMixin {
         this.$refs[formName].validate(valid => {
             if (valid) {
                 this.baseInfo.detailForm.departmentList.push({
+                    departmentName:'',
                     departmentCode:'',
+                    postName:'',
                     postCode:''
                 })
             } else {
@@ -299,6 +270,35 @@ export default class extends tableMixin {
     changeFile(file) {
         this.isShow = false
     }
+
+    // 选择部门
+    chooseDepartment(scope) {
+        $alert.alertDepartmentTree().then((res)=>{
+            this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'departmentName',res.orgName)
+            this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'departmentCode',res.orgId)
+        })
+    }
+    // 选择职务
+    choosePosition(scope) {
+        console.log(scope)
+        if(!scope.row.departmentCode) {
+            this.$message({message:'请先选择部门'})
+            return
+        }
+        $alert.alertPositionTree(scope.row.departmentCode).then(res=>{
+            this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'postName',res.orgName)
+            this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'postCode',res.orgId)
+        })
+    }
+    formatSendData(data) {
+        data = JSON.parse(JSON.stringify(data));
+        data.creatorOrgId = this.$store.getters.currentOrganization.organizationId,
+        data.creatorOrgName = this.$store.getters.currentOrganization.organizationName,
+        data.menuCode = this.MENU_CODE_LIST.userList
+        data.departmentList = data.detailForm.departmentList
+        delete data.detailForm
+        return data
+    }
     // 保存按钮
     saveBtn(){
         const _self = this
@@ -308,14 +308,15 @@ export default class extends tableMixin {
             resultArr.push(checkForm(_self,item))
         })
         Promise.all(resultArr).then(() => {
+            let params = this.formatSendData(this.baseInfo);
             this.$confirm('确定保存当前表单?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
                 }).then(() => {
-                    this.loadingBtn = 1;
                     this.baseInfo.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
-                    this.$API.apiCreateUser(this.baseInfo).then(res=>{
+                    this.loadingBtn = 1;
+                    this.$API.apiCreateUser(params).then(res=>{
                         this.loadingBtn = 0;
                         this.$message({
                             type: 'success',

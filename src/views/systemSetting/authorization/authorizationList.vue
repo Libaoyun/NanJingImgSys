@@ -54,7 +54,7 @@
                     <template slot-scope="scope">
                         <el-link type="primary" :underline="false" @click="updateMenuAuth(scope.row)" :disabled="scope.row.userId == $store.getters.userInfo.id">授权</el-link>
                         <el-divider direction="vertical"></el-divider>
-                        <el-popconfirm title="是否要删除此对象？" @onConfirm="deleteUser(scope)" placement="top" cancelButtonType="plain" :disabled="scope.row.userId == $store.getters.userInfo.id">
+                        <el-popconfirm title="是否要删除此对象？" @confirm="deleteUser(scope)" placement="top" cancelButtonType="plain" :disabled="scope.row.userId == $store.getters.userInfo.id">
                             <el-link type="danger" :underline="false" slot="reference" :disabled="scope.row.userId == $store.getters.userInfo.id">删除</el-link>
                         </el-popconfirm>
                     </template>

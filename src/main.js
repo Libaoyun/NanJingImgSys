@@ -13,8 +13,12 @@ import './permission'
 import {checkPermission} from './directives/checkPermission.js';
 import { CardGlobal, ImgPreview , UploadApprovalGlobal, ApprovalGlobal, LoadingBtn, FooterGlobal}from '@/components/index'
 import {menuCodeList} from '@/utils/menuCodeList.js'
+import {judgeBtn} from '@/utils/judgeBtn.js'
+import { exportFile } from '@/utils/export.js'
 
 Vue.prototype.MENU_CODE_LIST = menuCodeList
+Vue.prototype.JUDGE_BTN = judgeBtn
+Vue.prototype.EXPORT_FILE = exportFile
 
 let storageOptions= {
   namespace: 'pro__', // key prefix

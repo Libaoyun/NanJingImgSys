@@ -26,6 +26,7 @@ const user = {
             return new Promise((resolve, reject) => {
                 apiUserLogin(userInfo).then(res => {
                     Vue.ls.set(ACCESS_TOKEN, res.data.token || 'token', 24 * 60 * 60 * 1000)
+                    console.log(Vue.ls.get(ACCESS_TOKEN))
                     commit('SET_TOKEN', res.data.token)
                     resolve(res)
                 }).catch(error => {

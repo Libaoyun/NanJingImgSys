@@ -66,7 +66,7 @@
                     <template slot-scope="scope">
                         <el-link type="primary" :underline="false" @click="updateDictionary(scope.row)">编辑</el-link>
                         <el-divider direction="vertical"></el-divider>
-                        <el-popconfirm title="是否要删除当前数据？" @onConfirm="deleteDictionary(scope)" placement="top" cancelButtonType="plain">
+                        <el-popconfirm title="是否要删除当前数据？" @confirm="deleteDictionary(scope)" placement="top" cancelButtonType="plain">
                             <el-link type="danger" :underline="false" slot="reference">删除</el-link>
                         </el-popconfirm>
                     </template>

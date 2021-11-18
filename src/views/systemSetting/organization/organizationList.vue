@@ -117,7 +117,12 @@ export default class extends tableMixin {
     
 
     nodeDrop(Node){
-        this.$API.apiUpdateSysOrgTree({data:this.projectTree}).then(res=>{
+        const params = {
+            data:this.projectTree,
+            creatorOrgId:this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName:this.$store.getters.currentOrganization.organizationName,
+        }
+        this.$API.apiUpdateOTree(params).then(res=>{
             this.nodeExpand(Node.data)
             // console.log(res);
             this.$message({

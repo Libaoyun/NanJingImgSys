@@ -1,6 +1,6 @@
 import fetch from '@/api/request'
 
-// 新增员工 
+// 新增用户 
 export function apiCreateUser(data) {
     return fetch({
       url: '/rdexpense/user/addUser',
@@ -9,7 +9,7 @@ export function apiCreateUser(data) {
     })
 }
 
-// 删除员工 
+// 删除用户 
 export function apiDeleteUser(data) {
     return fetch({
       url: '/rdexpense/user/deleteUser',
@@ -27,7 +27,7 @@ export function apiGetPosition(data) {
     })
 }
 
-// 查询员工详情
+// 查询用户详情
 export function apiGetUserDetail(data) {
     return fetch({
       url: '/rdexpense/user/getUserDetail',
@@ -36,7 +36,7 @@ export function apiGetUserDetail(data) {
     })
 }
 
-// 查询员工详情
+// 查询用户详情
 export function apiGetUserList(data) {
     return fetch({
       url: '/rdexpense/user/queryUserList',

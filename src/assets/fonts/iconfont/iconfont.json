@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8871307",
+      "name": "系统",
+      "font_class": "xitong",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "524416",
+      "name": "重置密码",
+      "font_class": "zhongzhimima",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "2667525",
+      "name": "导出",
+      "font_class": "daochu",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "5387748",
+      "name": "打印机_o",
+      "font_class": "dayinji_o",
+      "unicode": "eb48",
+      "unicode_decimal": 60232
+    },
+    {
       "icon_id": "10156303",
       "name": "搜索",
       "font_class": "sousuo",

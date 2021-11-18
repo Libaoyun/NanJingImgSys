@@ -3,8 +3,23 @@
         <!-- 按钮组版块 -->
         <div class="global-btn-group">
             <el-button type="primary" size="small" icon="iconfont icon-icon_add" @click="createBtn" v-checkPermission="'create'">新建</el-button>
+            <upload-excel @afterUploadExcel="afterUploadExcel" :excelColumnName="excelColumnName"></upload-excel>
             <el-button size="small" icon="iconfont icon-bianji1" @click="editBtn" v-checkPermission="'edit'">编辑</el-button>
             <loading-btn size="small" icon="iconfont icon-icon-delete" @click="deleteBtn(1)" :loading="loadingBtn" v-checkPermission="'delete'">删除</loading-btn>
+            <el-dropdown style="margin:0 10px">
+                <el-button size="small" icon="iconfont icon-daochu">
+                    导出<i class="el-icon-arrow-down el-icon--right"></i>
+                </el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item  @click.native="exportPdfBtn">PDF</el-dropdown-item>
+                    <el-dropdown-item  @click.native="exportExcelBtn">Excel</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+            <el-button size="small" icon="iconfont icon-dayinji_o" @click="printBtn">打印</el-button>
+            <el-tooltip placement="top">
+                <div slot="content">重置说明：<br/>默认密码为：123456</div>
+                <el-button size="small" icon="iconfont icon-zhongzhimima" @click="resetPassWordBtn" v-checkPermission="'create'">重置密码</el-button>
+            </el-tooltip>
             <el-button size="small" icon="iconfont icon-icon_refresh" @click="refreshBtn">刷新</el-button>
             <div class="search iconfont icon-sousuo" @click="openSearch"> 搜索</div>
         </div>
@@ -21,39 +36,27 @@
             class="global-table-default"
             style="width: 100%;">
             <el-table-column type="selection" width="55" align="center" ></el-table-column>
-            <el-table-column fixed prop="userCode" label="编号" width="150" align="center" :show-overflow-tooltip="true">
+            <el-table-column label="序号" type="index" width="55" align="center">
+                <template slot-scope="scope">
+                <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column fixed prop="userCode" label="用户编号" width="180" align="center" :show-overflow-tooltip="true">
                 <template slot-scope="props">
                     <el-button type="text" size="small" @click="detailBtn(props.row)">{{props.row.userCode}}</el-button>
                 </template>
             </el-table-column>
-            <el-table-column fixed prop="userName" label="姓名" width="100" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="englishUserName" label="英文名" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="departmentName" label="部门" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="postName" label="职务" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="gender" label="性别" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="birthDate" label="出生日期" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="height" label="身高" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="education" label="学历" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="maritalStatus" label="婚姻状况" :show-overflow-tooltip="true">
-                <template slot-scope="scope">
-                    {{['否','是'][scope.row.maritalStatus]}}
-                </template>
-            </el-table-column>
-            <el-table-column prop="bloodType" label="血型" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="mobilePhone" label="移动电话" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="officeTelephone" label="办公电话" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="email" label="电子邮箱" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="fax" label="传真" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="employeeStatus" label="员工状态" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="employeeType" label="员工类型" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="participationDate" label="参工日期" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="entryDate" label="入职日期" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="confirmationDate" label="转正日期" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="leaveDate" label="离退日期" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="nationality" label="国籍" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="nativePlace" label="籍贯" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="nation" label="民族" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="religion	" label="宗教" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column fixed prop="userName" label="用户名称" width="120" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="mobilePhone" label="手机号码" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="departmentName" label="所属部门" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="postName" label="所属职务" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="education" label="学历" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="employeeStatus" label="员工状态" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="employeeType" label="员工类型" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="createUser" label="创建人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="updateUser" label="更新人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="updateTime" label="更新时间" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
         </el-table>
         <div class="pagination-wrapper">
             <el-pagination
@@ -74,11 +77,13 @@
 import { Component, Vue, mixins } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
 import search from './table/search'
+import uploadExcel from '@/components/uploadExcel'
 
 @Component({
     name: 'userList',
     components: {
         search,
+        uploadExcel
     }
 })
 export default class extends tableMixin {
@@ -90,6 +95,21 @@ export default class extends tableMixin {
     searchDialog = false
     loadingBtn = 0
     searchParams = {}
+    excelColumnName = [
+        {value:'serialNumber',label:'序号'},
+        {value:'userCode',label:'用户编号'},
+        {value:'userName',label:'用户名称'},
+        {value:'mobilePhone',label:'手机号码'},
+        {value:'departmentName',label:'所属部门'},
+        {value:'postName',label:'所属职务'},
+        {value:'education',label:'学历'},
+        {value:'employeeStatus',label:'员工状态'},
+        {value:'employeeType',label:'员工类型'},
+        {value:'createUser',label:'创建人'},
+        {value:'createTime',label:'创建时间'},
+        {value:'updateUser',label:'更新人'},
+        {value:'updateTime',label:'更新时间'},
+    ]
 
     created() {
         this.getUserList();
@@ -137,7 +157,7 @@ export default class extends tableMixin {
             return
         }
         this.$router.push({ name: 'userEdit',params:{
-            userId:this.selected[0].id
+            userInfo:this.selected[0]
         }})
     }
     // 详情
@@ -160,8 +180,14 @@ export default class extends tableMixin {
           cancelButtonText: '取消',
           type: 'warning'
         }).then((e) => {
+            const params = {
+                idList:this.idList,
+                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+                menuCode : this.MENU_CODE_LIST.userList
+            }
           this.loadingBtn = loadingBtnIndex
-          this.$API.apiDeleteUser({idList:this.idList}).then(res=>{
+          this.$API.apiDeleteUser(params).then(res=>{
             this.loadingBtn = 0
             this.$message({
               type: 'success',
@@ -175,6 +201,80 @@ export default class extends tableMixin {
         }).catch(() => {    
           this.loadingBtn = 0     
         });
+    }
+    afterUploadExcel(res){
+        console.log(res);
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:res,
+            menuCode:this.MENU_CODE_LIST.userList
+        };
+        this.$API.apiImportEquipmentDepreciation(data).then(res=>{
+            this.$message({
+                type: 'success',
+                message: '导入成功!'
+            });
+            this.refreshBtn();
+        })
+    }
+    // 导出excel
+    exportExcelBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.userList
+        };
+        this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/user/exportExcel',data});
+    }
+    // 导出pdf
+    exportPdfBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.userList
+        }
+        this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/user/exportPDF',data});
+    }
+    // 打印
+    printBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.userList
+        }
+        this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/user/exportPDF',data});
+    }
+    // 重置密码
+    resetPassWordBtn() {
+        if(this.selected.length == 0){
+            this.$message({
+                type: 'info',
+                message: '请至少选择一条记录!'
+            })
+            return
+        }
+        this.$confirm('确定重置已选择的用户密码, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then((e) => {
+            var data = {
+                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+                idList:this.idList,
+                menuCode:this.MENU_CODE_LIST.userList
+            }
+            this.$API.apiResetPassword(data).then(res=>{
+                this.$message({
+                    type:'success',
+                    message:'重置成功'
+                })
+            })
+        })
     }
     // 刷新
     refreshBtn(){
