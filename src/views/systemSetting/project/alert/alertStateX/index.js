@@ -1,6 +1,7 @@
 import create from './create';
 import edit from './edit'
 import Vue from 'vue';
+import store from '@/store'
 const createCon = Vue.extend(create);
 const editCon = Vue.extend(edit);
 var createInstance = null;
@@ -13,6 +14,7 @@ export function alertAddProject(params){
         document.body.appendChild(createInstance.$el);
     }
     createInstance.dialog = true;  
+    createInstance.$store = store
     createInstance.init();
     createInstance.params = params;
     return new Promise((resolve,reject)=>{
@@ -31,6 +33,7 @@ export function alertUpdateProject(alertStateX){
     }
     editInstance.dialog = true;  
     editInstance.alertStateX = alertStateX
+    editInstance.$store = store
     editInstance.init();
     return new Promise((resolve,reject)=>{
         editInstance.promise = {

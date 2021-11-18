@@ -21,11 +21,19 @@
             class="global-table-default"
             style="width: 100%;">
             <el-table-column type="selection" width="55" align="center" ></el-table-column>
-            <el-table-column prop="name" label="项目名称" width="100" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="genderText" label="描述" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="userTypeText" label="是否启用" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="contactNumber" label="备注" width="130" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="identityNumber" label="上级部门" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="orgName" label="项目名称" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="status" label="是否启用" width="120" align="center" :show-overflow-tooltip="true">
+                <template slot-scope="scope">
+                    {{['否','是'][scope.row.status]}}
+                </template>
+            </el-table-column>
+            <el-table-column prop="createUser" label="创建人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="createTime" label="创建时间" width="140" align="center" :show-overflow-tooltip="true">
+                <template slot-scope="scope">
+                    {{ scope.row.createTime | formatDate }}
+                </template>
+            </el-table-column>
+            <el-table-column prop="remark" label="备注" width="130" align="center" :show-overflow-tooltip="true"></el-table-column>
         </el-table>
         <div class="pagination-wrapper">
             <el-pagination
@@ -38,7 +46,7 @@
                 :total="total">
             </el-pagination>
         </div>
-        <!-- <search :searchDialog.sync="searchDialog" @searchSubmit="searchSubmit" :searchParams.sync="searchParams"></search>   -->
+        <search :searchDialog.sync="searchDialog" @searchSubmit="searchSubmit" :searchParams.sync="searchParams"></search>  
     </div>
 </template>
 
@@ -46,12 +54,12 @@
 import { Component, Vue, mixins } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
 import $alert from './alert'
-// import search from './table/search'
+import search from './table/search'
 
 @Component({
     name: 'projectList',
     components: {
-        // search,
+        search,
     }
 })
 export default class extends tableMixin {
@@ -65,7 +73,7 @@ export default class extends tableMixin {
     searchParams = {}
 
     created() {
-        // this.getProjectList();
+        this.getProjectList();
     }
     //复选框选中的id值
     get idList(){
@@ -99,7 +107,7 @@ export default class extends tableMixin {
     // 新建
     createBtn(){
         $alert.alertAddProject().then(()=>{
-
+            this.getProjectList()
         })
     }
     // 编辑
@@ -111,8 +119,8 @@ export default class extends tableMixin {
             })
             return
         }
-        $alert.alertUpdateProject({}).then(()=>{
-
+        $alert.alertUpdateProject(this.selected[0]).then(()=>{
+            this.getProjectList()
         })
     }
     // 删除
@@ -129,8 +137,14 @@ export default class extends tableMixin {
           cancelButtonText: '取消',
           type: 'warning'
         }).then((e) => {
+            const params = {
+                creatorOrgId:this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName:this.$store.getters.currentOrganization.organizationName,
+                menuCode:this.MENU_CODE_LIST.projectList,
+                idList:this.idList
+            }
           this.loadingBtn = loadingBtnIndex
-          this.$API.apiDeleteProject({idList:this.idList}).then(res=>{
+          this.$API.apiDeleteProject(params).then(res=>{
             this.loadingBtn = 0
             this.$message({
               type: 'success',

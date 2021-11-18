@@ -31,7 +31,7 @@ export default class extends Vue {
     }
     selectedOrganization = ''
     mounted() {
-        if(this.organizationList.length === 1) {
+        if(this.organizationList.length > 0) {
             this.selectedOrganization = this.organizationList[0].organizationId
             this.$store.commit('SET_CURRENT_ORGANIZATION', this.organizationList[0]);
         }

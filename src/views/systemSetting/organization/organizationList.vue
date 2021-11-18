@@ -20,7 +20,7 @@
             :default-expanded-keys = "defaultExpandedKeys"
             @node-expand="nodeExpand"
             @node-collapse="nodeCollapse"
-            node-key="code"
+            node-key="id"
             ref="projectTree"
             :expand-on-click-node="false"
             v-loading="loadingTree"
@@ -35,9 +35,9 @@
                         </span>
                     </span>
                     <span class="node_edit">
-                        <i @click.stop="update(node,data)" class="el-icon-edit"  v-if="[-1,-2,0,1,2].includes(data.orgType)"></i>
-                        <i @click.stop="remove(node,data)" class="el-icon-delete" v-if="[-1,-2,0,1,2].includes(data.orgType)"></i>
-                        <i @click.stop="append(node,data)" class="el-icon-plus" v-if="[-1,-2,0,1].includes(data.orgType)"></i>
+                        <i @click.stop="update(node,data)" class="el-icon-edit" v-if="['-1','-2','0','1','2'].includes(data.orgType)"></i>
+                        <i @click.stop="remove(node,data)" class="el-icon-delete" v-if="['-1','-2','0','1','2'].includes(data.orgType)"></i>
+                        <i @click.stop="append(node,data)" class="el-icon-plus" v-if="['-1','-2','0','1','2'].includes(data.orgType)"></i>
                     </span>
                 </span>
             </el-tree>
@@ -70,17 +70,17 @@ export default class extends tableMixin {
     projectTree = []
     // 树属性
     projectProps = {
-        children:'childNode',
-        label:'name'
+        children:'children',
+        label:'orgName'
     }
 
     created(){
-        // this.getOrganizationTree();
+        this.getOrganizationTree();
     }
     // 获取组织树
     getOrganizationTree(){
         let params = {
-            menuCode: this.MENU_CODE_LIST.organization
+            menuCode: this.MENU_CODE_LIST.organizationList
         }
         this.loadingTree = true;
         this.$API.apiGetOrganizationTree(params).then(res=>{
@@ -103,9 +103,9 @@ export default class extends tableMixin {
     }
 
     allowDrop(draggingNode,dropNode,type){
-        if(draggingNode.data.pId === dropNode.data.pId){
+        if(draggingNode.data.parentId === dropNode.data.parentId){
             return type == 'next' || type == 'prev'
-        }else if(draggingNode.data.pId === dropNode.data.code){
+        }else if(draggingNode.data.parentId === dropNode.data.id){
             return type == 'inner'
         }else{
             return false;
@@ -133,16 +133,16 @@ export default class extends tableMixin {
     // 树过滤方法
     filterProjectTreeNode(value,data){
         if (!value) return true;
-        return data.name.indexOf(value) !== -1;
+        return data.orgName.indexOf(value) !== -1;
     }
     nodeExpand(data){
         let flag = this.defaultExpandedKeys.some(item=>{
-            if(item == data.code){
+            if(item == data.id){
                 return true;
             }
         })
         if(!flag){
-            this.defaultExpandedKeys.push(data.code);
+            this.defaultExpandedKeys.push(data.id);
         }
     }
     nodeCollapse(data){
@@ -158,145 +158,70 @@ export default class extends tableMixin {
     // 循环获取需要关闭的节点
     getCloseNode(data){
         let collapseIndex = [];
-        collapseIndex.push(data.code);
-        if(data.childNode && data.childNode.length > 0){
-            data.childNode.forEach(item=>{
+        collapseIndex.push(data.id);
+        if(data.children && data.children.length > 0){
+            data.children.forEach(item=>{
                 collapseIndex.push(...this.getCloseNode(item))
             })
         }
         return collapseIndex;
     }
-    // 新增项目
+    // 新增公司
     addGroup(){
-        $alert.alertAddDepartPosition().then(res=>{
+        $alert.alertAddCompany().then(res=>{
             this.getOrganizationTree();
         }).catch(err=>{})
     }
 
     // 添加
     append(node,data){
-        if(data.orgType == -2){
-            // 添加公司
-            alertAddCompany({ pId: data.code },data.status).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(()=>{})
-        }else if(data.orgType == -1){
-            // 添加项目
-            alertAddProject({ pId: data.code },data.status).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(()=>{})
-        }else if(data.orgType == 0){
-            // 添加盾构队
-            alertAddShield({ pId: data.code },data.status).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(()=>{})
-        }else if (data.orgType == 1){
-            // 添加区间
-            alertAddInterval({ pId: data.code },data.status).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(()=>{})
-        }
+        // 添加部门/职务
+        $alert.alertAddDepartPosition({ parentId: data.orgId }).then(res=>{
+            this.nodeExpand(data);
+            this.getOrganizationTree();
+        }).catch(()=>{})
     }
 
     // 删除
     remove(node,data){
-        alertDeleteBox(data).then(res=>{
-            this.nodeCollapse(data);
-            this.getOrganizationTree();
-        }).catch(()=>{}) 
+        this.$confirm('确认删除该节点?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+            const params = {
+                creatorOrgId:this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName:this.$store.getters.currentOrganization.organizationName,
+                menuCode:this.MENU_CODE_LIST.organizationList,
+                orgId:data.orgId
+            }
+            this.$API.apiDeleteOrgNode(params).then(()=>{
+                this.$message({
+                    type: 'success',
+                    message: '删除成功!'
+                });
+                this.nodeCollapse(data);
+                this.getOrganizationTree();
+            })
+        }).catch(() => {
+                   
+        });
     }
 
     // 编辑
     update(node,data){
-        if(data.orgType == -2){
-            // 编辑集团
-            let project = {
-                code: data.code,
-                name: data.name,
-                status: data.status,
-                cityName: data.cityName,
-            }
-            alertUpdateGroup(project).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(err=>{})
-        }else if(data.orgType == -1){
+        if(data.orgType == 0){
             // 编辑公司
-            let project = {
-                code: data.code,
-                name: data.name,
-                status: data.status,
-                cityName: data.cityName,
-                pId: data.pId
-            }
-            alertUpdateCompany(project).then(res=>{
+            $alert.alertUpdateCompany(data).then(res=>{
                 this.nodeExpand(data);
                 this.getOrganizationTree();
             }).catch(err=>{})
-        }else if(data.orgType == 0){
-            // 编辑项目
-            let project = {
-                xCoordinate: data.xCoordinate,
-                yCoordinate: data.yCoordinate,
-                code: data.code,
-                name: data.name,
-                pId: data.pId,
-                status: data.status,
-                cityName: data.cityName,
-                flag: data.flag
-            }
-            alertUpdateProject(project).then(res=>{
+        }else {
+            // 编辑部门/职务
+            $alert.alertUpdateDepartPosition(data).then(res=>{
                 this.nodeExpand(data);
                 this.getOrganizationTree();
             }).catch(err=>{})
-        }else if (data.orgType == 1){
-            // 编辑盾构队
-           let shield = {
-               code: data.code,
-               name: data.name,
-               status: data.status,
-               pId: data.pId,
-               dingdingCode: data.dingdingCode,
-               financeCode: data.financeCode,
-               dingdingName: data.dingdingName,
-               financeName: data.financeName
-           }
-           alertUpdateShield(shield,node.parent.data.status).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(()=>{})
-        }else{
-            // 编辑区间
-            let interval = {
-                leftLine: 1,
-                rightLine: 1,
-                flatSection: 1,
-                name: data.name,
-                status: data.status,
-                pId: data.pId, 
-                code:data.code,
-                // dingdingCode: data.dingdingCode,
-                // financeCode: data.financeCode
-            }
-            if(data.childNode && data.childNode.length>0){
-                data.childNode.forEach(item => {
-                    if(item.orgType == '3'){
-                        interval.leftLine = item.status
-                    }else if(item.orgType == '4'){
-                        interval.rightLine = item.status
-                    }else if(item.orgType == '5'){
-                        interval.flatSection = item.status
-                    }
-                });
-            } 
-            alertUpdateInterval(interval,node.parent.data.status).then(res=>{
-                this.nodeExpand(data);
-                this.getOrganizationTree();
-            }).catch(()=>{})
         }
     }
 }

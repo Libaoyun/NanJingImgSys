@@ -17,24 +17,21 @@
         label-position="left"
         label-width="80px"
       >
-        <el-form-item label="项目名称" prop="name">
-          <el-input v-model="alertStateX.name" placeholder="请输入项目名称"></el-input>
+        <el-form-item label="项目名称" prop="orgName">
+          <el-input v-model="alertStateX.orgName" placeholder="请输入项目名称"></el-input>
         </el-form-item>
         <el-form-item label="上级部门" prop="sjbm">
             <el-select v-model="alertStateX.sjbm">
                 <el-option value="1"></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="是否启用:" prop="isValid">
-            <el-select v-model="alertStateX.isValid" placeholder="请选择">
-                <el-option label="启用" :value="1"></el-option>
-                <el-option label="禁用" :value="0"></el-option>
+        <el-form-item label="是否启用:" prop="status">
+            <el-select v-model="alertStateX.status" placeholder="请选择">
+                <el-option label="启用" value="1"></el-option>
+                <el-option label="禁用" value="0"></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="项目描述" class="large">
-          <el-input type="textarea" v-model="alertStateX.val3" placeholder="请输入项目描述"></el-input>
-        </el-form-item>
-        <el-form-item label="备注" class="large">
+        <el-form-item label="备注" class="large" prop="remark">
           <el-input type="textarea" v-model="alertStateX.remark" placeholder="请输入备注"></el-input>
         </el-form-item>
       </el-form>
@@ -49,7 +46,6 @@
 <script>
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import dictionaryMixin from '@/mixins/dictionaryMixin'
-import store from '@/store'
 
 @Component({
   name: 'editProject'
@@ -59,15 +55,16 @@ export default class editProject extends dictionaryMixin {
   loadingBtn = 0
 
   init(){
+
   }
 
   alertStateX = {
-    name:'',
-    status: 1,
+    orgName:'',
+    status: '1',
     remark:'',
   }
   formRules = {
-    name: [
+    orgName: [
       { required: true, message: '请输入项目名称', trigger: 'change' },
       { max:30, message: '项目名称不超过30个字符', trigger: 'change' } 
     ],
@@ -89,14 +86,15 @@ export default class editProject extends dictionaryMixin {
         // 调接口
         let params = Object.assign(
           {
-            menuCode:this.MENU_CODE_LIST.organization,
-            operatePath:store.getters.operatePath
+            creatorOrgId:this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName:this.$store.getters.currentOrganization.organizationName,
+            menuCode:this.MENU_CODE_LIST.projectList
           },
-          this.alertStateX,
-          this.params
+          this.alertStateX
         )
+        console.log(params)
         this.loadingBtn = loadingBtn;
-        this.$API.apiCreateProjectOrg(params).then(res=>{
+        this.$API.apiUpdateProject(params).then(res=>{
           this.loadingBtn = 0;
           this.$message({
             type: 'success',
