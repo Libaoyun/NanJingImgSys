@@ -43,3 +43,11 @@ export function apiExportFile ({ url, data}) {
       data
   })
 }
+// 获取数据字典数据
+export function apiGetDictionariesList (data) {
+  return fetch({
+      url: '/rdexpense/dataDictionary/queryPullDownDictionariesList',
+      method: 'post',
+      data
+  })
+}

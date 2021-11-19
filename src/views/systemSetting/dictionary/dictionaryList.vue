@@ -120,25 +120,7 @@ export default class extends tableMixin {
     }
 
     created(){
-        // this.getDictionaryTree();
-        this.projectTree = [
-            {
-                dicTypeName: '数据字典',
-                children: [
-                    {
-                        children: [],
-                        dicTypeFlag: "1",
-                        dicTypeId: "1011",
-                        dicTypeName: "操作类型",
-                        dicTypeParentId: "0",
-                        id: 104,
-                        menuCode: null,
-                        operatePath: null
-                    } 
-                ]
-            }
-        ];
-
+        this.getDictionaryTree();
     }
     
     // 获取菜单树
@@ -239,8 +221,9 @@ export default class extends tableMixin {
             let params ={
                 ids: [data.id],
                 dicTypeId:data.dicTypeId,
-                menuCode:this.MENU_CODE_LIST.dictionary,
-                operatePath:this.$store.getters.operatePath
+                menuCode:this.MENU_CODE_LIST.dictionaryList,
+                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
             };
             this.$API.apiDeleteDictionaryTree(params).then(res=>{
                 this.$message({
@@ -271,8 +254,16 @@ export default class extends tableMixin {
 
     // 删除数据值
     deleteDictionary(data){
+        console.log(data)
         if(data && data.row && data.row.id){
-            this.$API.apiDeleteDictionary({ids:[data.row.id],menuCode:this.MENU_CODE_LIST.dictionary,operatePath:this.$store.getters.operatePath}).then(res=>{
+            const params = {
+                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+                ids:[data.row.id],
+                dicTypeId:data.row.dicTypeId,
+                menuCode:this.MENU_CODE_LIST.dictionaryList
+            }
+            this.$API.apiDeleteDictionary(params).then(res=>{
                 this.$message({
                     type:'success',
                     message:'删除成功'

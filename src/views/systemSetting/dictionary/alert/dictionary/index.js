@@ -1,6 +1,7 @@
 import create from './create';
 import edit from './edit'
 import Vue from 'vue';
+import store from '@/store'
 const createCon = Vue.extend(create);
 const editCon = Vue.extend(edit);
 var createInstance = null;
@@ -14,6 +15,7 @@ export function alertAddDictionary(params){
     }
     createInstance.dialog = true;  
     createInstance.params = params;
+    createInstance.$store = store
     createInstance.init();
     return new Promise((resolve,reject)=>{
         createInstance.promise = {
@@ -31,6 +33,7 @@ export function alertUpdateDictionary(dictionary){
     }
     editInstance.dialog = true;  
     editInstance.dictionary = dictionary;
+    editInstance.$store = store
     editInstance.init();
     return new Promise((resolve,reject)=>{
         editInstance.promise = {

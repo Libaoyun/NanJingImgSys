@@ -81,7 +81,6 @@ export default class addCompany extends dictionaryMixin {
         let params = Object.assign(
           {
             menuCode:this.MENU_CODE_LIST.organization,
-            operatePath:store.getters.operatePath
           },
           this.alertStateX,
           this.params

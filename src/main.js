@@ -15,10 +15,13 @@ import { CardGlobal, ImgPreview , UploadApprovalGlobal, ApprovalGlobal, LoadingB
 import {menuCodeList} from '@/utils/menuCodeList.js'
 import {judgeBtn} from '@/utils/judgeBtn.js'
 import { exportFile } from '@/utils/export.js'
+import { getDictionariesList,getDictionariesText } from '@/utils/getDictionariesList.js'
 
 Vue.prototype.MENU_CODE_LIST = menuCodeList
 Vue.prototype.JUDGE_BTN = judgeBtn
 Vue.prototype.EXPORT_FILE = exportFile
+Vue.prototype.GET_DICTIONARY_LIST = getDictionariesList
+Vue.prototype.GET_DICTIONARY_TEXT = getDictionariesText
 
 let storageOptions= {
   namespace: 'pro__', // key prefix

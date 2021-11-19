@@ -14,9 +14,7 @@
                     </el-form-item>
                     <el-form-item label="性别:" prop="gender">
                         <el-select v-model="baseInfo.gender" placeholder="请选择性别">
-                            <el-option value="未知"></el-option>
-                            <el-option value="男"></el-option>
-                            <el-option value="女"></el-option>
+                            <el-option v-for="item in genderList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="出生日期:" prop="birthDate">
@@ -27,14 +25,7 @@
                     </el-form-item>
                     <el-form-item label="学历:" prop="education">
                         <el-select v-model="baseInfo.education" placeholder="请选择学历">
-                            <el-option value="未知"></el-option>
-                            <el-option value="小学"></el-option>
-                            <el-option value="初中"></el-option>
-                            <el-option value="高中"></el-option>
-                            <el-option value="专科"></el-option>
-                            <el-option value="本科"></el-option>
-                            <el-option value="硕士"></el-option>
-                            <el-option value="博士"></el-option>
+                            <el-option v-for="item in educationList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="婚姻状况:" prop="maritalStatus">
@@ -42,11 +33,7 @@
                     </el-form-item>
                     <el-form-item label="血型:" prop="bloodType">
                         <el-select v-model="baseInfo.bloodType" placeholder="请选择血型">
-                            <el-option value="未知"></el-option>
-                            <el-option value="A"></el-option>
-                            <el-option value="B"></el-option>
-                            <el-option value="AB"></el-option>
-                            <el-option value="O"></el-option>
+                            <el-option v-for="item in bloodTypeList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
                 </el-form>
@@ -110,17 +97,12 @@
                 </el-form-item>
                 <el-form-item label="用户状态:" prop="employeeStatus">
                     <el-select v-model="baseInfo.employeeStatus" placeholder="请选择用户状态">
-                        <el-option value="在职"></el-option>
-                        <el-option value="离职"></el-option>
-                        <el-option value="退休"></el-option>
+                        <el-option v-for="item in employeeStatusList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="用户类型:" prop="employeeType">
                     <el-select v-model="baseInfo.employeeType" placeholder="请选择用户类型">
-                        <el-option value="正式"></el-option>
-                        <el-option value="试用期"></el-option>
-                        <el-option value="实习生"></el-option>
-                        <el-option value="临时用户"></el-option>
+                        <el-option v-for="item in employeeTypeList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="参工日期:" prop="participationDate">
@@ -159,8 +141,9 @@
 </template>
 
 <script>
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component,Mixins, Vue, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
+import dictionaryMixin from '@/mixins/dictionaryMixin'
 import { checkForm } from '@/utils/index'
 import $alert from '../alert'
 
@@ -170,7 +153,7 @@ import $alert from '../alert'
     }
 })
    
-export default class extends tableMixin {
+export default class extends Mixins(tableMixin,dictionaryMixin) {
     loadingBtn = 0;
     baseInfo = this.getBaseInfo()
     dialogImageUrl = ''
@@ -221,6 +204,13 @@ export default class extends tableMixin {
             },
             attachmentList: []
         } 
+    }
+    created() {
+        this.getGenderList()
+        this.getEducationList()
+        this.getBloodTypeList()
+        this.getEmployeeStatusList()
+        this.getEmployeeTypeList()
     }
     activated() {
         if(Object.keys(this.$route.params).length > 0){

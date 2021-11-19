@@ -1,28 +1,26 @@
 <template>
     <el-dialog 
-        title="添加文件"
+        title="上传模板"
         :visible="createDialog"
         :close-on-click-modal="false"
         @close="closeDialog"
         width="500px">
         <div class="content">
             <el-form ref="fileInfoForm" :rules="formRules" :model="fileInfo" size="mini" label-position="right" label-width="100px">
-                <el-form-item label="文件类型:" prop="fileType">
-                    <el-select v-model="fileInfo.fileType" placeholder="请选择文件类型">
-                        <el-option v-for="item in fileTypeSelect" :key="item" :label="item" :value="item"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="文件名称:" prop="fileName">
-                    <el-input  v-model.trim="fileInfo.fileName" placeholder="请输入文件名称"></el-input>
-                </el-form-item>
-                <el-form-item label="描述信息:" prop="remark">
-                    <el-input  v-model="fileInfo.remark" placeholder="请输入与文件名称对应的描述信息" type="textarea"></el-input>
-                </el-form-item>
-                <el-form-item label="选择文件:" prop="fileList">
+                <el-form-item label="上传附件:" prop="fileList">
                     <el-upload class="upload" action="/" :file-list="fileInfo.fileList" :on-change="uploadChange"  ref="upload" :before-upload="beforeUpload" :http-request="handleUpolad"  :show-file-list="false">
-                        <el-button size="mini" type="primary">选择文件</el-button>
+                        <el-button size="mini" type="primary">+点击上传模板附件</el-button>
                     </el-upload>  
                     <span>{{uploadName||'未选择'}}</span>
+                </el-form-item>
+                <el-form-item label="备注:" prop="remark">
+                    <el-input  v-model="fileInfo.remark" placeholder="请输入备注" type="textarea"></el-input>
+                </el-form-item>
+                <el-form-item label="是否启用:" prop="status">
+                    <el-select v-model="fileInfo.status" placeholder="请选择">
+                        <el-option label="启用" value="1"></el-option>
+                        <el-option label="禁用" value="0"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
         </div>
@@ -44,11 +42,8 @@ export default class extends tableMixin {
     @Prop() createDialog
     @Prop() loadingBtn
     fileMaxSize = 10 * 1024 * 1024;
-    // 下拉选择流程
-    fileTypeSelect = ['文档','链接','视频','其他'];
     fileInfo = {
-        fileName: '',
-        fileType: '文档',
+        status:'1',
         remark: '',
         fileList:[]
     }
@@ -62,18 +57,6 @@ export default class extends tableMixin {
         callback();
     }
     formRules = {
-        fileType:[
-            { required: true, message: '请选择文件类型', trigger: 'change' },
-            
-        ],
-        fileName: [
-            { required: true, message: '请输入文件名称', trigger: 'change' },
-            { max: 64, message: '文件名称不超过64个字符', trigger: 'change' },
-        ],
-        remark: [
-            { required: false, message: '请输入文件名称', trigger: 'change' },
-            { max: 256, message: '描述信息不超过128个字符', trigger: 'change' },
-        ],
         fileList:[
             { required: true, message: '请上传文件', trigger: 'change' },
             { validator: this.validateFile, trigger: 'change' }

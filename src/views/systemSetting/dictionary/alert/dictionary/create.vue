@@ -77,8 +77,9 @@ export default class addDictionary extends dictionaryMixin {
             {
                 dicTypeFlag : 1,
                 dicTypeParentId : this.params.dicTypeParentId || 0,
-                menuCode:this.MENU_CODE_LIST.dictionary,
-                operatePath:store.getters.operatePath
+                menuCode:this.MENU_CODE_LIST.dictionaryList,
+                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
             },this.dictionary);
         this.$API.apiCreateDictionaryType(params).then(res=>{
           this.loadingBtn = 0;

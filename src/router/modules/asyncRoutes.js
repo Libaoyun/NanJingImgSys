@@ -26,7 +26,7 @@ export const apiRouteList = [
                 { path: 'authorizationList', component: 'systemSetting/authorization/authorizationList', name: 'authorizationList',meta:{title: '权限管理',btnPermissions:[] }},
                 { path: 'dictionaryList', component: 'systemSetting/dictionary/dictionaryList', name: 'dictionaryList',meta:{title: '数据字典',btnPermissions:[] }},
                 { path: 'routerMenuList', component: 'systemSetting/routerMenu/routerMenuList', name: 'routerMenuList',meta:{title: '菜单管理',btnPermissions:[] }},
-                { path: 'onlineManualsList', component: 'systemSetting/onlineManuals/onlineManualsList', name: 'onlineManualsList',meta:{title: '模板管理',btnPermissions:[{menuButtonCode:'edit'}] }},
+                { path: 'onlineManualsList', component: 'systemSetting/onlineManuals/onlineManualsList', name: 'onlineManualsList',meta:{title: '知识库管理',btnPermissions:[{menuButtonCode:'create'},{menuButtonCode:'edit'},{menuButtonCode:'delete'}] }},
                 { path: 'operationLogList', component: 'systemSetting/operationLog/operationLogList', name: 'operationLogList',meta:{title: '操作日志',btnPermissions:[] }},
             ]
         },

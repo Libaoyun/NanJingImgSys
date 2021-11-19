@@ -5,6 +5,8 @@ import * as routerMenuApi from './modules/systemSetting/routerMenu'
 import * as userApi from './modules/systemSetting/user'
 import * as organizationApi from './modules/systemSetting/organization'
 import * as projectApi from './modules/systemSetting/project'
+import * as dictionaryApi from './modules/systemSetting/dictionary'
+import * as onlineManualsApi from './modules/systemSetting/onlineManuals'
 
 let api = Object.assign(
     appApi,
@@ -12,7 +14,9 @@ let api = Object.assign(
     routerMenuApi,
     userApi,
     organizationApi,
-    projectApi
+    projectApi,
+    dictionaryApi,
+    onlineManualsApi
 )
 
 Vue.prototype.$API = api

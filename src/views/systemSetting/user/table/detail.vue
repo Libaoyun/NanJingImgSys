@@ -13,7 +13,7 @@
                         <span class="static-value">{{baseInfo.englishUserName}}</span>
                     </el-form-item>
                     <el-form-item label="性别:" prop="gender">
-                        <span class="static-value">{{baseInfo.gender}}</span>
+                        <span class="static-value">{{GET_DICTIONARY_TEXT(genderList,baseInfo.gender)}}</span>
                     </el-form-item>
                     <el-form-item label="出生日期:" prop="birthDate">
                         <span class="static-value">{{baseInfo.birthDate}}</span>
@@ -22,13 +22,13 @@
                         <span class="static-value">{{baseInfo.height}}</span>
                     </el-form-item>
                     <el-form-item label="学历:" prop="education">
-                        <span class="static-value">{{baseInfo.education}}</span>
+                        <span class="static-value">{{GET_DICTIONARY_TEXT(educationList,baseInfo.education)}}</span>
                     </el-form-item>
                     <el-form-item label="婚姻状况:" prop="maritalStatus">
                         <span class="static-value">{{['否','是'][baseInfo.maritalStatus]}}</span>
                     </el-form-item>
                     <el-form-item label="血型:" prop="bloodType">
-                        <span class="static-value">{{baseInfo.bloodType}}</span>
+                        <span class="static-value">{{GET_DICTIONARY_TEXT(bloodTypeList,baseInfo.bloodType)}}</span>
                     </el-form-item>
                 </el-form>
             </div>
@@ -82,10 +82,10 @@
                     <span class="static-value">{{baseInfo.fax}}</span>
                 </el-form-item>
                 <el-form-item label="用户状态:" prop="employeeStatus">
-                    <span class="static-value">{{baseInfo.employeeStatus}}</span>
+                    <span class="static-value">{{GET_DICTIONARY_TEXT(employeeStatusList,baseInfo.employeeStatus)}}</span>
                 </el-form-item>
                 <el-form-item label="用户类型:" prop="employeeType">
-                    <span class="static-value">{{baseInfo.employeeType}}</span>
+                    <span class="static-value">{{GET_DICTIONARY_TEXT(employeeTypeList,baseInfo.employeeType)}}</span>
                 </el-form-item>
                 <el-form-item label="参工日期:" prop="participationDate">
                     <span class="static-value">{{baseInfo.participationDate}}</span>
@@ -128,15 +128,16 @@
 </template>
 
 <script>
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component,Mixins, Vue, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
+import dictionaryMixin from '@/mixins/dictionaryMixin'
 
 @Component({
     name: 'userDetail',
     components: {
     }
 })
-export default class extends tableMixin {
+export default class extends Mixins(tableMixin,dictionaryMixin) {
     baseInfo = this.getBaseInfo()
     // 设置空数据
     getBaseInfo(){
@@ -176,6 +177,13 @@ export default class extends tableMixin {
             },
             attachmentList: []
         } 
+    }
+    created() {
+        this.getGenderList()
+        this.getEducationList()
+        this.getBloodTypeList()
+        this.getEmployeeStatusList()
+        this.getEmployeeTypeList()
     }
 
     activated() {

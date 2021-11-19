@@ -85,8 +85,9 @@ export default class addMenu extends dictionaryMixin {
         let params = Object.assign({
             dicTypeId: this.params.dicTypeId,
             dicTypeName: this.params.dicTypeName,
-            menuCode:this.MENU_CODE_LIST.dictionary,
-            operatePath:store.getters.operatePath
+            menuCode:this.MENU_CODE_LIST.dictionaryList,
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
         },this.dictionary);
 
         this.$API.apiCreateDictionary(params).then(res=>{

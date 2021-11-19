@@ -78,7 +78,6 @@ export default class editCompany extends dictionaryMixin {
         let params = Object.assign(
           {
             menuCode:this.MENU_CODE_LIST.organization,
-            operatePath:store.getters.operatePath
           },
           this.alertStateX
         )

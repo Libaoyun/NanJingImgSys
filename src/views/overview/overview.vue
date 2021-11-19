@@ -1,9 +1,6 @@
 <template>
     <div class="index-page">
         {{$route.name}} -- {{ $store.state.user.userInfo && $store.state.user.userInfo.role}} -- {{new Date() | formatDate}}
-        <div v-for="item in projectStatus" :key="item.value">
-            {{item.label}}
-        </div>
     </div>
 </template>
 

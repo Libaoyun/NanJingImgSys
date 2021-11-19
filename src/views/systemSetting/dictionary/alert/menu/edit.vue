@@ -70,8 +70,12 @@ export default class addMenu extends dictionaryMixin {
       if (valid) {
         // 调接口
         this.loadingBtn = loadingBtn;
-        let params = Object.assign({},this.dictionary,{menuCode:this.MENU_CODE_LIST.dictionary,
-            operatePath:store.getters.operatePath});
+        const data = {
+          menuCode:this.MENU_CODE_LIST.dictionaryList,
+          creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+          creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        }
+        let params = Object.assign({},this.dictionary,data);
         this.$API.apiUpdateDictionaryType(params).then(res=>{
           this.loadingBtn = 0;
           this.$message({
