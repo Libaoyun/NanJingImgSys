@@ -5,6 +5,16 @@
             <el-button type="primary" size="small" icon="iconfont icon-icon_add" @click="createBtn" v-checkPermission="'create'">新建</el-button>
             <el-button size="small" icon="iconfont icon-bianji1" @click="editBtn" v-checkPermission="'edit'">编辑</el-button>
             <loading-btn size="small" icon="iconfont icon-icon-delete" @click="deleteBtn(1)" :loading="loadingBtn" v-checkPermission="'delete'">删除</loading-btn>
+            <el-dropdown style="margin:0 10px">
+                <el-button size="small" icon="iconfont icon-daochu">
+                    导出<i class="el-icon-arrow-down el-icon--right"></i>
+                </el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item  @click.native="exportPdfBtn">PDF</el-dropdown-item>
+                    <el-dropdown-item  @click.native="exportExcelBtn">Excel</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+            <el-button size="small" icon="iconfont icon-dayinji_o" @click="printBtn">打印</el-button>
             <el-button size="small" icon="iconfont icon-icon_refresh" @click="refreshBtn">刷新</el-button>
             <div class="search iconfont icon-sousuo" @click="openSearch"> 搜索</div>
         </div>
@@ -21,19 +31,31 @@
             class="global-table-default"
             style="width: 100%;">
             <el-table-column type="selection" width="55" align="center" ></el-table-column>
-            <el-table-column prop="orgName" label="项目名称" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="status" label="是否启用" width="120" align="center" :show-overflow-tooltip="true">
+            <el-table-column label="序号" type="index" width="55" align="center">
+                <template slot-scope="scope">
+                <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="orgName" label="项目名称" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="orgNumber" label="项目编号" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="remark" label="项目描述" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="status" label="是否启用" width="100" align="center" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
                     {{['否','是'][scope.row.status]}}
                 </template>
             </el-table-column>
             <el-table-column prop="createUser" label="创建人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="140" align="center" :show-overflow-tooltip="true">
+            <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
                     {{ scope.row.createTime | formatDate }}
                 </template>
             </el-table-column>
-            <el-table-column prop="remark" label="备注" width="130" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="updateUser" label="更新人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="updateTime" label="更新时间" width="180" align="center" :show-overflow-tooltip="true">
+                <template slot-scope="scope">
+                    {{ scope.row.createTime | formatDate }}
+                </template>
+            </el-table-column>
         </el-table>
         <div class="pagination-wrapper">
             <el-pagination
@@ -106,9 +128,7 @@ export default class extends tableMixin {
     }
     // 新建
     createBtn(){
-        $alert.alertAddProject().then(()=>{
-            this.getProjectList()
-        })
+        this.$router.push({ name: 'projectNew',params:{initData: true}})
     }
     // 编辑
     editBtn(){
@@ -119,9 +139,9 @@ export default class extends tableMixin {
             })
             return
         }
-        $alert.alertUpdateProject(this.selected[0]).then(()=>{
-            this.getProjectList()
-        })
+        this.$router.push({ name: 'projectEdit',params:{
+            projectInfo:this.selected[0]
+        }})
     }
     // 删除
     deleteBtn(loadingBtnIndex){
@@ -158,6 +178,36 @@ export default class extends tableMixin {
         }).catch(() => {    
           this.loadingBtn = 0     
         });
+    }
+    // 导出excel
+    exportExcelBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.projectList
+        };
+        this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/organization/exportExcel',data});
+    }
+    // 导出pdf
+    exportPdfBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.projectList
+        }
+        this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/organization/exportPDF',data});
+    }
+    // 打印
+    printBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.projectList
+        }
+        this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/organization/exportPDF',data});
     }
     // 刷新
     refreshBtn(){

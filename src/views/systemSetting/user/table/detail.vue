@@ -132,7 +132,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
 
 @Component({
-    name: 'detail',
+    name: 'userDetail',
     components: {
     }
 })

@@ -3,9 +3,9 @@
         <div class="left">
             <h4>
                 <div>组织管理</div>
-                <div>
+                <!-- <div>
                     <i @click.stop="addGroup" class="el-icon-plus addProject"></i>
-                </div>
+                </div> -->
             </h4>
             <el-input placeholder="请输入名称" prefix-icon="el-icon-search" v-model="filterTreeText"></el-input>
             <el-tree 

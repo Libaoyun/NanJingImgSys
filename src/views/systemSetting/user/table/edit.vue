@@ -165,7 +165,7 @@ import { checkForm } from '@/utils/index'
 import $alert from '../alert'
 
 @Component({
-    name: 'edit',
+    name: 'userEdit',
     components: {
     }
 })
@@ -238,7 +238,6 @@ export default class extends tableMixin {
             this.baseInfo = Object.assign(this.baseInfo,this.getBaseInfo(),res.data);
             this.baseInfo.detailForm.departmentList = res.data.departmentList
             this.baseInfo.attachmentList = this.baseInfo.attachmentList || []
-            console.log(this.baseInfo)
         })
         
     }

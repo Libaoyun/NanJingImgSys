@@ -165,7 +165,7 @@ import { checkForm } from '@/utils/index'
 import $alert from '../alert'
 
 @Component({
-    name: 'create',
+    name: 'userNew',
     components: {
     }
 })
