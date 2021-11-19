@@ -7,5 +7,6 @@ export const menuCodeList = {
     dictionaryList:10004,
     routerMenuList:10005,
     onlineManualsList:10006,
+    ruleConfigurationList:10008,
     operationLogList:10007,
 }

@@ -12,8 +12,8 @@
                     <el-form-item label="英文名:" prop="englishUserName">
                         <el-input  v-model="baseInfo.englishUserName" placeholder="请输入英文名"></el-input>
                     </el-form-item>
-                    <el-form-item label="性别:" prop="gender">
-                        <el-select v-model="baseInfo.gender" placeholder="请选择性别">
+                    <el-form-item label="性别:" prop="genderCode">
+                        <el-select v-model="baseInfo.genderCode" placeholder="请选择性别" @change="baseInfo.gender = GET_DICTIONARY_TEXT(genderList,baseInfo.genderCode)">
                             <el-option v-for="item in genderList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
@@ -23,16 +23,16 @@
                     <el-form-item label="身高:" prop="height">
                         <el-input  v-model="baseInfo.height" placeholder="请输入身高"></el-input>
                     </el-form-item>
-                    <el-form-item label="学历:" prop="education">
-                        <el-select v-model="baseInfo.education" placeholder="请选择学历">
+                    <el-form-item label="学历:" prop="educationCode">
+                        <el-select v-model="baseInfo.educationCode" placeholder="请选择学历" @change="baseInfo.education = GET_DICTIONARY_TEXT(educationList,baseInfo.educationCode)">
                             <el-option v-for="item in educationList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="婚姻状况:" prop="maritalStatus">
                         <el-switch v-model="baseInfo.maritalStatus" active-value="1" inactive-value="0"></el-switch>
                     </el-form-item>
-                    <el-form-item label="血型:" prop="bloodType">
-                        <el-select v-model="baseInfo.bloodType" placeholder="请选择血型">
+                    <el-form-item label="血型:" prop="bloodTypeCode">
+                        <el-select v-model="baseInfo.bloodTypeCode" placeholder="请选择血型" @change="baseInfo.bloodType = GET_DICTIONARY_TEXT(bloodTypeList,baseInfo.bloodTypeCode)">
                             <el-option v-for="item in bloodTypeList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
@@ -95,13 +95,13 @@
                 <el-form-item label="传真:" prop="fax">
                     <el-input  v-model="baseInfo.fax" placeholder="请输入传真"></el-input>
                 </el-form-item>
-                <el-form-item label="用户状态:" prop="employeeStatus">
-                    <el-select v-model="baseInfo.employeeStatus" placeholder="请选择用户状态">
+                <el-form-item label="用户状态:" prop="employeeStatusCode">
+                    <el-select v-model="baseInfo.employeeStatusCode" placeholder="请选择用户状态" @change="baseInfo.employeeStatus = GET_DICTIONARY_TEXT(employeeStatusList,baseInfo.employeeStatusCode)">
                         <el-option v-for="item in employeeStatusList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="用户类型:" prop="employeeType">
-                    <el-select v-model="baseInfo.employeeType" placeholder="请选择用户类型">
+                <el-form-item label="用户类型:" prop="employeeTypeCode">
+                    <el-select v-model="baseInfo.employeeTypeCode" placeholder="请选择用户类型" @change="baseInfo.employeeType = GET_DICTIONARY_TEXT(employeeTypeList,baseInfo.employeeTypeCode)">
                         <el-option v-for="item in employeeTypeList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                     </el-select>
                 </el-form-item>

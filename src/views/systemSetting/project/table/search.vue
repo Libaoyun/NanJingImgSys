@@ -7,7 +7,7 @@
         size="250px"
         @close="$emit('update:searchDialog',false)"
         ref="drawer">
-        <span slot="title"><i class="iconfont iconsearch1"></i> 搜索</span>
+        <span slot="title"><i class="iconfont icon-sousuo"></i> 搜索</span>
         <div>
             <el-form :model="searchParams" :inline="true" size="mini" label-width="70px" label-position="right">
                 <el-form-item label="项目名称" prop="orgName">

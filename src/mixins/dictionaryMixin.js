@@ -3,6 +3,7 @@ import  Component  from 'vue-class-component';
 
 @Component  // 一定要用Component修饰
 export default class dictionaryMixin extends Vue {
+    operateTypeList = []
     genderList = []
     educationList = []
     bloodTypeList = []
@@ -10,6 +11,12 @@ export default class dictionaryMixin extends Vue {
     employeeTypeList = []
 
 
+    // 获取操作类型
+    getOperateTypeList(){
+        this.GET_DICTIONARY_LIST(1011).then(res=>{
+            this.operateTypeList = res;
+        })
+    }
     // 获取性别
     getGenderList(){
         this.GET_DICTIONARY_LIST(1012).then(res=>{

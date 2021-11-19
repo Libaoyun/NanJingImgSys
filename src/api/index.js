@@ -7,6 +7,8 @@ import * as organizationApi from './modules/systemSetting/organization'
 import * as projectApi from './modules/systemSetting/project'
 import * as dictionaryApi from './modules/systemSetting/dictionary'
 import * as onlineManualsApi from './modules/systemSetting/onlineManuals'
+import * as operationLogApi from './modules/systemSetting/operationLog'
+import * as ruleConfigurationApi from './modules/systemSetting/ruleConfiguration'
 
 let api = Object.assign(
     appApi,
@@ -16,7 +18,9 @@ let api = Object.assign(
     organizationApi,
     projectApi,
     dictionaryApi,
-    onlineManualsApi
+    onlineManualsApi,
+    operationLogApi,
+    ruleConfigurationApi
 )
 
 Vue.prototype.$API = api

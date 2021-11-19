@@ -2,8 +2,9 @@
     <div class="wrapper">
         <!-- 按钮组版块 -->
         <div class="global-btn-group">
-            <el-button size="small" icon="iconfont iconrefresh" @click="refreshBtn">刷新</el-button>
-            <div class="search iconfont iconsearch1" @click="openSearch"> 搜索</div>
+            <el-button size="small" icon="iconfont icon-daochu" @click="exportBtn">导出</el-button>
+            <el-button size="small" icon="iconfont icon-icon_refresh" @click="refreshBtn">刷新</el-button>
+            <div class="search iconfont icon-sousuo" @click="openSearch"> 搜索</div>
         </div>
         <!-- 表格版块 -->
         <el-table
@@ -22,19 +23,14 @@
                     <span>{{(listQuery.page-1)*listQuery.limit + props.$index + 1}}</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="index1" label="用户ID" width="90" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="userOrgName" label="操作用户" width="350" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="userDepartName" label="操作模块" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="userPositionName" label="操作类型" width="150" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="loginIp" label="操作内容"  align="center" width="150" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="createTime" label="操作时间" width="150"  align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="operateType" label="客户端IP" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="operateContent" label="操作结果" width="300" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="userPositionName" label="结果提示" width="150" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="loginIp" label="创建人"  align="center" width="150" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="createTime" label="修改人" width="150"  align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="operateType" label="创建日期" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="operateContent" label="修改日期" width="300" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="userName" label="用户名" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="userOrgName" label="所属组织" width="350" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="userDepartName" label="所属部门" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="userPositionName" label="所属岗位" width="150" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="loginIp" label="IP"  align="center" width="150" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="createTime" label="记录时间" width="150"  align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="operateType" label="操作类型" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="operateContent" label="操作内容" width="300" align="center" :show-overflow-tooltip="true"></el-table-column>
         </el-table>
         <div class="pagination-wrapper">
             <el-pagination
@@ -69,8 +65,16 @@ export default class extends tableMixin {
     total = 0
     searchDialog = false
     searchParams = {}
+    //复选框选中的id值
+    get idList(){
+        var list = [];
+        this.selected.forEach(item=>{
+            list.push(item.id)
+        })
+        return list;
+    };
     created() {
-        // this.getOperationLog();
+        this.getOperationLog();
     }
     // 查询外部用户列表
     getOperationLog(){
@@ -88,6 +92,17 @@ export default class extends tableMixin {
         }).catch(err=>{
             this.listLoading = false;
         })
+    }
+
+    // 导出excel
+    exportBtn(){
+        var data = {
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            idList:this.idList,
+            menuCode:this.MENU_CODE_LIST.userList
+        };
+        this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/operationLog/exportExcel',data});
     }
 
     // 刷新

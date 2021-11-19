@@ -36,7 +36,7 @@
             class="global-table-default"
             style="width: 100%;">
             <el-table-column type="selection" width="55" align="center" ></el-table-column>
-            <el-table-column label="序号" type="index" width="55" align="center">
+            <el-table-column fixed label="序号" type="index" width="55" align="center">
                 <template slot-scope="scope">
                 <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
                 </template>
@@ -50,9 +50,9 @@
             <el-table-column prop="mobilePhone" label="手机号码" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="departmentName" label="所属部门" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="postName" label="所属职务" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="education" label="学历" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="employeeStatus" label="员工状态" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="employeeType" label="员工类型" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="education" label="学历" width="100" column-key="educationCode" :filters="educationList" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="employeeStatus" label="员工状态" width="100" column-key="employeeStatusCode" :filters="employeeStatusList" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="employeeType" label="员工类型" width="100" column-key="employeeTypeCode" :filters="employeeTypeList" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="createUser" label="创建人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="createTime" label="创建时间" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="updateUser" label="更新人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
@@ -74,8 +74,9 @@
 </template>
 
 <script>
-import { Component, Vue, mixins } from 'vue-property-decorator'
+import { Component, Mixins, Vue, mixins } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
+import dictionaryMixin from '@/mixins/dictionaryMixin'
 import search from './table/search'
 import uploadExcel from '@/components/uploadExcel'
 
@@ -86,7 +87,7 @@ import uploadExcel from '@/components/uploadExcel'
         uploadExcel
     }
 })
-export default class extends tableMixin {
+export default class extends Mixins(tableMixin,dictionaryMixin) {
     tableData = []
     filterParams = {}
     listLoading = false
@@ -112,6 +113,11 @@ export default class extends tableMixin {
     ]
 
     created() {
+        this.getEducationList()
+        this.getEmployeeStatusList()
+        this.getEmployeeTypeList()
+
+
         this.getUserList();
     }
     //复选框选中的id值
