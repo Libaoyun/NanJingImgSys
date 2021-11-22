@@ -46,7 +46,7 @@
                         <el-option label="否" value="1"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="组合按钮:" prop="comButton" v-if="routerMenuInfo.pathRouting === 0">
+                <el-form-item label="组合按钮:" prop="comButton" v-if="routerMenuInfo.pathRouting == 0">
                     <el-checkbox-group v-model="routerMenuInfo.comButton">
                         <el-checkbox label="a10001">新建</el-checkbox>
                         <el-checkbox label="a10002">编辑</el-checkbox>
@@ -54,7 +54,7 @@
                         <el-checkbox label="a10004">审批</el-checkbox>
                     </el-checkbox-group>
                 </el-form-item>
-                <el-form-item label="按钮:" prop="comButton" v-else-if="routerMenuInfo.pathRouting === 1">
+                <el-form-item label="按钮:" prop="comButton" v-else-if="routerMenuInfo.pathRouting == 1">
                     <el-select v-model="routerMenuInfo.comButton">
                         <el-option label="新建" value="a10001"></el-option>
                         <el-option label="编辑" value="a10002"></el-option>

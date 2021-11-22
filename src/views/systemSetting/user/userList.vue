@@ -17,7 +17,7 @@
             </el-dropdown>
             <el-button size="small" icon="iconfont icon-dayinji_o" @click="printBtn">打印</el-button>
             <el-tooltip placement="top">
-                <div slot="content">重置说明：<br/>默认密码为：123456</div>
+                <div slot="content">重置说明：<br/>默认密码为：CRCC123456</div>
                 <el-button size="small" icon="iconfont icon-zhongzhimima" @click="resetPassWordBtn" v-checkPermission="'create'">重置密码</el-button>
             </el-tooltip>
             <el-button size="small" icon="iconfont icon-icon_refresh" @click="refreshBtn">刷新</el-button>

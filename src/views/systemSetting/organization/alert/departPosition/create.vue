@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    title="新增部门/职务"
+    title="新增组织"
     :visible.sync="dialog"
     :close-on-click-modal="false"
     custom-class="global-dialog-default"
@@ -31,8 +31,8 @@
           label-position="right"
           label-width="120px"
         >
-          <el-form-item label="编码:" prop="departmentCode">
-              <el-input v-model="alertStateX_bm.departmentCode" placeholder="请输入编码"></el-input>
+          <el-form-item label="部门编码:" prop="departmentCode">
+              <el-input v-model="alertStateX_bm.departmentCode" placeholder="请输入部门编码"></el-input>
             </el-form-item>
             <el-form-item label="部门名称:" prop="orgName">
               <el-input v-model="alertStateX_bm.orgName" placeholder="请输入部门名称"></el-input>
@@ -40,13 +40,16 @@
             <el-form-item label="部门简称:" prop="departmentSimpleName">
               <el-input v-model="alertStateX_bm.departmentSimpleName" placeholder="请输入部门简称"></el-input>
             </el-form-item>
+            <el-form-item label="联系电话:" prop="inTelephone">
+              <el-input v-model="alertStateX_bm.inTelephone" placeholder="请输入联系电话"></el-input>
+            </el-form-item>
             <el-form-item label="是否启用:" prop="status">
               <el-select v-model="alertStateX_bm.status" placeholder="请选择">
                   <el-option label="启用" value="1"></el-option>
                   <el-option label="禁用" value="0"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="部门类型:" prop="departmentType">
+            <!-- <el-form-item label="部门类型:" prop="departmentType">
               <el-select v-model="alertStateX_bm.departmentType" placeholder="请选择部门类型">
                 <el-option value="bm" label="部门"></el-option>
                 <el-option value="zw" label="职务"></el-option>
@@ -57,15 +60,9 @@
                 <el-option value="bm" label="部门"></el-option>
                 <el-option value="zw" label="职务"></el-option>
               </el-select>
-            </el-form-item>
-            <el-form-item label="传真:" prop="fax">
-              <el-input v-model="alertStateX_bm.fax" placeholder="请输入传真"></el-input>
-            </el-form-item>
-            <el-form-item label="内线电话:" prop="inTelephone">
-              <el-input v-model="alertStateX_bm.inTelephone" placeholder="请输入内线电话"></el-input>
-            </el-form-item>
-            <el-form-item label="外线电话:" prop="outTelephone">
-              <el-input v-model="alertStateX_bm.outTelephone" placeholder="请输入外线电话"></el-input>
+            </el-form-item> -->
+            <el-form-item label="定编人数:" prop="departmentPeople">
+              <el-input v-model.number="alertStateX_bm.departmentPeople" placeholder="请输入定编人数"></el-input>
             </el-form-item>
             <el-form-item label="部门描述" class="large" prop="departmentRemark">
               <el-input type="textarea" v-model="alertStateX_bm.departmentRemark" placeholder="请输入部门描述"></el-input>
@@ -73,9 +70,7 @@
             <el-form-item label="部门职责" class="large" prop="departmentDuty">
               <el-input type="textarea" v-model="alertStateX_bm.departmentDuty" placeholder="请输入部门职责"></el-input>
             </el-form-item>
-            <el-form-item label="定编人数:" prop="departmentPeople">
-              <el-input v-model="alertStateX_bm.departmentPeople" placeholder="请输入定编人数"></el-input>
-            </el-form-item>
+            
         </el-form>
       </div>
       <div v-show="type === 'zw'">
@@ -88,13 +83,13 @@
           label-position="right"
           label-width="120px"
         >
-          <el-form-item label="编码:" prop="postCode">
-            <el-input v-model="alertStateX_zw.postCode" placeholder="请输入编码"></el-input>
+          <el-form-item label="职务编码:" prop="postCode">
+            <el-input v-model="alertStateX_zw.postCode" placeholder="请输入职务编码"></el-input>
           </el-form-item>
           <el-form-item label="职务名称:" prop="orgName">
             <el-input v-model="alertStateX_zw.orgName" placeholder="请输入职务名称"></el-input>
           </el-form-item>
-          <el-form-item label="职务等级:" prop="postLevelCode">
+          <!-- <el-form-item label="职务等级:" prop="postLevelCode">
             <el-select v-model="alertStateX_zw.postLevelCode" placeholder="请选择职务等级">
               <el-option value="bm" label="部门"></el-option>
               <el-option value="zw" label="职务"></el-option>
@@ -105,15 +100,15 @@
               <el-option value="bm" label="部门"></el-option>
               <el-option value="zw" label="职务"></el-option>
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="是否启用:" prop="status">
             <el-select v-model="alertStateX_zw.status" placeholder="请选择">
                 <el-option label="启用" value="1"></el-option>
                 <el-option label="禁用" value="0"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="备注" class="large" prop="remark">
-            <el-input type="textarea" v-model="alertStateX_zw.remark" placeholder="请输入备注"></el-input>
+          <el-form-item label="职务描述" class="large" prop="remark">
+            <el-input type="textarea" v-model="alertStateX_zw.remark" placeholder="请输入职务描述"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -170,15 +165,22 @@ export default class addDepartPosition extends dictionaryMixin {
   }
   formRules_bm = {
     departmentCode: [
-      { required: true, message: '请输入编码', trigger: 'change' }
+      { required: true, message: '请输入部门编码', trigger: 'change' }
     ],
     orgName: [
       { required: true, message: '请输入部门名称', trigger: 'change' }
+    ],
+    inTelephone:[
+      {
+        pattern: /^[1]([3-9])[0-9]{9}$/,
+        message: "请输入正确的手机号码",
+        trigger: "change"
+      }
     ]
   }
   formRules_zw = {
     postCode: [
-      { required: true, message: '请输入编码', trigger: 'change' }
+      { required: true, message: '请输入职务编码', trigger: 'change' }
     ],
     orgName: [
       { required: true, message: '请输入职务名称', trigger: 'change' }
@@ -265,8 +267,9 @@ export default class addDepartPosition extends dictionaryMixin {
 <style lang="scss" scoped>
 ::v-deep {
   .global-dialog-default {
+    height: auto;
     .el-dialog__body {
-      height: 500px;
+      height: auto;
       overflow: auto;
     }
     .el-form-item.el-form-item--mini {

@@ -3,41 +3,87 @@
         title="功能菜单授权"
         :visible="menuAuthDialog"
         :close-on-click-modal="false"
-        custom-class="global-dialog-default"
+        custom-class="global-dialog-default global-dialog-large"
         @close="closeDialog"
         append-to-body
-        width="500px">
+        width="1000px">
         <!-- 这里的插槽会替换title显示的内容 -->
         <div slot="title">
             <span>功能菜单授权</span>
-            <el-popover
-                placement="bottom-start"
-                title="权限的定义"
-                width="480"
-                trigger="hover">
-                <div style="font-size: 13px;line-height:26px">
-                    <div>① 查询：组合权限 (查看、导出、打印、刷新)</div>
-                    <div>② 新建：组合权限 (查看、新建、编辑、提交、撤销、导出、打印、刷新)</div>
-                    <div>③ 编辑：组合权限 (查看、编辑、删除、提交、撤销、导出、打印、刷新)</div>
-                    <div>④ 审批：组合权限 (查看、审批、提交、撤销、导出、打印、刷新)</div>
-                </div>
-                <i class="el-icon-question" slot="reference"></i>
-            </el-popover>
         </div>
         <div class="content">
-            <div class="left">
-                <el-tree 
-                :data="projectTree" 
-                :props="projectProps" 
-                show-checkbox
-                v-loading="loadingTree"
-                :default-expanded-keys="[1,13,15]"
-                :default-checked-keys="defaultCheckedKeys"
-                element-loading-spinner="el-icon-loading"
-                node-key="menuCode"
-                ref="projectTree"
-                ></el-tree>
-            </div>
+            <el-table
+                :data="tableData"
+                style="width: 100%;margin-bottom: 20px;"
+                row-key="id"
+                class="global-table-default"
+                border
+                default-expand-all
+                :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+                <el-table-column prop="title" label="授权菜单" width="300">
+                    
+                </el-table-column>
+                <el-table-column prop="new" label="新建" align="center">
+                    <template slot-scope="scope">
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[0]) && scope.row.parentCode"
+                            v-model="scope.row.selected[menuButtons[0]]"
+                            @change="changeChild($event,scope.row,menuButtons[0])"
+                        ></el-checkbox>
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[0]) && !scope.row.parentCode"
+                            :indeterminate="scope.row.isIndeterminate[menuButtons[0]]"
+                            v-model="scope.row.selected[menuButtons[0]]"
+                            @change="changeParent($event,scope.row,menuButtons[0])"
+                        ></el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="edit" label="编辑" align="center">
+                    <template slot-scope="scope">
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[1]) && scope.row.parentCode"
+                            v-model="scope.row.selected[menuButtons[1]]"
+                            @change="changeChild($event,scope.row,menuButtons[1])"
+                        ></el-checkbox>
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[1]) && !scope.row.parentCode"
+                            :indeterminate="scope.row.isIndeterminate[menuButtons[1]]"
+                            v-model="scope.row.selected[menuButtons[1]]"
+                            @change="changeParent($event,scope.row,menuButtons[1])"
+                        ></el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="detail" label="详情" align="center">
+                    <template slot-scope="scope">
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[2]) && scope.row.parentCode"
+                            v-model="scope.row.selected[menuButtons[2]]"
+                            @change="changeChild($event,scope.row,menuButtons[2])"
+                        ></el-checkbox>
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[2]) && !scope.row.parentCode"
+                            :indeterminate="scope.row.isIndeterminate[menuButtons[2]]"
+                            v-model="scope.row.selected[menuButtons[2]]"
+                            @change="changeParent($event,scope.row,menuButtons[2])"
+                        ></el-checkbox>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="approval" label="审批" align="center">
+                    <template slot-scope="scope">
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[3]) && scope.row.parentCode"
+                            v-model="scope.row.selected[menuButtons[3]]"
+                            @change="changeChild($event,scope.row,menuButtons[3])"
+                        ></el-checkbox>
+                        <el-checkbox 
+                            v-if="scope.row.comButton.includes(menuButtons[3]) && !scope.row.parentCode"
+                            :indeterminate="scope.row.isIndeterminate[menuButtons[3]]"
+                            v-model="scope.row.selected[menuButtons[3]]"
+                            @change="changeParent($event,scope.row,menuButtons[3])"
+                        ></el-checkbox>
+                    </template>
+                </el-table-column>
+            </el-table>
         </div>
         <span slot="footer" class="dialog-footer">
             <el-button size="mini" @click="closeDialog">取消</el-button>
@@ -58,152 +104,148 @@ import eventBus from '@/utils/eventBus.js'
 export default class extends tableMixin {
     @Prop() menuAuthDialog
     @Prop() editParams
-    @Prop() authParams
 
     loadingBtn = 0;
-    loadingTree = false
-    projectTree = [
-        // { id: 1, label: '首页' },
-        // { id: 2, label: '设备调拨' ,children:[
-        //     { id: 21, label: '设备需求登记' ,parentId:2,children:[
-        //         { id: 211, label: '查询',parentId:21 },
-        //         { id: 212, label: '新建' ,selected:true,parentId:21},
-        //         { id: 213, label: '编辑',parentId:21 },
-        //         { id: 214, label: '审批' ,parentId:21},
-        //     ]},
-        //     { id: 22, label: '设备调拨' ,selected:true,parentId:2,children:[
-        //         { id: 221, label: '查询' ,parentId:22},
-        //         { id: 222, label: '新建（仅公司用户）' ,parentId:22},
-        //         { id: 223, label: '编辑（仅公司用户）' ,parentId:22},
-        //         { id: 224, label: '审批' ,parentId:22},
-        //     ]},
-        //     { id: 23, label: '设备闲置预警',parentId:2 ,children:[
-        //         { id: 231, label: '查询' ,selected:true,parentId:23},
-        //         { id: 232, label: '编辑' ,parentId:23},
-        //     ]}
-        // ]},
-        // { id: 3, label: '业务登记' },
-        // { id: 4, label: '设备使用' },
-        // { id: 5, label: '配件材料管理' },
-        // { id: 6, label: '车辆管理' },
-        // { id: 7, label: '成本中心' },
-        // { id: 8, label: '报表中心' },
-        // { id: 9, label: '系统管理' },
-    ]
-    // projectTree = []
-    projectProps= {
-        children: 'children',
-        label: 'title'
-    }
-    defaultCheckedKeys = []
+    tableData = []
+    menuButtons = ['a10001','a10002','a10003','a10004']
+    menuButtonParams = []
     created(){
-       this.getAuthUserMenu();
+        this.getRouterMenuTree()
     }
     mounted() {
-        // this.defaultCheckedKeys = filterCheckedTree(this.projectTree,[])
-        // console.log('defaultCheckedKeys',this.defaultCheckedKeys)
+    }
+    getRouterMenuTree() {
+        let data = {
+            menuCode:this.MENU_CODE_LIST.routerMenuList
+        }
+        this.$API.apiGetRouterMenuTree(data).then(res=>{
+            this.tableData = this.filterTree(res.data)
+            this.getAuthUserMenu()
+        })
+    }
+    getAuthUserMenu() {
+        const data = {
+            organizationId:this.editParams.organizationId,
+            userId:this.editParams.userId
+        }
+        this.$API.apiGetAuthUserMenu(data).then(res=>{
+            res.data.forEach(item=>{
+                var obj = this.findOne(this.tableData,item.menuCode)
+                obj.comButton.split(',').forEach((o,index)=>{
+                    if(o && item.authorityButtonCode.includes(o)) {
+                        obj.selected[o] = true
+                    }
+                })
+            })
+        })
+    }
+    findOne(objects, menuCode) {
+        const queue = [...objects]
+        while (queue.length) {
+            const o = queue.shift()
+            if (o.menuCode== menuCode) return o
+            queue.push(...(o.children || []))
+        }
+        return queue
+    }
+    filterTree(arr) {
+        const newArr = arr.filter(item => item.hidden === '0')
+        return newArr.map(item => {
+            item.selected = {}
+            item.isIndeterminate = {}
+            item.comButton.split(',').forEach(c=>{
+                if(c) {
+                    item.selected[c] = false
+                    item.isIndeterminate[c] = false
+                }
+            })
+            if (item.children) {
+                item.children = this.filterTree(item.children)
+            }
+            return item
+        })
+    }
+    changeParent(e,row,menuCode) {
+        if(e) {
+            let filterChild = row.children.filter(item=>item.comButton)
+            filterChild.forEach(item=>{
+                item.selected[menuCode] = true
+            })
+        }else {
+            let filterChild = row.children.filter(item=>item.comButton)
+            filterChild.forEach(item=>{
+                item.selected[menuCode] = false
+            })
+        }
+    }
+    changeChild(e,row,menuCode) {
+        let parentData = this.tableData.filter(item=>item.menuCode == row.parentCode)[0]
+        
+        let curFilter = parentData.children.filter(item=>item.comButton&&item.comButton.includes(menuCode))
+        const allSelected = curFilter.every(item=>{
+            return item.selected[menuCode]
+        })
+        const allNotSelected = curFilter.every(item=>{
+            return !item.selected[menuCode]
+        })
+        if(allSelected) {
+            parentData.selected[menuCode] = true
+            parentData.isIndeterminate[menuCode] = false
+        }else if(allNotSelected) {
+            parentData.selected[menuCode] = false
+            parentData.isIndeterminate[menuCode] = false
+        }else {
+            parentData.isIndeterminate[menuCode] = true
+        }
     }
     closeDialog() {
         this.$emit('update:menuAuthDialog', false);
     }
-    getAuthUserMenu(){
-        this.loadingTree = true;
-        this.$API.apiGetAuthUserMenu(this.editParams).then((res)=>{
-            this.projectTree = res.data;
-            this.defaultCheckedKeys = filterCheckedTree(this.projectTree,[])
-            this.loadingTree = false;
-        }).catch((err)=>{
-            this.loadingTree = false;
+    getParams(arr) {
+        const newArr = arr.filter(item => item.hidden === '0')
+        newArr.forEach(item => {
+            let flag = Object.keys(item.selected).some(v=>item.selected[v])
+            if(flag && item.parentCode) {
+                this.menuButtonParams.push({
+                    authorityButtonCode:Object.keys(item.selected).filter(v=>item.selected[v]).join(','),
+                    menuCode:item.menuCode
+                })
+            }
+            if (item.children) {
+                item.children = this.getParams(item.children)
+            }
         })
-    }
-    // 获取授权的菜单按钮
-    getMenuButton(){
-        // 拼接需要的数据结构
-        var selected = this.$refs.projectTree.getCheckedNodes() || [];
-        var halfSelected = this.$refs.projectTree.getHalfCheckedNodes() || [];
-        var result = [...selected,...halfSelected];
-        var params = [];
-        result.forEach(item=>{
-            params.push({
-                authorityButtonCode:item.authorityButtonCode|| '',
-                menuCode:item.authorityButtonCode?item.parentCode : item.menuCode
-            })
-        })
-        return params;
-        // var temp = {};
-        // selected.forEach(item => {
-        //     temp[item.menuCode] = item; 
-        // });
-        // var menuButton = [];
-        // var result = {};
-        // selected.forEach(item=>{
-        //     if(!item.children || item.children.length == 0){
-        //         let parentCode = item.parentCode;
-        //         result[parentCode] || (result[parentCode]=[]);
-        //         result[parentCode].push(item.menuCode);
-        //     }
-        // })
-        // for(var key in result){
-        //     var item = menuButton[menuButton.length] = {};
-        //     item.authorityButtonCode = result[key];
-        //     item.menuCode = key;
-        // }
-        // return menuButton;
     }
     submit() {
-        if(this.$refs.projectTree.getCheckedNodes().length == 0){
+        var data = JSON.parse(JSON.stringify(this.tableData))
+        this.menuButtonParams = []
+        this.getParams(data)
+        const params = {
+            menuCode:this.MENU_CODE_LIST.authorizationList,
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            organizationId:this.editParams.organizationId,
+            userFlag:this.editParams.userFlag,
+            userId:this.editParams.userId,
+            menuButton:this.menuButtonParams
+        }
+        this.loadingBtn = 1
+        this.$API.apiUpdateAuthUserMenu(params).then(res=>{
+            this.loadingBtn = 0
             this.$message({
-                type: 'info',
-                message: '请选择功能菜单!'
+                type:'success',
+                message:'授权成功'
             })
-            return
-        }
-        // console.log(this.authParams);
-        if(this.editParams){
-            // 提交编辑
-            var params = {};
-            params.menuButton = this.getMenuButton();
-            params = Object.assign(params,this.editParams);
-            this.loadingBtn = 1;
-            this.$API.apiUpdateAuthUserMenu(params).then(res=>{
-                this.$message({
-                    type:'success',
-                    message:'授权成功!'
-                })
-                this.loadingBtn = 0;
-                this.$emit('update:menuAuthDialog',false);
-            }).catch(()=>{
-                this.loadingBtn = 0;
-            })
-        }else{
-            
-            // 新增
-            var params = Object.assign(this.authParams,{menuButton:this.getMenuButton()});
-            this.loadingBtn = 1;
-            this.$API.apiCreateAuthorizeUser(params).then(res=>{
-                this.loadingBtn = 0;
-                this.$message({
-                    type:'success',
-                    message:'授权成功!'
-                })
-                eventBus.$emit('refreshList');
-                this.$emit('update:menuAuthDialog',false);
-            }).catch(()=>{
-                this.loadingBtn = 0;
-            })
-
-        }
+            this.$emit('menuAuth')
+        }).catch(()=>{
+            this.loadingBtn = 0
+        })
     }
 }
 </script>
 
 <style lang="scss" scoped>
-.content{
-    .left{
-        padding: 15px;
-        height: 470px;
-        overflow: auto;
-        border: 1px #ddd solid;
-    }
+/deep/ .el-dialog__body {
+    height: 85%;
 }
 </style>

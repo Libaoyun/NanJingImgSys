@@ -16,13 +16,11 @@
             @node-drop="nodeDrop"
             :props="projectProps" 
             @node-click="handleProjectNodeClick"
-            highlight-current
             :default-expanded-keys = "defaultExpandedKeys"
             @node-expand="nodeExpand"
             @node-collapse="nodeCollapse"
             node-key="id"
             ref="projectTree"
-            :expand-on-click-node="false"
             v-loading="loadingTree"
             element-loading-spinner="el-icon-loading"
             :filter-node-method="filterProjectTreeNode"
@@ -35,8 +33,8 @@
                         </span>
                     </span>
                     <span class="node_edit">
-                        <i @click.stop="update(node,data)" class="el-icon-edit" v-if="['-1','-2','0','1','2'].includes(data.orgType)"></i>
-                        <i @click.stop="remove(node,data)" class="el-icon-delete" v-if="['-1','-2','0','1','2'].includes(data.orgType)"></i>
+                        <i @click.stop="update(node,data)" class="el-icon-edit" v-if="['-1','-2','1','2'].includes(data.orgType)"></i>
+                        <i @click.stop="remove(node,data)" class="el-icon-delete" v-if="['-1','-2','1','2'].includes(data.orgType)"></i>
                         <i @click.stop="append(node,data)" class="el-icon-plus" v-if="['-1','-2','0','1','2'].includes(data.orgType)"></i>
                     </span>
                 </span>
@@ -85,6 +83,9 @@ export default class extends tableMixin {
         this.loadingTree = true;
         this.$API.apiGetOrganizationTree(params).then(res=>{
             this.projectTree = res.data || [];
+            if(res.data.length > 0){
+                this.defaultExpandedKeys = [res.data[0].id]
+            }
             this.loadingTree = false
         }).catch(()=>{
             this.loadingTree = false;

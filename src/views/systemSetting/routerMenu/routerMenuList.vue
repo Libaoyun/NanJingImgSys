@@ -90,7 +90,7 @@ import edit from './table/edit'
 import axios from 'axios'
 
 @Component({
-    name: 'workflow',
+    name: 'routerMenuList',
     components: {
         create,
         edit
@@ -134,7 +134,7 @@ export default class extends tableMixin {
     getRouterMenuTree(){
         this.loadingTree = true;
         let data = {
-            menuCode:100
+            menuCode:this.MENU_CODE_LIST.routerMenuList
         }
         this.$API.apiGetRouterMenuTree(data).then(res=>{
             this.$set(this.projectTree[0],'children',res.data);
@@ -148,6 +148,9 @@ export default class extends tableMixin {
     createRouterMenu(data){
         this.loadingBtn = 1;
         let params = Object.assign({
+            menuCode:this.MENU_CODE_LIST.routerMenuList,
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
             menuType:'1',
             parentCode : this.selected.menuCode
         },data)
@@ -167,8 +170,13 @@ export default class extends tableMixin {
         })
     }
     editRouterMenu(data){
+        console.log(data)
         this.loadingBtn = 2;
-        let params = Object.assign({},data);
+        let params = Object.assign({},data,{
+            menuCode:data.menuCode,
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        });
         Array.isArray(params.comButton) && (params.comButton = params.comButton.join(','));
         this.$API.apiUpdateNode(params).then(res=>{
             this.loadingBtn = 0;

@@ -56,6 +56,7 @@ const user = {
             //   })
                 Vue.ls.remove(ACCESS_TOKEN)
                 Vue.ls.clear()
+                commit('CLEAR_TAB_LIST')
                 resetRouter()
                 resolve()
             })

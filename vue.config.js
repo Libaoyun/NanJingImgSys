@@ -54,7 +54,7 @@ module.exports = {
 		proxy: {
 			'/rdexpense': {
 				// target: 'http://192.168.41.180:8888',
-				// target: 'http://192.168.41.202:8888',
+				// target: 'http://192.168.41.202:1001',
 				target: 'http://192.168.40.236:1001',//鲁
 				ws: true,
 				changeOrigin: true,

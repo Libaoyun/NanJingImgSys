@@ -12,10 +12,11 @@
                 <el-tree 
                 :data="projectTree" 
                 :props="projectProps" 
-                @node-click="handleProjectNodeClick"
                 highlight-current
                 :default-expanded-keys="defaultExpandedKeys"
                 node-key="id"
+                show-checkbox
+                @check="checkNode"
                 ref="projectTree"
                 :filter-node-method="filterProjectTreeNode"
                 v-loading="loadingTree"
@@ -24,22 +25,22 @@
             </div>
         </div>
         <span slot="footer" class="dialog-footer">
-            <el-button size="mini" @click="closeDialog">关闭</el-button>
-            <el-button size="mini" type="primary" @click="openMenuAuth">授权</el-button>
+            <el-button size="mini" @click="closeDialog">取消</el-button>
+            <el-button size="mini" type="primary" @click="choosePosition">选择</el-button>
         </span>
-        <menu-auth :menuAuthDialog.sync="menuAuthDialog" v-if="menuAuthDialog" :authParams="authParams"></menu-auth>
+        <!-- <menu-auth :menuAuthDialog.sync="menuAuthDialog" v-if="menuAuthDialog" :authParams="authParams"></menu-auth> -->
     </el-dialog>
 </template>
 
 <script>
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
-import menuAuth from './menuAuth'
+// import menuAuth from './menuAuth'
 
 @Component({
     name: 'authPosition',
     components:{
-        menuAuth
+        // menuAuth
     }
 })
 export default class extends tableMixin {
@@ -55,7 +56,7 @@ export default class extends tableMixin {
             position:[this.selectedPosition.id],
             station:{
                 stationCode:this.selectedPosition ? this.selectedPosition.code : '',
-                stationName:this.selectedPosition ? this.selectedPosition.name : '',
+                stationName:this.selectedPosition ? this.selectedPosition.orgName : '',
             }
         }
     }  
@@ -65,9 +66,13 @@ export default class extends tableMixin {
     defaultExpandedKeys = []
     projectProps= {
         children: 'children',
-        label: 'name'
+        label: 'orgName',
+        disabled:(data,node) => {
+            return data.orgType !='2'
+        }
     }
     menuAuthDialog = false
+    selected = []
 
     @Watch('filterTreeText')
     filter(val){
@@ -80,67 +85,62 @@ export default class extends tableMixin {
 
     // 获取岗位列表
     getStationTreeList() {
-        // this.loadingTree = true
-        // this.$API.apiGetStationTree().then((res)=>{
-        //     this.loadingTree = false
-        //     this.projectTree = res.data
-        //     if(res.data.length > 0){
-        //         this.defaultExpandedKeys = [res.data[0].id]
-        //     }
-        // }).catch((err)=>{
-        //     this.loadingTree = false
-        // })
-        const data = [
-            {
-                code: "000010001100010",
-                fullname: "中铁十一局集团城市轨道工程有限公司",
-                id: 101093,
-                name: "城轨公司",
-                order: 21,
-                show: true,
-                type: 1,
-                virtual: false,
-                children:[
-                    {
-                        code: "00001000110001001",
-                        fullname: "中铁十一局集团城轨公司总部",
-                        id: 101094,
-                        name: "总部",
-                        order: 1,
-                        show: true,
-                        type: 1,
-                        virtual: true,
-                        children:[]
-                    }
-                ]
+        this.loadingTree = true
+        this.$API.apiGetOrganizationTree().then((res)=>{
+            this.loadingTree = false
+            this.projectTree = res.data
+            if(res.data.length > 0){
+                this.defaultExpandedKeys = [res.data[0].id]
             }
-        ]
-        this.projectTree = data
-        if(data.length > 0){
-            this.defaultExpandedKeys = [data[0].id]
+        }).catch((err)=>{
+            this.loadingTree = false
+        })
+    }
+    checkNode(node,selectedNodes) {
+        this.selected = selectedNodes.checkedNodes || []
+        this.selected.filter(item=>item.orgType == '2')
+    }
+    choosePosition() {
+        if(this.selected.length === 0){
+            this.$message({
+                type: 'info',
+                message: '请至少选择一条记录!'
+            })
+            return
         }
+        let userList = []
+        this.selected.forEach(item=>{
+            userList.push({
+                authName:item.orgName,
+                userId:item.orgId
+            })
+        })
+        const data = {
+            menuCode:this.MENU_CODE_LIST.authorizationList,
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+            userFlag:'1',
+            organizationId:this.project[0].organizationId,
+            userList:userList
+        }
+        this.btnLoading = 1
+        this.$API.apiAddStationUser(data).then(res=>{
+            this.btnLoading = 0
+            this.$message({
+                type:'success',
+                message:'添加成功'
+            })
+            this.$emit('addAuthPosition')
+        }).catch(()=>{
+            this.btnLoading = 0
+        })
     }
     closeDialog() {
         this.$emit('update:positionDialog', false)
     }
     filterProjectTreeNode(value, data){
         if (!value) return true;
-        return data.name.indexOf(value) !== -1;
-    }
-    handleProjectNodeClick(data) {
-        this.selectedPosition = data;
-    }
-    // 授权+点击后文字颜色变化
-    openMenuAuth(scope){
-        if(this.$refs.projectTree.getCurrentNode() && this.selectedPosition.type == 3){
-            this.menuAuthDialog = true
-        }else{
-            this.$message({
-                type: 'info',
-                message: '请选择岗位!'
-            })
-        }
-        
+        return data.orgName.indexOf(value) !== -1;
     }
 }
 </script>

@@ -2,7 +2,7 @@
     <div class="authorizationList">
         <div class="left">
             <h4>
-                <div>工程树列表</div>
+                <div>项目树列表</div>
             </h4>
             <el-input placeholder="请输入工程名称" prefix-icon="el-icon-search" v-model="filterTreeText"></el-input>
             <el-tree 
@@ -11,7 +11,7 @@
             @node-click="handleProjectNodeClick"
             highlight-current
             :default-expand-all="true"
-            node-key="scopeCode"
+            node-key="organizationId"
             ref="projectTree"
             :expand-on-click-node="false"
             v-loading="loadingTree"
@@ -31,6 +31,10 @@
                 <el-button icon="el-icon-coordinate" size="mini" type="primary" @click="addPosition">添加授权岗位</el-button>
                 <el-button icon="el-icon-delete" size="mini" type="danger" @click="bathDeleteUser">删除授权对象</el-button>
             </div>
+            <div class="search-group">
+                <el-input placeholder="授权对象" v-model="search.authName"></el-input>
+                <div class="searchBtn iconfont icon-sousuo" @click="listQuery.page = 1;getAuthProjectUser()"></div>
+            </div>
             <el-table
                 :data="userList"
                 :max-height="tableConfig.maxHeight"
@@ -47,15 +51,23 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="authName" label="授权对象" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-                <el-table-column prop="userFlagName" label="类型" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-                <el-table-column prop="userOrganizationName" label="所属组织" align="center" :show-overflow-tooltip="true"></el-table-column>
-                <el-table-column prop="scopeName" label="权限工程" width="300" align="center" :show-overflow-tooltip="true"></el-table-column>
+                <el-table-column prop="userFlag" label="类型" width="80" align="center" :show-overflow-tooltip="true">
+                    <template slot-scope="scope">
+                        {{['人员','职务'][scope.row.userFlag]}}
+                    </template>
+                </el-table-column>
+                <el-table-column prop="departmentName" label="所属组织" width="300" align="center" :show-overflow-tooltip="true"></el-table-column>
+                <el-table-column prop="authStatus" label="授权状态" width="100" align="center" :show-overflow-tooltip="true">
+                    <template slot-scope="scope">
+                        {{['未授权','已授权'][scope.row.authStatus]}}
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作" width="120" :show-overflow-tooltip="true" align="center">
                     <template slot-scope="scope">
-                        <el-link type="primary" :underline="false" @click="updateMenuAuth(scope.row)" :disabled="scope.row.userId == $store.getters.userInfo.id">授权</el-link>
+                        <el-link type="primary" :underline="false" @click="updateMenuAuth(scope.row)" :disabled="scope.row.userId == $store.getters.userInfo.userCode">授权</el-link>
                         <el-divider direction="vertical"></el-divider>
-                        <el-popconfirm title="是否要删除此对象？" @confirm="deleteUser(scope)" placement="top" cancelButtonType="plain" :disabled="scope.row.userId == $store.getters.userInfo.id">
-                            <el-link type="danger" :underline="false" slot="reference" :disabled="scope.row.userId == $store.getters.userInfo.id">删除</el-link>
+                        <el-popconfirm title="是否要删除此对象？" @confirm="deleteUser(scope)" placement="top" cancelButtonType="plain" :disabled="scope.row.userId == $store.getters.userInfo.userCode">
+                            <el-link type="danger" :underline="false" slot="reference" :disabled="scope.row.userId == $store.getters.userInfo.userCode">删除</el-link>
                         </el-popconfirm>
                     </template>
                 </el-table-column>
@@ -75,8 +87,8 @@
         <!-- 添加用户授权 -->
         <auth-user :userDialog.sync="userDialog" v-if="userDialog" :project="project" @addAuthUser="addAuthUser"></auth-user>
         <!-- 添加岗位授权 -->
-        <auth-position :positionDialog.sync="positionDialog" v-if="positionDialog" :project="project"></auth-position>
-        <menu-auth :menuAuthDialog.sync="menuAuthDialog" v-if="menuAuthDialog" :editParams="editParams" :project="project"></menu-auth>
+        <auth-position :positionDialog.sync="positionDialog" v-if="positionDialog" :project="project" @addAuthPosition="addAuthPosition"></auth-position>
+        <menu-auth :menuAuthDialog.sync="menuAuthDialog" v-if="menuAuthDialog" :editParams="editParams" :project="project" @menuAuth="menuAuth"></menu-auth>
     </div>
 </template>
 
@@ -108,10 +120,13 @@ export default class extends tableMixin {
     defaultExpandedKeys = []
     projectProps= {
         children: 'children',
-        label: 'simpleName'
+        label: 'organizationName'
     }
     userList = []
     total = 0
+    search = {
+        authName:''
+    }
     userDialog = false
     positionDialog = false
     selected = []
@@ -133,148 +148,53 @@ export default class extends tableMixin {
     beforeDestroy(){
         eventBus.$off('refreshList');
     }
-    // 获取工程树
+    // 获取项目树
     getProjectTree(){
-        // this.loadingTree = true;
-        // this.$API.apiGetProjectTree().then((res)=>{
-        //     res.data && res.data.forEach(item=>{
-        //         item.simpleName = item.simpleName?item.simpleName:item.scopeName;
-        //         item.children && item.children.forEach(child=>{
-        //             child.simpleName = child.simpleName?child.simpleName:child.scopeName;
-        //         })
-        //     })
-        //     this.projectTree = res.data
-        //     if(res.data.length > 0){
-        //         // :default-expanded-keys="defaultExpandedKeys"
-        //         this.defaultExpandedKeys = [res.data[0].scopeCode]
-        //     }
-        //     this.loadingTree = false;
-        // }).catch((err)=>{
-        //     this.loadingTree = false;
-        // })
-
-        const data = [
-            {
-                hrCode: "[{\"orgid\":\"101093\",\"providerId\":\"crcc11\"}]",
-                id: "a0eed590e4de4c46876144968be76e8b",
-                ifUse: 1,
-                ifVirtual: 0,
-                isProject: "0",
-                orgCode: "000010000100011",
-                orgCreditCode: "914201006667974746",
-                orgCreditId: "1018",
-                orgFullName: "中铁十一局集团城市轨道工程有限公司",
-                orgLevel: "2",
-                orgName: "城轨公司",
-                parentId: "0addc89ce0c84b56b7260adbaf04fda7",
-                scopeCode: "000010000100011",
-                scopeName: "中铁十一局集团城市轨道工程有限公司",
-                sortNo: "00011",
-                treeSort: 13,
-                children:[
-                    {
-                        actualBeginDate: "2018-05-20",
-                        areaHQCode: "AHQ_11",
-                        areaHQName: "中南指挥部",
-                        auditTime: "2020-04-29 14:12:45",
-                        biddingContractAmount: "19400.00",
-                        biddingTechnologyManager: "中铁十一局城轨公司福州滨海快线2标2工区项目部项目领导项目副经理袁旭东",
-                        biddingUnit: "中铁十一局集团城市轨道工程有限公司",
-                        biddingUnitCode: "914201006667974746",
-                        biddingUnitManager: "中铁十一局城轨公司总部物资管理部（物资集采中心）副部长涂庭婧",
-                        biddingUnitOut: true,
-                        biddingUnitSimpleName: "城市轨道工程有限公司",
-                        buildOrg: "武汉地铁集团有限公司",
-                        buildOrgPhone: "13147160710",
-                        code: "CRCC1100CG0320200010",
-                        constructionUnit: "中铁十一局集团城市轨道工程有限公司",
-                        constructionUnitCode: "crcc11:101093",
-                        contractBeginDate: "2018-01-15",
-                        contractEndDate: "2019-09-15",
-                        designeOrg: "北京城建设计发展集团股份有限公司",
-                        designeOrgPhone: "13720352372",
-                        effectiveContractAmount: "17637.00",
-                        engLocationCity: "27305151",
-                        engLocationProvince: "896897",
-                        engOutline: "老关村车辆段站主体及附属基坑临近各类管线、高压线塔基、民居；220KV高压线斜跨主体基坑及2座附属基坑；基坑开挖范围多为淤泥质粉质粘土，基坑变形量大环保工作压力大、文明施工要求高；协调工作繁杂；周边建（构）筑物、管线情况复杂；基坑开挖风险较高。",
-                        hasChildren: 0,
-                        id: "860d825f41064ce3a2e91fdd1dd97493",
-                        isProject: "1",
-                        manageMode: "selfTube",
-                        manageModeName: "自管",
-                        name: "武汉市轨道交通16号线一期工程老关村车辆段站及老关村站土建预埋工程",
-                        orgNode: "000010000100011",
-                        orgNodeName: "城轨公司",
-                        parentId: "a0eed590e4de4c46876144968be76e8b",
-                        planEndDate: "2020-08-31",
-                        projectCharacter: "zbProject|zb-sgzcb",
-                        projectCharacterName: "总包项目|施工总承包",
-                        projectChiefEngineer: "中铁十一局城轨公司武汉16号线老关村车辆段站项目部项目领导总工程师黄冉",
-                        projectDeptDetailAddress: "湖北省武汉市蔡甸区沌口路邦士润滑油对面",
-                        projectManager: "中铁十一局城轨公司武汉16号线老关村车辆段站项目部项目领导项目经理李永刚",
-                        projectManagerUnit: "中铁十一局集团城轨公司武汉16号线老关村车辆段站项目部",
-                        projectManagerUnitCode: "crcc11:1508457",
-                        scopeCode: "CRCC1100CG0320200010",
-                        scopeName: "武汉市轨道交通16号线一期工程老关村车辆段站及老关村站土建预埋工程",
-                        simpleName: "武汉老关村项目部",
-                        status: "building",
-                        statusName: "在建",
-                        superviseOrg: "湖北建盛工程管理有限公司",
-                        superviseOrgPhone: "15337164181",
-                        technologyManagerOut: false,
-                        type: "CG03",
-                        unitManagerOut: false,
-                        unitSimpleName: "城轨公司",
-                        updateTime: "2020-09-29 23:04:51"
-                    }
-                ]
-            }
-        ]
-            data && data.forEach(item=>{
-                item.simpleName = item.simpleName?item.simpleName:item.scopeName;
-                item.children && item.children.forEach(child=>{
-                    child.simpleName = child.simpleName?child.simpleName:child.scopeName;
-                })
+        this.loadingTree = true;
+        this.$API.apiGetProjectTree().then((res)=>{
+            res.data && res.data.forEach(item=>{
+                item.children = []
             })
-            this.projectTree = data
-            if(data.length > 0){
-                this.defaultExpandedKeys = [data[0].scopeCode]
+            this.projectTree = res.data
+            if(res.data.length > 0){
+                this.defaultExpandedKeys = [res.data[0].organizationId]
             }
+            this.loadingTree = false;
+        }).catch((err)=>{
+            this.loadingTree = false;
+        })
     }
-    // 获取已授权工程树用户apiGetAuthProjectUser
+    // 获取已授权项目树用户apiGetAuthProjectUser
     getAuthProjectUser(){
-        // let params = {
-        //     pageNum: this.listQuery.page,
-        //     pageSize: this.listQuery.limit,
-        //     scopeCode: this.currentProject.scopeCode,
-        // }
-        // this.listLoading = true
-        // this.$API.apiGetAuthProjectUser(params).then((res)=>{
-        //     this.listLoading = false
-        //     this.userList = res.data.list
-        //     this.total = res.data.total || 0;
-        // }).catch((err)=>{
-        //     this.listLoading = false
-        // })
-
-        this.userList = [
-            {
-                authName: "童慧瑶",
-                authStatus: null,
-                id: 23510,
-                scopeCode: "CRCC1100CG0320200010",
-                scopeName: "武汉老关村项目部",
-                userFlag: "0",
-                userFlagName: "人员",
-                userId: "5184991",
-                userOrganizationCode: "1/101093/1508064/1508082/1508256",
-                userOrganizationName: "中铁十一局/城轨公司/南通1号线4标项目部/财务部/部员"
-            }
-        ]
+        let params = {
+            pageNum: this.listQuery.page,
+            pageSize: this.listQuery.limit,
+            organizationId: this.currentProject.organizationId,
+        }
+        params = Object.assign(params,this.search)
+        this.listLoading = true
+        this.$API.apiGetAuthProjectUser(params).then((res)=>{
+            this.listLoading = false
+            this.userList = res.data.list
+            this.total = res.data.total || 0;
+        }).catch((err)=>{
+            this.listLoading = false
+        })
     }
     // 添加授权人员
     addAuthUser(selected) {
-        // todo
+        this.userDialog = false
+        this.getAuthProjectUser()
+    }
+    // 添加授权岗位
+    addAuthPosition(selected) {
+        this.positionDialog = false
+        this.getAuthProjectUser()
+    }
+    // 授权
+    menuAuth() {
+        this.menuAuthDialog = false
+        this.getAuthProjectUser()
     }
     // 删除已授权用户
     deleteAuthProjectUser(params) {
@@ -291,15 +211,14 @@ export default class extends tableMixin {
     }
     filterProjectTreeNode(value, data){
         if (!value) return true;
-        return data.simpleName.indexOf(value) !== -1;
+        return data.organizationName.indexOf(value) !== -1;
     }
     handleProjectNodeClick(data) {
         this.currentProject = data
         var project = [];
         !project[0] && (project[0]={});
-        project[0].scopeCode = data.scopeCode || '';
-        project[0].scopeName = data.simpleName || data.scopeName || '';
-        project[0].isProject = data.isProject || '';
+        project[0].organizationId = data.organizationId || '';
+        project[0].organizationName = data.organizationName || '';
         this.project = project;
         console.log(this.project)
         this.getAuthProjectUser()
@@ -307,8 +226,11 @@ export default class extends tableMixin {
     // 删除授权对象
     deleteUser(data){
         let params = {
-            scopeCode: this.currentProject.scopeCode,
-            userList: [data.row.userId]
+            organizationId: this.currentProject.organizationId,
+            userList: [data.row.userId],
+            menuCode:this.MENU_CODE_LIST.authorizationList,
+            creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+            creatorOrgName : this.$store.getters.currentOrganization.organizationName,
         }
         this.deleteAuthProjectUser(params)
     }
@@ -327,8 +249,11 @@ export default class extends tableMixin {
           type: 'warning'
         }).then((e) => {
           let params = {
-                scopeCode: this.currentProject.scopeCode,
-                userList: []
+                organizationId: this.currentProject.organizationId,
+                userList: [],
+                menuCode:this.MENU_CODE_LIST.authorizationList,
+                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
             }
             for(let i in this.selected){
                 params.userList.push(this.selected[i].userId)
@@ -360,7 +285,7 @@ export default class extends tableMixin {
         if(this.project.length == 0){
             this.$message({
                 type: 'info',
-                message: '请选择工程树!'
+                message: '请选择项目树!'
             })
             return
         }
@@ -372,7 +297,7 @@ export default class extends tableMixin {
         if(this.project.length == 0){
             this.$message({
                 type: 'info',
-                message: '请选择工程树!'
+                message: '请选择项目树!'
             })
             return
         }
@@ -381,7 +306,7 @@ export default class extends tableMixin {
     // 功能菜单授权
     updateMenuAuth(value){
         let params = {
-            scopeCode: value.scopeCode,
+            organizationId: this.currentProject.organizationId,
             userFlag: value.userFlag,
             userId: value.userId
         }
@@ -431,7 +356,7 @@ export default class extends tableMixin {
     flex: 1;
     padding: 15px;
     .btn-group{
-        margin-bottom: 30px;
+        // margin-bottom: 15px;
     }
     position: relative;
     height: calc(100vh - 130px);
@@ -443,6 +368,29 @@ export default class extends tableMixin {
         display: flex;
         width: 100%;
         justify-content: center;
+    }
+    .search-group{
+        margin-bottom: 15px;
+        text-align: right;
+        .el-input{
+            display: inline-block;
+            width: 150px;
+            margin-right: 10px;
+            &::v-deep{
+                .el-input__inner{
+                    width: 150px;
+                    height: 30px;
+                    line-height: 30px;
+                }
+            }
+            
+        }
+        .searchBtn{
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
     }
 }
 </style>
