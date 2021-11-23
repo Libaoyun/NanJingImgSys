@@ -1,6 +1,6 @@
 <template>
     <div class="navbar">
-        <el-select v-model="selectedOrganization" @change="changeOrganization" size="small">
+        <el-select v-model="selectedOrganization" @change="changeOrganization" size="small" :popper-append-to-body="false">
             <el-option v-for="item in organizationList" :label="item.organizationName" :value="item.organizationId" :key="item.organizationId"></el-option>
         </el-select>
         <el-dropdown>
@@ -69,6 +69,19 @@ export default class extends Vue {
 }
 .el-select {
     margin-right: 20px;
+    /deep/{
+        input {
+            border: none;
+            background-color: #B4D9FC;
+            text-align: right;
+        }
+        .el-scrollbar {
+            text-align: left;
+        }
+        .el-popper .popper__arrow::after {
+            margin-left: 100px !important;
+        }
+    }
 }
 .el-dropdown-link {
     font-size: 14px;

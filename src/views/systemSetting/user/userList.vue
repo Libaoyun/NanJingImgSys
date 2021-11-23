@@ -3,7 +3,7 @@
         <!-- 按钮组版块 -->
         <div class="global-btn-group">
             <el-button type="primary" size="small" icon="iconfont icon-icon_add" @click="createBtn" v-checkPermission="'create'">新建</el-button>
-            <upload-excel @afterUploadExcel="afterUploadExcel" :excelColumnName="excelColumnName"></upload-excel>
+            <!-- <upload-excel @afterUploadExcel="afterUploadExcel" :excelColumnName="excelColumnName"></upload-excel> -->
             <el-button size="small" icon="iconfont icon-bianji1" @click="editBtn" v-checkPermission="'edit'">编辑</el-button>
             <loading-btn size="small" icon="iconfont icon-icon-delete" @click="deleteBtn(1)" :loading="loadingBtn" v-checkPermission="'delete'">删除</loading-btn>
             <el-dropdown style="margin:0 10px">

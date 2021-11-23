@@ -26,7 +26,7 @@
             <el-table-column prop="userName" label="用户名" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="userOrgName" label="所属组织" width="350" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="userDepartName" label="所属部门" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="userPositionName" label="所属岗位" width="150" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column prop="userPositionName" label="所属职务" width="150" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="loginIp" label="IP"  align="center" width="150" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="createTime" label="记录时间" width="150"  align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="operateType" label="操作类型" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>

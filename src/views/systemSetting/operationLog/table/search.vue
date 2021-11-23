@@ -19,8 +19,8 @@
                 <el-form-item label="所属部门" prop="userDepartName">
                     <el-input v-model.trim="searchParams.userDepartName" placeholder="请输入所属部门"></el-input>
                 </el-form-item>
-                <el-form-item label="所属岗位" prop="userPositionName">
-                    <el-input v-model.trim="searchParams.userPositionName" placeholder="请输入所属岗位"></el-input>
+                <el-form-item label="所属职务" prop="userPositionName">
+                    <el-input v-model.trim="searchParams.userPositionName" placeholder="请输入所属职务"></el-input>
                 </el-form-item>
                 <el-form-item label="IP" prop="loginIp">
                     <el-input v-model.trim="searchParams.loginIp" placeholder="请输入IP"></el-input>

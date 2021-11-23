@@ -5,7 +5,7 @@
             <el-button type="primary" size="small" icon="iconfont icon-icon_add" @click="createBtn" v-checkPermission="'create'">新建</el-button>
             <el-button size="small" icon="iconfont icon-bianji1" @click="editBtn" v-checkPermission="'edit'">编辑</el-button>
             <loading-btn size="small" icon="iconfont icon-icon-delete" @click="deleteBtn(1)" :loading="loadingBtn" v-checkPermission="'delete'">删除</loading-btn>
-            <el-dropdown style="margin:0 10px">
+            <!-- <el-dropdown style="margin:0 10px">
                 <el-button size="small" icon="iconfont icon-daochu">
                     导出<i class="el-icon-arrow-down el-icon--right"></i>
                 </el-button>
@@ -14,7 +14,7 @@
                     <el-dropdown-item  @click.native="exportExcelBtn">Excel</el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
-            <el-button size="small" icon="iconfont icon-dayinji_o" @click="printBtn">打印</el-button>
+            <el-button size="small" icon="iconfont icon-dayinji_o" @click="printBtn">打印</el-button> -->
             <el-button size="small" icon="iconfont icon-icon_refresh" @click="refreshBtn">刷新</el-button>
             <!-- <div class="search iconfont icon-sousuo" @click="openSearch"> 搜索</div> -->
         </div>
@@ -53,6 +53,11 @@
             <el-table-column prop="createTime" label="编制时间" width="180" align="center" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
                     {{ scope.row.createTime | formatDate }}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="90" align="center">
+                <template slot-scope="scope">
+                    <el-button type="text" class="el-icon-download downloadBtn" @click="downloadFile(scope)">下载</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -261,6 +266,15 @@ export default class extends tableMixin {
             menuCode:this.MENU_CODE_LIST.onlineManualsList
         }
         this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/organization/exportPDF',data});
+    }
+    // 下载
+    downloadFile(scope){
+        var a = document.createElement('a')
+        // var event = new MouseEvent('click')
+        a.download = scope.row.fileName
+        a.href = scope.row.fileUrl;
+        a.target = '_blank'
+        a.click()
     }
     // 刷新
     refreshBtn(){

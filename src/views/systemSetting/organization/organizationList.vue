@@ -120,6 +120,7 @@ export default class extends tableMixin {
     nodeDrop(Node){
         const params = {
             data:this.projectTree,
+            menuCode:this.MENU_CODE_LIST.organizationList,
             creatorOrgId:this.$store.getters.currentOrganization.organizationId,
             creatorOrgName:this.$store.getters.currentOrganization.organizationName,
         }

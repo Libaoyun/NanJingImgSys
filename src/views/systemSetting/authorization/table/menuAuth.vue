@@ -61,7 +61,7 @@
                             v-if="!scope.row.parentCode"
                             :indeterminate="scope.row.isIndeterminate[menuButtons[2]]"
                             v-model="scope.row.selected[menuButtons[2]]"
-                            @change="changeParent(scope.row,menuButtons[2])"
+                            @change="changeParent($event,scope.row,menuButtons[2])"
                         ></el-checkbox>
                     </template>
                 </el-table-column>
