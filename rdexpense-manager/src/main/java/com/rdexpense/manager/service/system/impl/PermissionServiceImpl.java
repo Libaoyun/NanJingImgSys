@@ -64,8 +64,16 @@ public class PermissionServiceImpl implements PermissionService {
         String userListStr = pd.getString("userList");
         List<PageData> userList = JSONObject.parseArray(userListStr, PageData.class);
 
+
+        List<String> idList = (List<String>) baseDao.findForList("AuthorityUserMapper.queryUserByCode",pd);
+
+        StringBuffer buffer = new StringBuffer();
         List<PageData> addList = new ArrayList<>();
         for (PageData data : userList) {
+
+            if(!CollectionUtils.isEmpty(idList) && idList.contains(data.getString("userId"))){
+                buffer.append(data.getString("authName"));
+            }
 
             PageData newData = new PageData();
             newData.put("scopeCode", pd.getString("organizationId"));
@@ -92,6 +100,9 @@ public class PermissionServiceImpl implements PermissionService {
 
         }
 
+        if(StringUtils.isNotBlank(buffer.toString())){
+            throw new MyException("以下用户已重复授权："+buffer.toString());
+        }
 
         if (!CollectionUtils.isEmpty(addList)) {
             baseDao.batchInsert("AuthorityUserMapper.saveUser", addList);
@@ -109,88 +120,13 @@ public class PermissionServiceImpl implements PermissionService {
      * @return
      */
     @Override
-    public List<PageData> queryAuthMenuTree(PageData pd) {
-        //合并菜单和组合按钮
-        List<PageData> authMenuButton = getAuthMenuButton();
-        if (CollectionUtils.isEmpty(authMenuButton)) {
-            throw new MyException("查询合并菜单和组合按钮失败");
-        }
+    public List<PageData> queryAuthMenu(PageData pd) {
+        List<PageData> list = (List<PageData>) baseDao.findForList("RouteMenuMapper.queryAuthMenuList",pd);
+        return list;
 
-        List<PageData> authMenuList = (List<PageData>) baseDao.findForList("RouteMenuMapper.queryAuthMenuList", pd);
-
-        if (CollectionUtils.isEmpty(authMenuList)) {
-            return treefyMenuList(0, authMenuButton);
-        }
-
-        //设置菜单的勾选状态
-        for (Map menu : authMenuButton) {
-            String menuCode = MapUtils.getString(menu, "menuCode");
-            Object code = menu.get("authorityButtonCode");
-            for (Map strings : authMenuList) {
-                if (code == null && MapUtils.getString(strings, "menu_code").equals(menuCode)) {
-                    menu.put("selected", true);
-                    menu.put("flag", "1");
-                }
-            }
-        }
-
-        //设置已勾选的组合按钮及菜单
-        for (Map menu : authMenuButton) {
-            String btn = MapUtils.getString(menu, "authorityButtonCode");
-            if (!StringUtils.isBlank(btn)) {
-                String parentCode = MapUtils.getString(menu, "parentCode");
-                for (Map strings : authMenuList) {
-                    String menuCode = MapUtils.getString(strings, "menu_code");
-                    String authBtn = MapUtils.getString(strings, "authority_button_code");
-                    if (StringUtils.isBlank(authBtn)) {
-                        continue;
-                    }
-                    String[] split = authBtn.split(",");
-                    for (int i = 0; i < split.length; i++) {
-                        if (btn.equals(split[i]) && parentCode.equals(menuCode)) {
-                            menu.put("selected", true);
-                        }
-                    }
-                }
-            }
-        }
-
-
-        log.info("用户授权菜单 => {}", authMenuButton);
-        List<PageData> menuMap = treefyMenuList(0, authMenuButton);
-        return menuMap;
     }
 
 
-    private List<PageData> getAuthMenuButton() {
-        List<PageData> menus = (List<PageData>) baseDao.findForList("RouteMenuMapper.queryMenuListMap");
-        if (CollectionUtils.isEmpty(menus)) {
-            return Collections.EMPTY_LIST;
-        }
-
-        List<PageData> buttons = (List<PageData>) baseDao.findForList("RouteMenuMapper.queryAuthBtnCodeMap");
-        if (!CollectionUtils.isEmpty(buttons)) {
-            menus.addAll(buttons);
-        }
-
-        log.info("菜单关联组合按钮 =>{}", JSON.toJSONString(menus));
-        return menus;
-    }
-
-
-    public List<PageData> treefyMenuList(int parentId, List<PageData> menuList) {
-        List<PageData> childMenu = new ArrayList<>();
-        for (PageData menu : menuList) {
-            int menuId = MapUtils.getInteger(menu, "menuCode");
-            int pid = MapUtils.getInteger(menu, "parentCode");
-            if (parentId == pid) {
-                List<PageData> children = treefyMenuList(menuId, menuList);
-                menu.put("children", children);
-                childMenu.add(menu);
-            }
-        }
-        return childMenu;
-    }
 
     /**
      * 根据员工编码查询所属部门及职务
@@ -213,8 +149,8 @@ public class PermissionServiceImpl implements PermissionService {
             String nameStr = departName.toString();
             String codeStr = departCode.toString();
 
-            result[0] = nameStr.substring(0, nameStr.length() - 1);
-            result[1] = codeStr.substring(0, codeStr.length() - 1);
+            result[1] = nameStr.substring(0, nameStr.length() - 1);
+            result[0] = codeStr.substring(0, codeStr.length() - 1);
         }
 
         return result;
@@ -313,6 +249,10 @@ public class PermissionServiceImpl implements PermissionService {
 
         }
 
+        //变更授权表为已授权
+        if(!CollectionUtils.isEmpty(updateList) || !CollectionUtils.isEmpty(addList)){
+            baseDao.update("AuthorityUserMapper.updateAuthStatus", pd);
+        }
 
 
     }
@@ -390,24 +330,24 @@ public class PermissionServiceImpl implements PermissionService {
     public List<PageData> queryUser(PageData pd) {
 
         List<PageData> list = (List<PageData>) baseDao.findForList("AuthorityUserMapper.queryUser", pd);
-        if (!CollectionUtils.isEmpty(list)) {
-            //查询部门职务表
-            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData", list);
-            if (!CollectionUtils.isEmpty(postList)) {
-                for (PageData data : list) {
-                    String userCode = data.getString("userCode");
-                    for (PageData postData : postList) {
-                        if (userCode.equals(postData.getString("userCode"))) {
-                            data.put("departmentName", postData.getString("departmentName"));
-                            data.put("postName", postData.getString("postName"));
-                            data.put("departmentCode", postData.getString("departmentCode"));
-                            data.put("postCode", postData.getString("postCode"));
-                        }
-                    }
-
-                }
-            }
-        }
+//        if (!CollectionUtils.isEmpty(list)) {
+//            //查询部门职务表
+//            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData", list);
+//            if (!CollectionUtils.isEmpty(postList)) {
+//                for (PageData data : list) {
+//                    String userCode = data.getString("userCode");
+//                    for (PageData postData : postList) {
+//                        if (userCode.equals(postData.getString("userCode"))) {
+//                            data.put("departmentName", postData.getString("departmentName"));
+//                            data.put("postName", postData.getString("postName"));
+//                            data.put("departmentCode", postData.getString("departmentCode"));
+//                            data.put("postCode", postData.getString("postCode"));
+//                        }
+//                    }
+//
+//                }
+//            }
+//        }
 
         return list;
 

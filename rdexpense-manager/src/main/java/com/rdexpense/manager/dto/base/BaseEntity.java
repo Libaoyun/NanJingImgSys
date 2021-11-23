@@ -1,6 +1,7 @@
 package com.rdexpense.manager.dto.base;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -15,19 +16,23 @@ public class BaseEntity {
     @ApiModelProperty(value = "业务主键ID")
     private String businessId;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ApiModelProperty(value = "创建时间",hidden = true)
+    @ApiModelProperty(value = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ApiModelProperty(value = "修改时间",hidden = true)
+    @ApiModelProperty(value = "修改时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ApiModelProperty(value = "创建人",hidden = true)
+    @ApiModelProperty(value = "创建人")
     private String createUser;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ApiModelProperty(value = "修改人",hidden = true)
+    @ApiModelProperty(value = "修改人")
     private String updateUser;
+
+    @ApiModelProperty(value = "创建人ID")
+    private String createUserId;
+
+    @ApiModelProperty(value = "修改人ID")
+    private String updateUserId;
 }

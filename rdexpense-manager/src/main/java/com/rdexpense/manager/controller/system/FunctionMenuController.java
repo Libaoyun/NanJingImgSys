@@ -50,7 +50,7 @@ public class FunctionMenuController extends BaseController {
     public ResponseEntity<List<FunctionMenuButtonDTO>> queryRoutingMenuTree() {
 
         try {
-            List<PageData> result = functionMenuService.queryRoutingMenuTree(this.getUserToken("token"));
+            List<FunctionMenuButtonDTO> result = functionMenuService.queryRoutingMenuTree(this.getUserToken("token"));
             return ResponseEntity.success(PropertyUtil.covertListModel(result, FunctionMenuButtonDTO.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (Exception e) {
             return ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), e.getMessage());

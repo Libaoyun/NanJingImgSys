@@ -2,6 +2,8 @@ package com.rdexpense.manager.service.system;
 
 import com.common.entity.PageData;
 import com.common.entity.ResponseEntity;
+import com.itextpdf.text.Document;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.util.List;
 
@@ -49,5 +51,16 @@ public interface OrganizationService {
      */
     PageData getOrganizationDetail(PageData pd);
 
+
+    /**
+     * 导出excel
+     */
+    HSSFWorkbook exportExcel(PageData pd);
+
+
+    /**
+     * 导出pdf
+     */
+    void exportPDF(PageData pd, Document document) throws Exception;
 
 }

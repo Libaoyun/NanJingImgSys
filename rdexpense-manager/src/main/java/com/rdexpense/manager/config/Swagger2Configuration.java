@@ -84,7 +84,10 @@ public class Swagger2Configuration {
                         PathSelectors.ant("/user/**"),//员工管理
                         PathSelectors.ant("/department/**"),//部门职务管理
                         PathSelectors.ant("/organization/**"),//组织管理
-                        PathSelectors.ant("/template/**")
+                        PathSelectors.ant("/template/**"),//知识库
+                        PathSelectors.ant("/rule/**"),//规则配置
+                        PathSelectors.ant("/flow/**")//流程配置
+
 
                 )) // 可以根据url路径设置哪些请求加入文档，忽略哪些请求
                 .build()

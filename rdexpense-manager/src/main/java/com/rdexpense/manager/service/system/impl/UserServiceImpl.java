@@ -63,25 +63,33 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List queryUserList(PageData pd) {
-        List<PageData> userInfoList = (List<PageData>) baseDao.findForList("UserMapper.selectUserInfoAll", pd);
-        if(!CollectionUtils.isEmpty(userInfoList)){
-            //查询部门职务表
-            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData",userInfoList);
-            if(!CollectionUtils.isEmpty(postList)){
-                for(PageData data : userInfoList){
-                    String userCode = data.getString("userCode");
-                    for(PageData postData : postList){
-                        if(userCode.equals(postData.getString("userCode"))){
-                            data.put("departmentName",postData.getString("departmentName"));
-                            data.put("postName",postData.getString("postName"));
-                            data.put("departmentCode",postData.getString("departmentCode"));
-                            data.put("postCode",postData.getString("postCode"));
-                        }
-                    }
 
-                }
-            }
-        }
+        List<String> educationCodeList = JSONArray.parseArray(pd.getString("educationCode"), String.class);
+        pd.put("educationCodeList", educationCodeList);
+        List<String> employeeStatusCodeList = JSONArray.parseArray(pd.getString("employeeStatusCode"), String.class);
+        pd.put("employeeStatusCodeList", employeeStatusCodeList);
+        List<String> employeeTypeCodeList = JSONArray.parseArray(pd.getString("employeeTypeCode"), String.class);
+        pd.put("employeeTypeCodeList", employeeTypeCodeList);
+
+        List<PageData> userInfoList = (List<PageData>) baseDao.findForList("UserMapper.selectUserInfoAll", pd);
+//        if(!CollectionUtils.isEmpty(userInfoList)){
+//            //查询部门职务表
+//            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData",userInfoList);
+//            if(!CollectionUtils.isEmpty(postList)){
+//                for(PageData data : userInfoList){
+//                    String userCode = data.getString("userCode");
+//                    for(PageData postData : postList){
+//                        if(userCode.equals(postData.getString("userCode"))){
+//                            data.put("departmentName",postData.getString("departmentName"));
+//                            data.put("postName",postData.getString("postName"));
+//                            data.put("departmentCode",postData.getString("departmentCode"));
+//                            data.put("postCode",postData.getString("postCode"));
+//                        }
+//                    }
+//
+//                }
+//            }
+//        }
 
         return userInfoList;
     }
@@ -107,17 +115,58 @@ public class UserServiceImpl implements UserService {
         pd.put("version", 0);
         pd.put("businessId", businessId);
 
-        //插入员工表
-        baseDao.insert("UserMapper.insertUser", pd);
 
         //插入部门表
+        String departmentName = "";
+        String departmentCode = "";
+        String postName = "";
+        String postCode = "";
         List<PageData> departmentList = JSONObject.parseArray(pd.getString("departmentList"), PageData.class);
         if(!CollectionUtils.isEmpty(departmentList)){
             for(PageData data : departmentList){
+
+                if(StringUtils.isNotBlank(data.getString("departmentName"))){
+                    departmentName = departmentName + data.getString("departmentName") +",";
+                }
+
+                if(StringUtils.isNotBlank(data.getString("departmentCode"))){
+                    departmentCode = departmentCode + data.getString("departmentCode") +",";
+                }
+
+                if(StringUtils.isNotBlank(data.getString("postName"))){
+                    postName = postName + data.getString("postName") +",";
+                }
+
+                if(StringUtils.isNotBlank(data.getString("postCode"))){
+                    postCode = postCode + data.getString("postCode") +",";
+                }
+
+
+
                 data.put("userCode",pd.getString("userCode"));
             }
             baseDao.batchInsert("UserMapper.insertDepartment", departmentList);
         }
+
+        if(StringUtils.isNotBlank(departmentName)){
+            pd.put("departmentName",departmentName.substring(0,departmentName.lastIndexOf(",")-1));
+        }
+
+        if(StringUtils.isNotBlank(departmentCode)){
+            pd.put("departmentCode",departmentCode.substring(0,departmentCode.lastIndexOf(",")-1));
+        }
+
+        if(StringUtils.isNotBlank(postName)){
+            pd.put("postName",postName.substring(0,postName.lastIndexOf(",")-1));
+        }
+
+        if(StringUtils.isNotBlank(postCode)){
+            pd.put("postCode",postCode.substring(0,postCode.lastIndexOf(",")-1));
+        }
+
+        //插入员工表
+        baseDao.insert("UserMapper.insertUser", pd);
+
 
         // 插入到附件表
         String file = pd.getString("attachmentList");
@@ -144,8 +193,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUser(PageData pd) {
 
-        //修改员工表
-        baseDao.update("UserMapper.updateUser",pd);
 
         //更新部门表
         List<PageData> departmentList = (List<PageData>) baseDao.findForList("UserMapper.queryUserDepartment", pd);
@@ -157,10 +204,33 @@ public class UserServiceImpl implements UserService {
         List<PageData> updateList = new ArrayList<>();
         List<String> idList = new ArrayList<>();
 
+        String departmentName = "";
+        String departmentCode = "";
+        String postName = "";
+        String postCode = "";
 
         List<PageData> departmentLists = JSONObject.parseArray(departmentListStr, PageData.class);
         if(!CollectionUtils.isEmpty(departmentLists)) {
             for(PageData pageData : departmentLists){
+
+                if(StringUtils.isNotBlank(pageData.getString("departmentName"))){
+                    departmentName = departmentName + pageData.getString("departmentName") +",";
+                }
+
+                if(StringUtils.isNotBlank(pageData.getString("departmentCode"))){
+                    departmentCode = departmentCode + pageData.getString("departmentCode") +",";
+                }
+
+                if(StringUtils.isNotBlank(pageData.getString("postName"))){
+                    postName = postName + pageData.getString("postName") +",";
+                }
+
+                if(StringUtils.isNotBlank(pageData.getString("postCode"))){
+                    postCode = postCode + pageData.getString("postCode") +",";
+                }
+
+
+
                 if(StringUtils.isNotEmpty(pageData.getString("id"))){
                     updateList.add(pageData);
                     idList.add(pageData.getString("id"));
@@ -170,6 +240,27 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
+
+
+        if(StringUtils.isNotBlank(departmentName)){
+            pd.put("departmentName",departmentName.substring(0,departmentName.lastIndexOf(",")-1));
+        }
+
+        if(StringUtils.isNotBlank(departmentCode)){
+            pd.put("departmentCode",departmentCode.substring(0,departmentCode.lastIndexOf(",")-1));
+        }
+
+        if(StringUtils.isNotBlank(postName)){
+            pd.put("postName",postName.substring(0,postName.lastIndexOf(",")-1));
+        }
+
+        if(StringUtils.isNotBlank(postCode)){
+            pd.put("postCode",postCode.substring(0,postCode.lastIndexOf(",")-1));
+        }
+
+        //修改员工表
+        baseDao.update("UserMapper.updateUser",pd);
+
 
         if(!CollectionUtils.isEmpty(departmentList)) {
             for(PageData pageData : departmentList){
@@ -326,20 +417,23 @@ public class UserServiceImpl implements UserService {
 
         PageData request = (PageData) baseDao.findForObject("UserMapper.queryOneRecord", pd);
 
-        // 查询明细表
-        List<PageData> departmentList = (List<PageData>) baseDao.findForList("UserMapper.queryUserDepartment", request);
-        if(!CollectionUtils.isEmpty(departmentList)){
-            request.put("departmentList", departmentList);
+        if (request != null){
+            // 查询明细表
+            List<PageData> departmentList = (List<PageData>) baseDao.findForList("UserMapper.queryUserDepartment", request);
+            if(!CollectionUtils.isEmpty(departmentList)){
+                request.put("departmentList", departmentList);
+            }
+
+
+            // 查询附件表
+            List<PageData> attachmentList = (List<PageData>) baseDao.findForList("FileMapper.queryFile", request);
+            if(!CollectionUtils.isEmpty(attachmentList)){
+                AwsUtil.queryOneUrl(attachmentList, ConstantValUtil.BUCKET_PRIVATE);
+                request.put("attachmentList", attachmentList);
+
+            }
         }
 
-
-        // 查询附件表
-        List<PageData> attachmentList = (List<PageData>) baseDao.findForList("FileMapper.queryFile", pd);
-        if(!CollectionUtils.isEmpty(attachmentList)){
-            AwsUtil.queryOneUrl(attachmentList, ConstantValUtil.BUCKET_PRIVATE);
-            request.put("attachmentList", attachmentList);
-
-        }
 
         return request;
     }
@@ -395,29 +489,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public HSSFWorkbook exportExcel(PageData pageData) {
         String title = "员工信息";
-        String[] head = {"序号","编号","姓名","英文名","部门","职务","性别","出生日期","身高","学历","婚姻状况","血型","移动电话","办公电话",
-                "电子邮箱","传真","员工状态","员工类型","参工日期","入职日期","转正日期","离职日期","国籍","籍贯","民族","宗教",
-                "创建人","修改人","创建日期","修改日期"};
+        String[] head = {"序号","用户编号","用户姓名","手机号码","所属部门","所属职务","学历","员工状态","员工类型","创建人","创建日期","更新人","更新日期"};
         String idStr = pageData.getString("idList");
         List<String> listId = JSONObject.parseArray(idStr, String.class);
         //根据idList查询主表
         List<PageData> userInfoList = (List<PageData>) baseDao.findForList("UserMapper.queryUserById", listId);
-        if(!CollectionUtils.isEmpty(userInfoList)){
-            //查询部门职务表
-            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData",userInfoList);
-            if(!CollectionUtils.isEmpty(postList)){
-                for(PageData data : userInfoList){
-                    String userCode = data.getString("userCode");
-                    for(PageData postData : postList){
-                        if(userCode.equals(postData.getString("userCode"))){
-                            data.put("departmentName",postData.getString("departmentName"));
-                            data.put("postName",postData.getString("postName"));
-                        }
-                    }
-
-                }
-            }
-        }
+//        if(!CollectionUtils.isEmpty(userInfoList)){
+//            //查询部门职务表
+//            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData",userInfoList);
+//            if(!CollectionUtils.isEmpty(postList)){
+//                for(PageData data : userInfoList){
+//                    String userCode = data.getString("userCode");
+//                    for(PageData postData : postList){
+//                        if(userCode.equals(postData.getString("userCode"))){
+//                            data.put("departmentName",postData.getString("departmentName"));
+//                            data.put("postName",postData.getString("postName"));
+//                        }
+//                    }
+//
+//                }
+//            }
+//        }
 
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet(title + 1);
@@ -459,7 +551,7 @@ public class UserServiceImpl implements UserService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("englishUserName"));
+                cell.setCellValue(pd.getString("mobilePhone"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -471,43 +563,7 @@ public class UserServiceImpl implements UserService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("gender"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("birthDate"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("height"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
                 cell.setCellValue(pd.getString("education"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("maritalStatus").equals("0")?"否":"是");
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("bloodType"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("mobilePhone"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("officeTelephone"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("email"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("fax"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -519,43 +575,7 @@ public class UserServiceImpl implements UserService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("participationDate"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("entryDate"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("confirmationDate"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("leaveDate"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("nationality"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("nativePlace"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("nation"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("religion"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
                 cell.setCellValue(pd.getString("createUser"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("updateUser"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -563,6 +583,10 @@ public class UserServiceImpl implements UserService {
                 cell.setCellValue(time.substring(0,time.lastIndexOf(".")));
                 cell.setCellStyle(styleCell);
 
+
+                cell = row.createCell(j++);
+                cell.setCellValue(pd.getString("updateUser"));
+                cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
                 String time1 = pd.getString("updateTime");
@@ -608,20 +632,19 @@ public class UserServiceImpl implements UserService {
 
         //根据idList查询主表
         PageData pd = (PageData) baseDao.findForObject("UserMapper.queryOneRecord", pageData);
-        if(pd != null){
-            //查询部门职务表
-            List<PageData> userInfoList = new ArrayList<>();
-            userInfoList.add(pd);
-            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData",userInfoList);
-            if(!CollectionUtils.isEmpty(postList)){
-                for (PageData postData : postList) {
-                    pd.put("departmentName", postData.getString("departmentName"));
-                    pd.put("postName", postData.getString("postName"));
-                }
-
-            }
-        }
-
+//        if(pd != null){
+//            //查询部门职务表
+//            List<PageData> userInfoList = new ArrayList<>();
+//            userInfoList.add(pd);
+//            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData",userInfoList);
+//            if(!CollectionUtils.isEmpty(postList)){
+//                for (PageData postData : postList) {
+//                    pd.put("departmentName", postData.getString("departmentName"));
+//                    pd.put("postName", postData.getString("postName"));
+//                }
+//
+//            }
+//        }
 
 
         //创建一个表格,10为一行有几栏

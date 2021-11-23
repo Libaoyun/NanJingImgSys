@@ -195,7 +195,7 @@ public class DictionaryController extends BaseController {
     @PostMapping("/saveDictionType")
     public ResponseEntity saveDictionType(DictionaryTypeDto dictionaryTypeDto) {
         PageData pd = this.getParams();
-        checkParams(pd);
+//        checkParams(pd);
         CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         try {
@@ -219,7 +219,7 @@ public class DictionaryController extends BaseController {
     @PostMapping("/modifyDictionType")
     public ResponseEntity modifyDictionType(DictionaryTypeDto dictionaryTypeDto) {
         PageData pd = this.getParams();
-        checkParams(pd);
+ //       checkParams(pd);
         CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         try {

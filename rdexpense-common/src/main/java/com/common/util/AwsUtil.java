@@ -117,10 +117,11 @@ public class AwsUtil {
         objectMetadata.setContentLength(fileSize);
         objectMetadata.setContentType(contentType);
         String fileName = file.getOriginalFilename();
-        String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+ //       String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
         //生成服务器上的文件名，使用uuid保证唯一
-        String serveFileName = UUID.randomUUID().toString();
-        String filePath = yearMonth + "/" + day + "/" + serveFileName + "." + suffix;
+//        String serveFileName = UUID.randomUUID().toString();
+//        String filePath = yearMonth + "/" + day + "/" + serveFileName + "." + suffix;
+        String filePath = yearMonth + "/" + day + "/" + fileName;
         pageData.put("filePath", filePath);
         //验证名称为bucketName的bucket是否存在，不存在则创建
         if (!checkBucketExists(s3, bucketName)) {

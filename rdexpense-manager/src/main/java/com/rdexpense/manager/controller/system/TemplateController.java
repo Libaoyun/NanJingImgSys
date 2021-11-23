@@ -35,7 +35,7 @@ import static com.common.util.ConstantMsgUtil.INFO_QUERY_SUCCESS;
  * @date 2021/6/29 11:53
  * @describe
  */
-@Api(value = "模板管理", tags = "模板管理")
+@Api(value = "知识库管理", tags = "知识库管理")
 @RestController
 @RequestMapping(value = "/template")
 public class TemplateController extends BaseController {
@@ -50,7 +50,7 @@ public class TemplateController extends BaseController {
 
     @ApiOperation(value = "列表查询")
     @PostMapping(value = "/searchRecord", consumes = "application/json")
-    public ResponseEntity<PageInfo<TemplateListDto>> searchRecord(TemplateQueryDto handBookQueryDto) {
+    public ResponseEntity<PageInfo<TemplateListDto>> searchRecord(TemplateQueryDto templateQueryDto) {
         PageData pd = this.getParams();
         String strMenuId = String.valueOf(pd.getInt("menuCode"));
         CheckParameter.checkPositiveInt(strMenuId, "菜单编码");
@@ -60,7 +60,7 @@ public class TemplateController extends BaseController {
             PageInfo<PageData> pageInfo = new PageInfo<>(list);
             return ResponseEntity.success(PropertyUtil.pushPageList(pageInfo, TemplateListDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (Exception e) {
-            logger.error("查询模板管理,request=[{}]", pd);
+            logger.error("查询知识库管理,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), e.getMessage());
         }
     }
@@ -68,49 +68,50 @@ public class TemplateController extends BaseController {
 
     @ApiOperation(value = "新增")
     @PostMapping(value = "/addRecord", consumes = "application/json")
-    public ResponseEntity addHandBook(TemplateSaveDto handBookSaveDto) {
+    public ResponseEntity addRecord(TemplateSaveDto templateSaveDto) {
         PageData pd = this.getParams();
         checkSave(pd);
         CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         try {
-            templateService.addHandBook(pd);
+            templateService.addRecord(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_SAVE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("新增模板管理,request=[{}]", pd);
+            logger.error("新增知识库管理,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_SAVE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_SAVE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 1, "模板管理", pd);
+            logUtil.saveLogData(result.getCode(), 1, "知识库管理", pd);
         }
     }
 
 
     @ApiOperation(value = "编辑")
     @PostMapping(value = "/updateRecord", consumes = "application/json")
-    public ResponseEntity updateHandBook(TemplateSaveDto handBookSaveDto) {
+    public ResponseEntity updateRecord(TemplateSaveDto templateSaveDto) {
         PageData pd = this.getParams();
         checkSave(pd);
         CheckParameter.checkDefaultParams(pd);
+        CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID",128);
         ResponseEntity result = null;
         try {
-            templateService.updateHandBook(pd);
+            templateService.updateRecord(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_UPDATE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("编辑模板管理,request=[{}]", pd);
+            logger.error("编辑知识库管理,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_UPDATE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_UPDATE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 2, "模板管理", pd);
+            logUtil.saveLogData(result.getCode(), 2, "知识库管理", pd);
         }
     }
 
 
     @ApiOperation(value = "删除")
     @PostMapping(value = "/deleteRecord", consumes = "application/json")
-    public ResponseEntity deleteHandBook(TemplateDeleteDto handBookDeleteDto) {
+    public ResponseEntity deleteRecord(TemplateDeleteDto templateDeleteDto) {
         PageData pd = this.getParams();
         CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
@@ -121,15 +122,15 @@ public class TemplateController extends BaseController {
                 throw new MyException(ConstantMsgUtil.ERR_NO_EMPTY.desc());
             }
 
-            templateService.deleteHandBook(pd);
+            templateService.deleteRecord(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_DELETE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_DELETE_FAIL.val(), e.getMessage());
-            logger.error("删除模板管理,request=[{}]", pd);
+            logger.error("删除知识库管理,request=[{}]", pd);
             throw new MyException(ConstantMsgUtil.ERR_DELETE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 3, "模板管理", pd);
+            logUtil.saveLogData(result.getCode(), 3, "知识库管理", pd);
         }
     }
 
@@ -137,41 +138,23 @@ public class TemplateController extends BaseController {
     @ApiOperation(value = "查看详情")
     @PostMapping(value = "/recordDetail")
     @ApiImplicitParam(name = "businessId", value = "业务主键id", required = true, dataType = "string")
-    public ResponseEntity<TemplateDetailDto> handBookDetail() {
+    public ResponseEntity<TemplateDetailDto> recordDetail() {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID",128);
         try {
-            PageData pageData = templateService.handBookDetail(pd);
+            PageData pageData = templateService.recordDetail(pd);
             return PropertyUtil.pushData(pageData, TemplateDetailDto.class, ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (MyException e) {
-            logger.error("查询模板管理详情,request=[{}]", pd);
+            logger.error("查询知识库管理详情,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), ConstantMsgUtil.ERR_QUERY_FAIL.desc());
 
         }
     }
 
 
-    @ApiOperation(value = "查询树节点")
-    @GetMapping(value = "/searchNode")
-    public ResponseEntity<List<TemplateTreeDto>> searchNode() {
-        PageData pd = this.getParams();
-        try {
-            List<PageData> list = templateService.searchNode(pd);
-            return ResponseEntity.success(PropertyUtil.covertListModel(list, TemplateTreeDto.class), INFO_QUERY_SUCCESS.desc());
-        } catch (Exception e) {
-            logger.error("查询用户手册节点,request=[{}]", pd);
-            return ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), e.getMessage());
-        }
-    }
-
-
-
     private void checkSave(PageData pd) {
-        String fileType = pd.getString("fileType");
-        CheckParameter.stringLengthAndEmpty(fileType, "文件类型", 8);
-
-        String fileName = pd.getString("fileName");
-        CheckParameter.stringLengthAndEmpty(fileName, "文件名称", 128);
+        String status = pd.getString("status");
+        CheckParameter.stringLengthAndEmpty(status, "是否启用", 8);
 
         String file = pd.getString("fileList");
         if (StringUtils.isBlank(file)) {

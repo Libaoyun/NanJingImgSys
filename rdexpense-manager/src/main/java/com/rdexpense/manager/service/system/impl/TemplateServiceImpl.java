@@ -40,26 +40,37 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional
-    public void addHandBook(PageData pd) {
-        String businessId = "YHSC" + UUID.randomUUID().toString();//生成业务主键ID
-
+    public void addRecord(PageData pd) {
+        String businessId = "ZSKGL-" + UUID.randomUUID().toString();//生成业务主键ID
         pd.put("businessId", businessId);
-        pd.put("creatorUserId", pd.getString("userId"));
-        pd.put("creatorUserName", pd.getString("userName"));
 
-        //插入主表
-        dao.insert("TemplateMapper.insertRecord", pd);
         //插入到附件表
         String file = pd.getString("fileList");
         if (StringUtils.isNotBlank(file)) {
             List<PageData> listFile = JSONObject.parseArray(file, PageData.class);
-            if (listFile.size() > 0) {
+            if (!CollectionUtils.isEmpty(listFile)) {
                 for (PageData data : listFile) {
                     data.put("businessId", businessId);
+
+                    String fileStr = data.getString("fileName");
+                    if(StringUtils.isNotBlank(fileStr)){
+                        String suffix = fileStr.substring(fileStr.lastIndexOf(".") + 1);
+                        String frofix = fileStr.substring(0,fileStr.lastIndexOf("."));
+
+                        pd.put("fileFormat",suffix);
+                        pd.put("fileName",frofix);
+
+                    }
+                    pd.put("fileSize",data.getString("fileSize"));
+
+
                 }
                 dao.batchInsert("FileMapper.saveFileDetail", listFile);
             }
         }
+
+        //插入主表
+        dao.insert("TemplateMapper.insertRecord", pd);
 
     }
 
@@ -71,12 +82,9 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional
-    public void updateHandBook(PageData pd) {
+    public void updateRecord(PageData pd) {
         String businessId = pd.getString("businessId");
-        pd.put("creatorUserId", pd.getString("userId"));
-        pd.put("creatorUserName", pd.getString("userName"));
-        //更新主表
-        dao.update("TemplateMapper.updateRecord", pd);
+
 
         //编辑附件表
         //更新附件表，前端只传无id的，将这些数据入库
@@ -91,6 +99,19 @@ public class TemplateServiceImpl implements TemplateService {
                         data.put("businessId", businessId);
                         fileList.add(data);
                     }
+
+                    String fileStr = data.getString("fileName");
+                    if(StringUtils.isNotBlank(fileStr)){
+                        String suffix = fileStr.substring(fileStr.lastIndexOf(".") + 1);
+                        String frofix = fileStr.substring(0,fileStr.lastIndexOf("."));
+
+                        pd.put("fileFormat",suffix);
+                        pd.put("fileName",frofix);
+
+                    }
+                    pd.put("fileSize",data.getString("fileSize"));
+
+
                 }
                 if (fileList.size() > 0) {
 
@@ -100,6 +121,9 @@ public class TemplateServiceImpl implements TemplateService {
             }
 
         }
+
+        //更新主表
+        dao.update("TemplateMapper.updateRecord", pd);
 
     }
 
@@ -154,7 +178,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional
-    public void deleteHandBook(PageData pd) {
+    public void deleteRecord(PageData pd) {
 
         //校验不通过的部分
         List<String> removeList = JSONObject.parseArray(pd.getString("businessIdList"), String.class);
@@ -175,7 +199,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     @Override
     @Transactional
-    public PageData handBookDetail(PageData pd){
+    public PageData recordDetail(PageData pd){
 
         PageData request = (PageData) dao.findForObject("TemplateMapper.queryOneRecord", pd);
 
@@ -189,59 +213,6 @@ public class TemplateServiceImpl implements TemplateService {
 
 
 
-    /**
-     * 查询节点
-     * @param pd
-     * @return
-     * @throws Exception
-     */
-    @Override
-    public List<PageData> searchNode(PageData pd) {
-        //查询菜单表数据
-        List<PageData> result = new LinkedList<>();
-        List<PageData> menuList = (List<PageData>) dao.findForList("TemplateMapper.queryAllMenu", pd);
-
-
-        if(!CollectionUtils.isEmpty(menuList)){
-            for(PageData pageData : menuList){
-                String parentCode = pageData.getString("parentCode");
-                if(parentCode.equals("1")){
-                    pageData.put("children","");
-                    pageData.put("nodeType",1);
-                    result.add(pageData);
-                }
-            }
-
-            List<PageData> list = recursiveTreeMenuList("0",menuList);
-            result.addAll(list);
-        }
-
-        return result;
-
-    }
-
-    public List<PageData> recursiveTreeMenuList(String parentId, List<PageData> menuList) {
-        List<PageData> childMenu = new ArrayList<>();
-        for (PageData menu : menuList) {
-            String menuId = menu.getString("nodeId");
-            String pid = menu.getString("parentCode");
-            String authCode = menu.getString("authMenuCode");
-            if((parentId.equals(pid) && org.springframework.util.StringUtils.isEmpty(authCode)) || parentId.equals(authCode)){
-                List<PageData> children = recursiveTreeMenuList(menuId,menuList);
-                if(!CollectionUtils.isEmpty(children)){
-                    menu.put("children",children);
-                }else {
-                    menu.put("children","");
-                }
-
-                menu.put("nodeType",1);
-                childMenu.add(menu);
-            }
-
-        }
-
-        return childMenu;
-    }
 
 
 }

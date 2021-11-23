@@ -206,4 +206,23 @@
         from uq_attachment
         where id =#{sceneImage}
     </select>
+
+    <!-- 批量删除附件 -->
+    <delete id="deleteFileDetailByBusinessIds" parameterType="java.util.List">
+        delete from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </delete>
+
+    <!-- 查询出附件列表的信息 -->
+    <select id="queryByBusinessIds" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </select>
+
 </mapper>

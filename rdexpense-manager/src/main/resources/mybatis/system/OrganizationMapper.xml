@@ -8,6 +8,7 @@
         org_name as orgName,
         remark,
         status,
+            org_number as orgNumber,
         company_id as companyId,
         create_user as createUser,
         create_user_id as createUserId,
@@ -23,15 +24,29 @@
         <include refid="Base_Column"/>
         from sys_organization_info
         <where>
-            status = 1
-            <if test="orgName!=null and orgName!=''">
-                and org_name LIKE concat('%',#{orgName},'%')
+            <if test="fileName!=null and fileName!=''">
+                and file_name LIKE concat('%',#{fileName},'%')
+            </if>
+            <if test="fileFormat!=null and fileFormat!=''">
+                and file_format LIKE concat('%',#{fileFormat},'%')
+            </if>
+            <if test="status!=null and status!=''">
+                and status = #{status}
             </if>
             <if test="remark!=null and remark!=''">
                 and remark LIKE concat('%',#{remark},'%')
             </if>
-            <if test="companyId!=null and companyId!=''">
-                and company_id = #{companyId}
+            <if test="createUser!=null and createUser!=''">
+                and create_user LIKE concat('%',#{createUser},'%')
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                and update_user LIKE concat('%',#{updateUser},'%')
+            </if>
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
             </if>
         </where>
         ORDER BY update_time DESC;
@@ -39,8 +54,8 @@
 
     <insert id="insertOrganization" parameterType="pd">
         INSERT INTO sys_organization_info
-        (org_name, remark, status, company_id,  create_user, create_user_id, create_time, update_user, update_user_id, update_time)
-        VALUES (#{orgName}, #{remark}, #{status}, #{companyId}, #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
+        (org_name, remark, status, company_id, org_number, create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        VALUES (#{orgName}, #{remark}, #{status}, #{companyId},#{orgNumber}, #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
     </insert>
 
 
@@ -92,5 +107,17 @@
         from sys_organization_info
         where id = #{id,jdbcType=BIGINT}
     </select>
+
+
+    <select id="queryByIds" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_organization_info
+        where id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
 
 </mapper>

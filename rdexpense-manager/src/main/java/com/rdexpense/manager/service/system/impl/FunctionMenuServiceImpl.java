@@ -8,6 +8,8 @@ import com.common.entity.PageData;
 import com.common.entity.ResponseEntity;
 import com.common.util.ErrorCodeEnum;
 import com.rdexpense.manager.dto.base.UserInfoDTO;
+import com.rdexpense.manager.dto.system.menu.FunctionMenuButtonDTO;
+import com.rdexpense.manager.dto.system.menu.Meta;
 import com.rdexpense.manager.service.system.FunctionMenuService;
 
 import com.rdexpense.manager.util.UseTokenInfo;
@@ -58,20 +60,20 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
     }
 
 
-    public List<PageData> recursiveTreeMenuList(int parentId, List<PageData> menuList) {
-        List<PageData> childMenu = new ArrayList<>();
+    public List<FunctionMenuButtonDTO> recursiveTreeMenuList(String parentId, List<FunctionMenuButtonDTO> menuList) {
+        List<FunctionMenuButtonDTO> childMenu = new ArrayList<>();
         try {
-            for (PageData menu : menuList) {
+            for (FunctionMenuButtonDTO menu : menuList) {
 
-                int menuId = menu.getInt("menuCode");
-                int pid = menu.getInt("ParentCode");
-                if (parentId == pid) {
-                    List<PageData> children = recursiveTreeMenuList(menuId, menuList);
+                String menuId = menu.getMenuCode().toString();
+                String pid = menu.getParentCode().toString();
+                if (parentId.equals(pid)) {
+                    List<FunctionMenuButtonDTO> children = recursiveTreeMenuList(menuId, menuList);
 
-                    List<PageData> resultList = children.stream().collect(
+                    List<FunctionMenuButtonDTO> resultList = children.stream().collect(
                             Collectors.collectingAndThen(
-                                    Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(e -> e.getInt("orderNumber")))), ArrayList::new));
-                    menu.put("children", resultList);
+                                    Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(FunctionMenuButtonDTO::getOrderNumber))), ArrayList::new));
+                    menu.setChildren(resultList);
                     childMenu.add(menu);
 
                 }
@@ -109,7 +111,7 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
      * @return ResponseEntity<List < FunctionMenu>>
      */
     @Override
-    public List<PageData> queryRoutingMenuTree(String token) {
+    public List<FunctionMenuButtonDTO> queryRoutingMenuTree(String token) {
 
         List<Map> allData = (List<Map>) baseDao.findForList("RouteMenuMapper.queryAllButtonRoutingList");
         ResponseEntity<UserInfoDTO> responseEntity = this.getUserInfo(token);
@@ -150,47 +152,42 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
                         Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(e->e.getString("menuCode")))), ArrayList::new)
         );
         //所有的菜单
-        List<PageData> allMenuInfoList = (List<PageData>) baseDao.findForList("RouteMenuMapper.selectMenuButton");
-        for (PageData pageData : allMenuInfoList) {
-            pageData.put("menu", new PageData());
-        }
+        List<PageData> allMenuInfoList1 = (List<PageData>) baseDao.findForList("RouteMenuMapper.selectMenuButton");
+//        for (FunctionMenuButtonDTO pageData : allMenuInfoList) {
+//            pageData.setM
+//            pageData.put("menu", new PageData());
+//        }
+
+        List<FunctionMenuButtonDTO> allMenuInfoList = transforToList(allMenuInfoList1);
 
 
         //所有的按钮
         List<PageData> buttonList = (List<PageData>) baseDao.findForList("RouteMenuMapper.selectButton");
 
-        PageData rootMenu = new PageData();
-        List<PageData> childerList = new ArrayList<>();
-        List<PageData> newMenuButtonList = new ArrayList<>();
+        FunctionMenuButtonDTO rootMenu = null;
+        List<FunctionMenuButtonDTO> childerList = new ArrayList<>();
+        List<FunctionMenuButtonDTO> newMenuButtonList = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(allMenuInfoList)) {
             //所有的菜单
-            for (PageData menu : allMenuInfoList) {
+            for (FunctionMenuButtonDTO menu : allMenuInfoList) {
 
                 //根据写在数据库的前端信息
-                PageData meta = (PageData) menu.get("meta");
-                if(meta != null){
-                    meta.put("title", menu.getString("title"));
-                }
-
+                menu.getMeta().setTitle(menu.getTitle());
                 Integer val = 1;
-                if (val.equals(menu.getInt("noDropdownVal"))) {
-                    menu.put("noDropdown", true);
+                if (val.equals(menu.getNoDropdownVal())) {
+                    menu.setNoDropdown(true);
                 }
-                if (val.equals(menu.getInt("keepAliveVal"))) {
-                    if(meta != null){
-                        meta.put("keepAlive", true);
-                    }
-
-
+                if (val.equals(menu.getKeepAliveVal())) {
+                    menu.getMeta().setKeepAlive(true);
                 }
-                if (val.equals(menu.getInt("hiddenVal"))) {
-                    menu.put("hidden", true);
+                if (val.equals(menu.getHiddenVal())) {
+                    menu.setHidden(true);
                 }
                 //根据菜单的menuCode判断是否跟菜单
                 Integer rootCode = 0;
                 if (rootMenu == null) {
-                    if (rootCode.equals(menu.getInt("menuCode"))) {
+                    if (rootCode.equals(menu.getMenuCode())) {
                         rootMenu = menu;
                         continue;
                     }
@@ -198,11 +195,10 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
 
                 //根据菜单的menuCode判断是否欢迎页
                 Integer comeCode = -2;
-                if (comeCode.equals(menu.getInt("menuCode"))) {
+                if (comeCode.equals(menu.getMenuCode())) {
                     childerList.add(menu);
                     continue;
                 }
-
 
                 //授权的菜单、组合按钮、组合按钮详细
                 if (!CollectionUtils.isEmpty(menuList)) {
@@ -225,25 +221,25 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
                                 }
                             }
 
-                            log.info("buttonRoutingList === " + buttonRoutingList.toString());
+//                            log.info("buttonRoutingList === " + buttonRoutingList.toString());
                         }
                         //判断菜单是否授权===只针对菜单路由 查找对应的组合按钮详细
-                        if (str.getString("menuCode").equals(menu.getString("menuCode"))) {
+                        if (str.getString("menuCode").equals(menu.getMenuCode().toString())) {
                             //是否首页 ishome判断是否首页
                             Integer home = 1;
-                            if (home.equals(menu.getInt("isHome"))) {
+                            if (home.equals(menu.getIsHome())) {
                                 childerList.add(menu);
                                 //有首页权限的有以下的权限
-                                for (PageData functionMenuButton : allMenuInfoList) {
+                                for (FunctionMenuButtonDTO functionMenuButton : allMenuInfoList) {
                                     //消息提醒
                                     Integer code = -1;
-                                    if (code.equals(functionMenuButton.getInt("menuCode"))) {
+                                    if (code.equals(functionMenuButton.getMenuCode())) {
                                         childerList.add(functionMenuButton);
                                         continue;
                                     }
                                     //我的代办
                                     Integer myTo = 22;
-                                    if (myTo.equals(functionMenuButton.getInt("menuCode"))) {
+                                    if (myTo.equals(functionMenuButton.getMenuCode())) {
                                         childerList.add(functionMenuButton);
                                         continue;
                                     }
@@ -263,25 +259,19 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
                                     });
                                 }
                             }
-                            if(meta != null){
-                                meta.put("btnPermissions", new ArrayList(set));
-                            }
+                            menu.getMeta().setBtnPermissions(new ArrayList(set));
 
                             newMenuButtonList.add(menu);
                         }
                         //按钮路由   0，路由菜单，1，按钮路由
                         Integer pathRouting = 1;
-                        if ((pathRouting.equals(menu.getInt("pathRouting")))) {
+                        if ((pathRouting.equals(menu.getPathRouting()))) {
 
                             if (!buttonRoutingList.isEmpty()) {
                                 buttonRoutingList.forEach(buttonRout -> {
-                                    if (buttonRout.equals(menu.getString("menuCode"))) {
-
-                                        if((PageData) menu.get("meta") != null){
-                                            ((PageData) menu.get("meta")).put("keepAlive", true);
-                                            ((PageData) menu.get("meta")).put("hidden", true);
-                                        }
-
+                                    if (buttonRout.equals(String.valueOf(menu.getMenuCode()))) {
+                                        menu.getMeta().setKeepAlive(true);
+                                        menu.setHidden(true);
                                         newMenuButtonList.add(menu);
                                     }
                                 });
@@ -292,21 +282,21 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
             }
         }
 
-        if (rootMenu != null) {
-            rootMenu.put("children", childerList);
+        if(rootMenu!=null){
+            rootMenu.setChildren(childerList);
         }
 
-        List<PageData> combinationMenu = new ArrayList<>();
-        List<PageData> resultList = new ArrayList<>();
+        List<FunctionMenuButtonDTO> combinationMenu = new ArrayList<>();
+        List<FunctionMenuButtonDTO> resultList = new ArrayList<>();
 
-        List<PageData> unique = newMenuButtonList.stream().collect(
+        List<FunctionMenuButtonDTO> unique = newMenuButtonList.stream().collect(
                 Collectors.collectingAndThen(
-                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(e -> e.getInt("menuCode")))), ArrayList::new)
+                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(FunctionMenuButtonDTO::getMenuCode))), ArrayList::new)
         );
         //递归出其他节点
-        List<PageData> otherMenuList = recursiveTreeMenuList(0, unique);
+        List<FunctionMenuButtonDTO> otherMenuList = recursiveTreeMenuList("0", unique);
 
-        if (rootMenu != null && StringUtils.isNotBlank(rootMenu.getString("menuCode"))) {
+        if (rootMenu != null && rootMenu.getMenuCode() != null) {
             combinationMenu.add(rootMenu);
         }
         if (!CollectionUtils.isEmpty(otherMenuList)) {
@@ -314,7 +304,7 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
         }
         resultList = combinationMenu.stream().collect(
                 Collectors.collectingAndThen(
-                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(e -> e.getString("orderNumber")))), ArrayList::new)
+                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(FunctionMenuButtonDTO::getOrderNumber))), ArrayList::new)
         );
         return resultList;
     }
@@ -332,4 +322,41 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
         }
         return ResponseEntity.success(userInfoVo);
     }
+
+
+
+    private List<FunctionMenuButtonDTO> transforToList(List<PageData> list){
+        List<FunctionMenuButtonDTO> allMenuInfoList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(list)){
+            for(PageData data : list){
+                FunctionMenuButtonDTO button = new FunctionMenuButtonDTO();
+                button.setId(Long.parseLong(data.getString("id")));
+                button.setMenuCode(data.getInt("menuCode"));
+                button.setTitle(data.getString("title"));
+                button.setPath(data.getString("path"));
+                button.setParentCode(data.getInt("parentCode"));
+                button.setMenuType(data.getString("menuType"));
+                button.setOrderNumber(data.getInt("orderNumber"));
+                button.setLevelNumber(data.getInt("levelNumber"));
+                button.setIcon(data.getString("icon"));
+                button.setName(data.getString("name"));
+                button.setRedirect(data.getString("redirect"));
+                button.setComponent(data.getString("component"));
+                button.setIsValid(data.getString("isValid"));
+                button.setRelateFlow(data.getString("relateFlow"));
+                button.setNoDropdownVal(data.getInt("noDropdownVal"));
+                button.setKeepAliveVal(data.getInt("keepAliveVal"));
+                button.setHiddenVal(data.getInt("hiddenVal"));
+                button.setIsHome(data.getInt("isHome"));
+                button.setPathRouting(data.getInt("pathRouting"));
+                button.setMeta(new Meta());
+
+                allMenuInfoList.add(button);
+            }
+        }
+
+        return allMenuInfoList;
+
+    }
+
 }

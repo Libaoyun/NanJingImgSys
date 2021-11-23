@@ -49,7 +49,7 @@ import static com.common.util.ConstantMsgUtil.INFO_EXPORT_SUCCESS;
  */
 @RestController
 @RequestMapping("/user")
-@Api(value = "员工管理", tags = "员工管理")
+@Api(value = "用户管理", tags = "用户管理")
 public class UserController extends BaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -78,7 +78,7 @@ public class UserController extends BaseController {
 
 
 
-    @ApiOperation(value = "新增员工")
+    @ApiOperation(value = "新增用户")
     @PostMapping("/addUser")
     public ResponseEntity addUser(UserAddDto userAddDto) {
         PageData pd = this.getParams();
@@ -90,15 +90,15 @@ public class UserController extends BaseController {
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_SAVE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("新增员工信息失败,request=[{}]", pd);
+            logger.error("新增用户信息失败,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_SAVE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_SAVE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 1, "员工信息", pd);
+            logUtil.saveLogData(result.getCode(), 1, "用户信息", pd);
         }
     }
 
-    @ApiOperation(value = "修改员工")
+    @ApiOperation(value = "修改用户")
     @PostMapping("/updateUser")
     public ResponseEntity updateUser(UserUpdateDto userUpdateDto) {
 
@@ -112,11 +112,11 @@ public class UserController extends BaseController {
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_UPDATE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("修改员工失败,request=[{}]", pd);
+            logger.error("修改用户失败,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_UPDATE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_UPDATE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 2, "员工信息", pd);
+            logUtil.saveLogData(result.getCode(), 2, "用户信息", pd);
         }
     }
 
@@ -171,7 +171,7 @@ public class UserController extends BaseController {
     }
 
 
-    @ApiOperation(value = "删除员工")
+    @ApiOperation(value = "删除用户")
     @PostMapping("/deleteUser")
     public ResponseEntity deleteUser(IdListDto idListDto) {
         PageData pd = this.getParams();
@@ -189,11 +189,11 @@ public class UserController extends BaseController {
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_DELETE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("删除员工失败,request=[{}]", pd);
+            logger.error("删除用户失败,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_DELETE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_DELETE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 3, "员工信息", pd);
+            logUtil.saveLogData(result.getCode(), 3, "用户信息", pd);
         }
 
 
@@ -201,7 +201,7 @@ public class UserController extends BaseController {
 
 
     @PostMapping("/getUserDetail")
-    @ApiOperation(value = "查询员工详情", notes = "查询用户详情")
+    @ApiOperation(value = "查询用户详情", notes = "查询用户详情")
     @ApiImplicitParam(name = "id", value = "主键ID", required = true, dataType = "String")
     public ResponseEntity<UserDetailDto> getUserDetail() {
         PageData pd = this.getParams();
@@ -250,7 +250,7 @@ public class UserController extends BaseController {
             HSSFWorkbook wb = userService.exportExcel(pd);
             HttpServletResponse res = this.getResponse();
             String serialNumber = SerialNumberUtil.generateSerialNo("userExcel");
-            String fileName = "员工管理_" + df.format(new Date()) + "_"+serialNumber +".xls";
+            String fileName = "用户管理_" + df.format(new Date()) + "_"+serialNumber +".xls";
             res.setHeader("Content-Disposition",
                     "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
             OutputStream out = res.getOutputStream();
@@ -262,7 +262,7 @@ public class UserController extends BaseController {
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_EXPORT_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_EXPORT_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 6, "员工管理EXCEL", pd);
+            logUtil.saveLogData(result.getCode(), 6, "用户管理EXCEL", pd);
         }
     }
 
@@ -284,7 +284,7 @@ public class UserController extends BaseController {
             HttpServletResponse response = this.getResponse();
             SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
             String serialNumber = SerialNumberUtil.generateSerialNo("userPdf");
-            String fileName = "员工管理_" + df.format(new Date()) + "_"+serialNumber +".pdf";
+            String fileName = "用户管理_" + df.format(new Date()) + "_"+serialNumber +".pdf";
             //输出流
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             String idStr = pd.getString("idList");
@@ -329,13 +329,12 @@ public class UserController extends BaseController {
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_EXPORT_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_EXPORT_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 6, "其他合同费用校核导出PDF", pd);
+            logUtil.saveLogData(result.getCode(), 6, "用户管理PDF", pd);
         }
     }
 
 
     private void checkParams(PageData pd) {
-        CheckParameter.checkDefaultParams(pd);
         String oldPassword = pd.getString("oldPassword");
         String password = pd.getString("password");
 
@@ -360,7 +359,6 @@ public class UserController extends BaseController {
 
     private void checkParam(PageData pd) {
         CheckParameter.checkDefaultParams(pd);
-        CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键", 128);
         CheckParameter.stringLengthAndEmpty(pd.getString("userCode"), "编号", 128);
         CheckParameter.stringLengthAndEmpty(pd.getString("userName"), "姓名", 128);
         List<PageData> departmentList = JSONObject.parseArray(pd.getString("departmentList"), PageData.class);

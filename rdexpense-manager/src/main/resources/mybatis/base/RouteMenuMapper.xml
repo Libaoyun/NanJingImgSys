@@ -33,7 +33,13 @@
 
     <select id="queryAuthMenuList" parameterType="pd" resultType="pd">
         SELECT
-           menu_code,authority_button_code
+            id,
+            user_id as userId,
+            menu_code as menuCode,
+            authority_button_code as authorityButtonCode,
+            user_flag as userFlag,
+            detail_button as detailButton,
+            scope_code as scopeCode
         FROM
             uq_authority_menu
         where user_id = #{userId,jdbcType=VARCHAR}

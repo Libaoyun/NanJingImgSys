@@ -29,8 +29,8 @@ public class UserAddDto extends OrganizationDto implements Serializable {
     @ApiModelProperty(value = "姓名",required = true)
     private String userName;
 
-    @ApiModelProperty(value = "英文名")
-    private String englishUserName;
+//    @ApiModelProperty(value = "英文名")
+//    private String englishUserName;
 
     @ApiModelProperty(value = "性别")
     private String gender;
@@ -59,16 +59,16 @@ public class UserAddDto extends OrganizationDto implements Serializable {
     @ApiModelProperty(value = "血型编码")
     private String bloodTypeCode;
 
-    @ApiModelProperty(value = "移动电话")
+    @ApiModelProperty(value = "手机号码")
     private String mobilePhone;
 
-    @ApiModelProperty(value = "办公电话")
-    private String officeTelephone;
+//    @ApiModelProperty(value = "办公电话")
+//    private String officeTelephone;
 
     @ApiModelProperty(value = "电子邮件")
     private String email;
 
-    @ApiModelProperty(value = "传真")
+    @ApiModelProperty(value = "其他")
     private String fax;
 
     @ApiModelProperty(value = "员工状态")

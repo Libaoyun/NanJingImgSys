@@ -28,17 +28,17 @@ public class PostAddDTO extends OrganizationDto implements Serializable {
     @ApiModelProperty(value = "职务编码", required = true)
     private String postCode;
 
-    @ApiModelProperty("职务级别")
-    private String postLevel;
-
-    @ApiModelProperty("职务级别编码")
-    private String postLevelCode;
-
-    @ApiModelProperty("职务类型")
-    private String postType;
-
-    @ApiModelProperty("职务类型编码")
-    private String postTypeCode;
+//    @ApiModelProperty("职务级别")
+//    private String postLevel;
+//
+//    @ApiModelProperty("职务级别编码")
+//    private String postLevelCode;
+//
+//    @ApiModelProperty("职务类型")
+//    private String postType;
+//
+//    @ApiModelProperty("职务类型编码")
+//    private String postTypeCode;
 
     @ApiModelProperty("备注")
     private String remark;

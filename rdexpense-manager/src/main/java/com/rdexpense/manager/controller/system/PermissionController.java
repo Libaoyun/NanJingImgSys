@@ -44,7 +44,7 @@ public class PermissionController extends BaseController {
     @ApiOperation(value = "查询已授权用户", notes = "查询已授权用户")
     public ResponseEntity<PageInfo<AuthorityUserListDTO>> queryAuthorizedUser(QueryAuthUserDto queryAuthUserDto) {
         PageData pd = this.getParams();
-        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "组织ID", 64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "授权项目ID", 64);
         try {
             PageHelper.startPage(pd.getInt("pageNum"), pd.getInt("pageSize"));
             List<PageData> list = permissionService.queryAuthorizedUser(pd);
@@ -66,7 +66,7 @@ public class PermissionController extends BaseController {
         ResponseEntity result = null;
 
         CheckParameter.checkDefaultParams(pd);
-        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "组织ID", 64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "授权项目ID", 64);
         CheckParameter.stringLengthAndEmpty(pd.getString("userFlag"), "用户类型", 64);
         //校验取出参数
         String userList = pd.getString("userList");
@@ -89,18 +89,18 @@ public class PermissionController extends BaseController {
     }
 
 
-    @PostMapping(value = "/queryAuthMenuTree")
-    @ApiOperation(value = "查询授权菜单")
+    @PostMapping(value = "/queryAuthMenu")
+    @ApiOperation(value = "查询已授权限")
     @ApiImplicitParams(value = {
             @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String"),
-            @ApiImplicitParam(name = "organizationId", value = "组织编码", required = true, dataType = "String")})
-    public ResponseEntity<List<MenuTreeDto>> queryAuthMenuTree() {
+            @ApiImplicitParam(name = "organizationId", value = "授权项目ID", required = true, dataType = "String")})
+    public ResponseEntity<List<UserAuthMenuListDto>> queryAuthMenuTree() {
         PageData pd = this.getParams();
-        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "组织ID", 64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "授权项目ID", 64);
         CheckParameter.stringLengthAndEmpty(pd.getString("userId"), "用户ID", 64);
         try {
-            List<PageData> list = permissionService.queryAuthMenuTree(pd);
-            return ResponseEntity.success(PropertyUtil.covertListModel(list, MenuTreeDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
+            List<PageData> list = permissionService.queryAuthMenu(pd);
+            return ResponseEntity.success(PropertyUtil.covertListModel(list, UserAuthMenuListDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
 
         } catch (Exception e) {
             logger.error("查询授权菜单,request=[{}]", pd);
@@ -118,7 +118,7 @@ public class PermissionController extends BaseController {
         PageData pd = this.getParams();
 
         CheckParameter.checkDefaultParams(pd);
-        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "组织ID", 64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "授权项目ID", 64);
         CheckParameter.stringLengthAndEmpty(pd.getString("userId"), "授权对象ID", 64);
 
         ResponseEntity result = null;
@@ -150,7 +150,7 @@ public class PermissionController extends BaseController {
             throw new MyException("授权对象不能为空");
         }
         CheckParameter.checkDefaultParams(pd);
-        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "组织ID", 64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "授权项目ID", 64);
 
         try {
             permissionService.removeAuthorization(pd);
@@ -167,7 +167,7 @@ public class PermissionController extends BaseController {
 
 
 
-    @ApiOperation(value = "查询部门职务树", notes = "查询部门职务树")
+    @ApiOperation(value = "查询授权组织", notes = "查询授权组织")
     @GetMapping(value = "/queryDeptTree")
     public ResponseEntity<List<DepartmentTreeDTO>> queryDeptTree() {
         PageData pd = this.getParams();
@@ -181,11 +181,11 @@ public class PermissionController extends BaseController {
 
     }
 
-    @ApiOperation(value = "查询员工", notes = "查询员工")
+    @ApiOperation(value = "查询未授权用户", notes = "查询未授权用户")
     @PostMapping(value = "/queryUser")
     public ResponseEntity<PageInfo<UserListDTO>> queryUser(QueryUserDto queryUserDto) {
         PageData pd = this.getParams();
-        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "组织ID", 64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("organizationId"), "授权项目ID", 64);
         try {
             PageHelper.startPage(pd.getInt("pageNum"), pd.getInt("pageSize"));
             List<PageData> list = permissionService.queryUser(pd);
@@ -198,7 +198,7 @@ public class PermissionController extends BaseController {
     }
 
 
-    @ApiOperation(value = "查询授权组织", notes = "查询授权组织")
+    @ApiOperation(value = "查询授权项目", notes = "查询授权项目")
     @GetMapping(value = "/queryOrganization")
     public ResponseEntity<List<PermissionOrganizationListDTO>> queryOrganization() {
         PageData pd = this.getParams();

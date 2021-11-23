@@ -66,7 +66,7 @@ public class MenuController extends BaseController {
     @PostMapping(value = "/updateTree", consumes = "application/json")
     ResponseEntity<List<MenuTreeDto>> updateTree(MenuTreeDto menuTreeDto) {
         PageData pd = this.getParams();
-        CheckParameter.checkDefaultParams(pd);
+//        CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         try {
             List<PageData> dataList = menuService.updateTree(pd);
@@ -101,7 +101,7 @@ public class MenuController extends BaseController {
     @PostMapping(value = "/saveNode", consumes = "application/json")
     public ResponseEntity saveNode(AddMenuNodeDto addMenuNodeDto){
         PageData pd = this.getParams();
-        CheckParameter.checkDefaultParams(pd);
+ //       CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         checkSave(pd);
         try {
@@ -120,7 +120,7 @@ public class MenuController extends BaseController {
     @PostMapping(value = "/updateNode", consumes = "application/json")
     public ResponseEntity updateNode(AddMenuNodeDto addMenuNodeDto){
         PageData pd = this.getParams();
-        CheckParameter.checkDefaultParams(pd);
+ //       CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         checkSave(pd);
         try {
@@ -141,7 +141,7 @@ public class MenuController extends BaseController {
     public ResponseEntity deleteNode(MenuNodeDto menuNodeDto) {
         PageData pd = this.getParams();
         String menuCode = pd.getString("menuCode");
-        CheckParameter.checkDefaultParams(pd);
+//        CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
 
         if(menuCode.equals("-10") || menuCode.equals("3000")){

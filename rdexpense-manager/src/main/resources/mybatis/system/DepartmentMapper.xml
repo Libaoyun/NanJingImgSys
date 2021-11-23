@@ -32,26 +32,32 @@
 
     <!--    新增主表节点-->
     <insert id="insertTreeData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
-        insert into sys_department_tree(parent_id,org_id,org_name,status,create_time,org_type,order_number)
-        values (#{parentId},#{orgId},#{orgName},#{status},getDate(),#{orgType},#{orderNumber})
+        insert into sys_department_tree(parent_id,org_id,org_name,status,org_type,order_number,
+                                        create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        values (#{parentId},#{orgId},#{orgName},#{status},#{orgType},#{orderNumber},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
     </insert>
 
 
     <!--    新增部门表节点-->
     <insert id="insertDepartmentData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
-        insert into sys_department_info(org_id,department_code,org_name,status,create_time,department_simple_name,
+        insert into sys_department_info(org_id,department_code,org_name,status,department_simple_name,
                                         department_level,department_type,fax,in_telephone,out_telephone,department_remark,
-                                          department_duty,department_people,department_level_code,department_type_code)
-        values (#{orgId},#{departmentCode},#{orgName},#{status},getDate(),#{departmentSimpleName},#{departmentLevel},#{departmentType},
+                                          department_duty,department_people,department_level_code,department_type_code,
+                                        create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        values (#{orgId},#{departmentCode},#{orgName},#{status},#{departmentSimpleName},#{departmentLevel},#{departmentType},
                 #{fax},#{inTelephone},#{outTelephone},#{departmentRemark},#{departmentDuty},#{departmentPeople},
-                #{departmentLevelCode},#{departmentTypeCode})
+                #{departmentLevelCode},#{departmentTypeCode},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
     </insert>
 
     <!--    修改主表状态-->
     <update id="updateNodeStatus" parameterType="pd">
         update sys_department_tree
         set status = #{status},
-            create_time = getDate()
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
         where org_id = #{item.orgId}
     </update>
 
@@ -59,7 +65,9 @@
     <update id="updateDepartmentStatus" parameterType="pd">
         update sys_department_info
         set status = #{status},
-            create_time = getDate()
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
         where org_id = #{item.orgId}
     </update>
 
@@ -68,7 +76,9 @@
         update sys_department_tree
         set status = #{status},
             org_name = #{orgName},
-            create_time = getDate()
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
         where org_id = #{orgId}
     </update>
 
@@ -78,7 +88,9 @@
         set department_code = #{departmentCode},
             org_name = #{orgName},
             status = #{status},
-            create_time = getDate(),
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate(),
             department_simple_name = #{departmentSimpleName},
             department_level = #{departmentLevel},
             department_level_code = #{departmentLevelCode},
@@ -96,17 +108,21 @@
 
     <!--    新增职务表节点-->
     <insert id="insertPostData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
-        insert into sys_post_info(org_id,post_code,org_name,status,create_time,
-                                  post_level,post_type,remark,post_level_code,post_type_code)
-        values (#{orgId},#{postCode},#{orgName},#{status},getDate(),#{postLevel},#{postType},
-                #{remark},#{postLevelCode},#{postTypeCode})
+        insert into sys_post_info(org_id,post_code,org_name,status,
+                                  post_level,post_type,remark,post_level_code,post_type_code,
+                                  create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        values (#{orgId},#{postCode},#{orgName},#{status},#{postLevel},#{postType},
+                #{remark},#{postLevelCode},#{postTypeCode},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
     </insert>
 
     <!--    修改职务表状态-->
     <update id="updatePostStatus" parameterType="pd">
         update sys_post_info
         set status = #{status},
-            create_time = getDate()
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
         where org_id = #{item.orgId}
     </update>
 
@@ -116,7 +132,9 @@
         set status = #{status},
             org_name = #{orgName},
             remark = #{remark},
-            create_time = getDate(),
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate(),
             post_level = #{postLevel},
             post_level_code = #{postLevelCode},
             post_type = #{postType},
@@ -203,4 +221,21 @@
         where org_id = #{orgId}
     </select>
 
+    <delete id="deleteAllData" parameterType="pd">
+        delete from sys_department_tree
+        where 1=1
+    </delete>
+
+    <insert id="insertNewTreeData" parameterType="java.util.List">
+        INSERT INTO sys_department_tree
+        (parent_id,org_id,org_name,status,org_type,order_number,
+        create_user, create_user_id, create_time, update_user, update_user_id, update_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.parentId},#{item.orgId},#{item.orgName},#{item.status},#{item.orgType},#{item.orderNumber},
+            #{item.createUser}, #{item.createUserId}, getDate(), #{item.createUser}, #{item.createUserId},getDate()
+            )
+        </foreach>
+    </insert>
 </mapper>

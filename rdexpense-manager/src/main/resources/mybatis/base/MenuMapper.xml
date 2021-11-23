@@ -18,7 +18,7 @@
         select
         <include refid="BaseMenuButton"/>
         from uq_function_menu um left join uq_button_routing  ur on um.menu_code = ur.menu_code
-        where 1=1 and um.menu_code not in (0,-2,-1,22,2) order by order_number
+        where 1=1 and um.menu_code not in (0,-2,-1,22,2) and is_valid = 1 order by order_number
     </select>
 
 

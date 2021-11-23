@@ -23,7 +23,8 @@
         employee_type as employeeType,employee_type_code as employeeTypeCode,participation_date as participationDate,entry_date as entryDate,
         confirmation_date as confirmationDate,leave_date as leaveDate,nationality,native_place as nativePlace,nation,religion,
         create_user as createUser,create_user_id as createUserId,create_time as createTime,update_user as updateUser,update_user_id as updateUserId,
-            update_time as updateTime,password,version
+            update_time as updateTime,password,version,department_name as departmentName,department_code as departmentCode,
+            post_name as postName,post_code as postCode,business_id as businessId
 
 	</sql>
 
@@ -118,6 +119,21 @@
 		</where>
 	</select>
 
+	<select id="queryUserByCode" resultType="String" parameterType="pd">
+		select user_id as userId
+		from uq_authority_user
+		<where>
+			<if test="organizationId!=null and organizationId!=''">
+				and scope_code = #{organizationId}
+			</if>
+			<if test="userFlag!=null and userFlag!=''">
+				and user_flag = #{userFlag}
+			</if>
+
+		</where>
+	</select>
+
+
 	<select id="findMenuCodeByUserId" resultType="java.lang.String" parameterType="pd">
 		select menu_code from uq_authority_menu
 		where user_id=#{userId,jdbcType=VARCHAR} and scope_code = #{organizationId,jdbcType=VARCHAR}
@@ -147,14 +163,18 @@
 		<include refid="Base_Column"/>
 		from sys_user_info
 		<where>
+			<if test="orgCode != null and orgCode != '' and orgType != null and orgType != '' and orgType == 1">
+				and department_code LIKE concat('%',#{orgCode},'%')
+			</if>
+			<if test="orgCode != null and orgCode != '' and orgType != null and orgType != '' and orgType == 2">
+				and post_code LIKE concat('%',#{orgCode},'%')
+			</if>
+
 			<if test="userCode!=null and userCode!=''">
 				and user_code LIKE concat('%',#{userCode},'%')
 			</if>
 			<if test="userName!=null and userName!=''">
 				and user_name LIKE concat('%',#{userName},'%')
-			</if>
-			<if test="englishUseName!=null and englishUseName!=''">
-				and english_user_name LIKE concat ('%',#{englishUseName},'%')
 			</if>
 			<if test="organizationId!=null and organizationId!=''">
 				and user_code not in (select user_id from uq_authority_user where scope_code = #{organizationId} and user_flag = 0)
@@ -207,6 +227,12 @@
 		from sys_user_department_info
 		where user_code = #{userId}
 	</select>
+
+	<update id="updateAuthStatus"  parameterType="pd">
+		update uq_authority_user
+		set auth_status = 1
+		where user_id =#{userId} and user_flag = #{userFlag}
+	</update>
 
 
 </mapper>

@@ -27,11 +27,11 @@ import static com.common.util.ConstantMsgUtil.*;
 /**
  * @author luxiangbao
  * @date 2021/11/12 11:44
- * @description 部门职务管理
+ * @description 组织管理
  */
 @RestController
 @RequestMapping("/department")
-@Api(value = "部门职务管理", tags = "部门职务管理")
+@Api(value = "组织管理", tags = "组织管理")
 public class DepartmentController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(DepartmentController.class);
 
@@ -59,7 +59,7 @@ public class DepartmentController extends BaseController {
 
     @ApiOperation(value = "拖拽树")
     @PostMapping(value = "/updateOTree", consumes = "application/json")
-    public ResponseEntity<List<DepartmentTreeDTO>> updateOrgTree(DepartmentTreeDTO departmentTreeDTO) {
+    public ResponseEntity<List<DepartmentTreeDTO>> updateOrgTree(DepartmentUpdateTreeDTO departmentUpdateTreeDTO) {
         PageData pd = this.getParams();
         CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
@@ -71,7 +71,7 @@ public class DepartmentController extends BaseController {
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_UPDATE_FAIL.val(), e.getMessage());
             throw new MyException(ERR_UPDATE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 2, "部门职务树", pd);
+            logUtil.saveLogData(result.getCode(), 2, "组织树", pd);
         }
     }
 

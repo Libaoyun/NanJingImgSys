@@ -1,6 +1,7 @@
 package com.rdexpense.manager.dto.system.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rdexpense.manager.dto.base.BaseEntity;
 import com.rdexpense.manager.dto.file.CreateFileDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,15 +18,9 @@ import java.util.List;
  */
 @Data
 @ApiModel(value = "员工明细")
-public class UserDetailDto implements Serializable {
+public class UserDetailDto extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @ApiModelProperty("主键ID")
-    private String id;
-
-    @ApiModelProperty(value = "业务主键ID")
-    private String businessId;
 
     @ApiModelProperty(value = "编号")
     private String userCode;

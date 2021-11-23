@@ -466,7 +466,7 @@ public class CheckParameter {
 
 
     public static void checkDefaultParams(PageData pd){
-        checkPositiveInt(pd.getString("menuCode"), "菜单编码");
+        checkPositiveInt(pd.getString("menuCode"), "功能菜单编码");
         CheckParameter.stringLengthAndEmpty(pd.getString("creatorOrgId"), "右上角项目ID",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("creatorOrgName"), "右上角项目名称",128);
     }

@@ -31,26 +31,26 @@ public class DepartmentUpdateDTO extends OrganizationDto implements Serializable
     @ApiModelProperty("部门简称")
     private String departmentSimpleName;
 
-    @ApiModelProperty("部门级别")
-    private String departmentLevel;
+//    @ApiModelProperty("部门级别")
+//    private String departmentLevel;
+//
+//    @ApiModelProperty("部门级别编码")
+//    private String departmentLevelCode;
+//
+//    @ApiModelProperty("部门类型")
+//    private String departmentType;
+//
+//    @ApiModelProperty("部门类型编码")
+//    private String departmentTypeCode;
 
-    @ApiModelProperty("部门级别编码")
-    private String departmentLevelCode;
+//    @ApiModelProperty("传真")
+//    private String fax;
 
-    @ApiModelProperty("部门类型")
-    private String departmentType;
-
-    @ApiModelProperty("部门类型编码")
-    private String departmentTypeCode;
-
-    @ApiModelProperty("传真")
-    private String fax;
-
-    @ApiModelProperty("内线电话")
+    @ApiModelProperty("联系电话")
     private String inTelephone;
-
-    @ApiModelProperty("外线电话")
-    private String outTelephone;
+//
+//    @ApiModelProperty("外线电话")
+//    private String outTelephone;
 
     @ApiModelProperty("部门描述")
     private String departmentRemark;

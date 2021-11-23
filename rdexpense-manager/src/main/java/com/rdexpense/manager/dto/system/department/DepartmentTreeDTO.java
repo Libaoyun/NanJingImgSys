@@ -1,6 +1,5 @@
 package com.rdexpense.manager.dto.system.department;
 
-import com.rdexpense.manager.dto.base.OrganizationDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,7 +14,7 @@ import java.util.List;
  */
 @ApiModel
 @Data
-public class DepartmentTreeDTO extends OrganizationDto implements Serializable {
+public class DepartmentTreeDTO implements Serializable {
 
     @ApiModelProperty("id")
     private String id;

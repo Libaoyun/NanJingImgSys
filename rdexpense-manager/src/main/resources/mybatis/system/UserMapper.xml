@@ -11,7 +11,8 @@
         employee_type as employeeType,employee_type_code as employeeTypeCode,participation_date as participationDate,entry_date as entryDate,
         confirmation_date as confirmationDate,leave_date as leaveDate,nationality,native_place as nativePlace,nation,religion,
         create_user as createUser,create_user_id as createUserId,create_time as createTime,update_user as updateUser,update_user_id as updateUserId,
-            update_time as updateTime,password,version
+            update_time as updateTime,password,version,department_name as departmentName,department_code as departmentCode,
+            post_name as postName,post_code as postCode,business_id as businessId
 
     </sql>
 
@@ -32,8 +33,47 @@
             <if test="userName!=null and userName!=''">
                 and user_name LIKE concat('%',#{userName},'%')
             </if>
-            <if test="englishUseName!=null and englishUseName!=''">
-                and english_user_name LIKE concat ('%',#{englishUseName},'%')
+            <if test="departmentCode!=null and departmentCode!=''">
+                and department_code LIKE concat('%',#{departmentCode},'%')
+            </if>
+            <if test="postCode!=null and postCode!=''">
+                and post_code LIKE concat('%',#{postCode},'%')
+            </if>
+            <if test="mobilePhone!=null and mobilePhone!=''">
+                and mobile_phone LIKE concat('%',#{mobilePhone},'%')
+            </if>
+            <if test="createUser!=null and createUser!=''">
+                and create_user LIKE concat('%',#{createUser},'%')
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                and update_user LIKE concat('%',#{updateUser},'%')
+            </if>
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
+            </if>
+
+            <if test="educationCodeList != null and educationCodeList.size()>0">
+                and education_code in
+                <foreach item="item" index="index" collection="educationCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="employeeStatusCodeList != null and employeeStatusCodeList.size()>0">
+                and employeeStatusCode in
+                <foreach item="item" index="index" collection="employeeStatusCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="employeeTypeCodeList != null and employeeTypeCodeList.size()>0">
+                and employee_type_code in
+                <foreach item="item" index="index" collection="employeeTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
         </where>
         ORDER BY update_time DESC;
@@ -48,7 +88,7 @@
          employee_type, employee_type_code, participation_date, entry_date, confirmation_date, leave_date, nationality,
          native_place, nation,
          religion, create_user, create_user_id, create_time, update_user, update_user_id, update_time, password,
-         version)
+         version,department_name,department_code,post_name,post_code)
         VALUES (#{businessId}, #{userCode}, #{userName}, #{englishUserName},
                 #{gender}, #{genderCode}, #{birthDate,jdbcType=DATE}, #{height}, #{education}, #{educationCode},
                 #{maritalStatus}, #{bloodType}, #{bloodTypeCode}, #{mobilePhone},
@@ -57,7 +97,8 @@
                 #{confirmationDate,jdbcType=DATE}, #{leaveDate,jdbcType=DATE}, #{nationality}, #{nativePlace},
                 #{nation}, #{religion},
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},
-                getDate(), #{password}, #{version})
+                getDate(), #{password}, #{version},#{departmentName},
+                #{departmentCode},#{postName},#{postCode})
     </insert>
 
 
@@ -106,7 +147,11 @@
             religion             = #{religion},
             update_user          = #{createUser},
             update_user_id       = #{createUserId},
-            update_time          = getdate()
+            update_time          = getdate(),
+            department_name = #{departmentName},
+            department_code = #{departmentCode},
+            post_name       = #{postName},
+            post_code       = #{postCode}
         where business_id = #{businessId}
     </update>
 

@@ -56,33 +56,43 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return
      */
     @Override
+    @Transactional
     public List<PageData> updateOrgTree(PageData pd) {
-        int i = 1;
+        int i = 0;
         String data = pd.getString("data");
         List<PageData> orgPdList = JSON.parseArray(data, PageData.class);
 
         // 整理成集合
         List<PageData> newTreeDataList = rebuild(i, orgPdList);
 
-        // 删除数据库组织数据
-        baseDao.delete("SysOrgMapper.deleteAllData", new PageData());
-
-        //分批插入数据
-        Integer listSize = newTreeDataList.size();
-        if(listSize > 50){
-            List<List<PageData>> resultList = ListHandleUtil.splitMobile(newTreeDataList,listSize,50);
-            for(List<PageData> dataList : resultList){
-                //插入数据
-                baseDao.batchInsert("SysOrgMapper.insertNewTreeData", dataList);
+        if(!CollectionUtils.isEmpty(newTreeDataList)){
+            for(PageData data1 : newTreeDataList){
+                data1.put("createUser",pd.getString("createUser"));
+                data1.put("createUserId",pd.getString("createUserId"));
             }
 
-        }else{
-            //插入数据
-            baseDao.batchInsert("SysOrgMapper.insertNewTreeData", newTreeDataList);
+            // 删除数据库组织数据
+            baseDao.delete("DepartmentMapper.deleteAllData", pd);
+
+            //分批插入数据
+            if(newTreeDataList.size() > 50){
+                List<List<PageData>> resultList = ListHandleUtil.splitMobile(newTreeDataList,newTreeDataList.size(),50);
+                for(List<PageData> dataList : resultList){
+                    //插入数据
+                    baseDao.batchInsert("DepartmentMapper.insertNewTreeData", dataList);
+                }
+
+            }else{
+                //插入数据
+                baseDao.batchInsert("DepartmentMapper.insertNewTreeData", newTreeDataList);
+            }
+
+
+            // 整理成树形结构
         }
 
 
-        // 整理成树形结构
+
 
         return queryOrgTree(pd);
     }
@@ -93,7 +103,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             i++;
             orgPd.put("orderNumber", i);
             result.add(orgPd);
-            String children = orgPd.getString("childNode");
+            String children = orgPd.getString("children");
 
             List<PageData> newChild = new ArrayList<>();
             if (!org.springframework.util.StringUtils.isEmpty(children)) {

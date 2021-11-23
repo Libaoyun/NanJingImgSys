@@ -1,55 +1,37 @@
 package com.rdexpense.manager.dto.system.handbook;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rdexpense.manager.dto.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * @author luxiangbao
  * @date 2020/6/3 13:33
- * @describe 用户手册列表
+ * @describe 知识库
  */
 @ApiModel
 @Data
-public class TemplateListDto implements Serializable {
+public class TemplateListDto extends BaseEntity implements Serializable {
 
-    @ApiModelProperty(value = "主键id")
-    private Long id;
-
-    @ApiModelProperty(value = "业务主键ID")
-    private String businessId;
-
-    @ApiModelProperty(value = "作者ID")
-    private String  creatorUserId;
-
-    @ApiModelProperty(value = "作者")
-    private String  creatorUserName;
-
-    @ApiModelProperty(value = "文件类型")
-    private String fileType;
-
-    @ApiModelProperty(value = "文件名称")
+    @ApiModelProperty(value = "文件名称", required = true)
     private String fileName;
 
-    @ApiModelProperty(value = "描述信息")
+    @ApiModelProperty(value = "文件格式", required = true)
+    private String fileFormat;
+
+    @ApiModelProperty(value = "文件大小", required = true)
+    private String fileSize;
+
+    @ApiModelProperty(value = "状态 0 禁用 ，1 启用", required = true)
+    private String status;
+
+    @ApiModelProperty(value = "备注", required = true)
     private String remark;
 
     @ApiModelProperty(value = "文件url地址")
     private String fileUrl;
-
-    @ApiModelProperty(value = "上传的文件名称")
-    private String fileOriginalName;
-
-
-    @ApiModelProperty(value = "编制日期")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date createTime;
-
-
-
 
 }

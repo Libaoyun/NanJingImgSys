@@ -1,5 +1,6 @@
 package com.rdexpense.manager.dto.system.organization;
 
+import com.rdexpense.manager.dto.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,15 +14,16 @@ import java.io.Serializable;
  */
 @ApiModel
 @Data
-public class OrganizationDetailDTO implements Serializable {
+public class OrganizationDetailDTO extends BaseEntity implements Serializable {
 
-    @ApiModelProperty("主键ID")
-    private String id;
 
     @ApiModelProperty("项目名称")
     private String orgName;
 
-    @ApiModelProperty("部门描述")
+    @ApiModelProperty("项目编号")
+    private String orgNumber;
+
+    @ApiModelProperty("项目描述")
     private String remark;
 
     @ApiModelProperty("状态 0 禁用 ，1 启用")

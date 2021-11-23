@@ -12,18 +12,15 @@ import java.util.List;
  */
 public interface TemplateService {
 
-    void addHandBook(PageData pageData) ;
+    void addRecord(PageData pageData) ;
 
-    void updateHandBook(PageData pageData) ;
+    void updateRecord(PageData pageData) ;
 
     List<PageData> searchRecord(PageData pageData) ;
 
-    void deleteHandBook(PageData pageData) ;
+    void deleteRecord(PageData pageData) ;
 
-    PageData handBookDetail(PageData pageData);
-
-
-    List<PageData> searchNode(PageData pageData) ;
+    PageData recordDetail(PageData pageData);
 
 
 }

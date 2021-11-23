@@ -375,9 +375,9 @@ public class MenuServiceImpl implements MenuService {
                 //更新菜单按钮
                 if(count > 0){
                     int deleteCount = dao.delete("MenuMapper.deleteButtonByMenuCode",pd);
-                    if(deleteCount > 0){
+//                    if(deleteCount > 0){
                         batchInsertMenuButton(comButton,menuCode);
-                    }
+//                    }
                 }
 
             }else{//修改非列表

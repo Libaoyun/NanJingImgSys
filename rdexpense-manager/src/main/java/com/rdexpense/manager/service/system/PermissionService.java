@@ -28,7 +28,7 @@ public interface PermissionService {
      * @param pd
      * @return
      */
-    List<PageData> queryAuthMenuTree(PageData pd);
+    List<PageData> queryAuthMenu(PageData pd);
 
 
     /**
