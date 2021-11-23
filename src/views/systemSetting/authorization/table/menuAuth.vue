@@ -215,7 +215,7 @@ export default class extends tableMixin {
         const newArr = arr.filter(item => item.hidden === '0')
         newArr.forEach(item => {
             let flag = Object.keys(item.selected).some(v=>item.selected[v])
-            if(flag && item.parentCode) {
+            if(flag) {
                 this.menuButtonParams.push({
                     authorityButtonCode:Object.keys(item.selected).filter(v=>item.selected[v]).join(','),
                     menuCode:item.menuCode
