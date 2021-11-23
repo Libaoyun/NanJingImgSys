@@ -52,11 +52,11 @@ export default class extends Vue {
         ],
         password: [
           { required: true, message: '请输入新密码', trigger: 'change' },
-          { pattern:/^\w{3,16}$/, message: '密码可由数字、字母、下划线组成，且密码位数为3-16位', trigger: 'blur' }
+          { pattern:/^\w{3,15}$/, message: '密码可由数字、字母、下划线组成，且密码位数为3-15位', trigger: 'blur' }
         ],
         confirmPassword: [
           { required: true, message: '请确认新密码', trigger: 'change' },
-          { pattern:/^\w{3,16}$/, message: '密码可由数字、字母、下划线组成，且密码位数为3-16位', trigger: 'blur' },
+          { pattern:/^\w{3,15}$/, message: '密码可由数字、字母、下划线组成，且密码位数为3-15位', trigger: 'blur' },
           { validator: this.validatePass, trigger: 'blur' }
         ]
     }

@@ -43,7 +43,7 @@ export default class dictionaryMixin extends Vue {
     }
     // 获取员工类型
     getEmployeeTypeList(){
-        this.GET_DICTIONARY_LIST(1015).then(res=>{
+        this.GET_DICTIONARY_LIST(1016).then(res=>{
             this.employeeTypeList = res;
         })
     }

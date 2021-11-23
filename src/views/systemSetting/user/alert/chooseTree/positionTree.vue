@@ -46,7 +46,7 @@ import tableMixin from '@/mixins/tableMixin'
     
     }
 })
-export default class extends tableMixin {
+export default class PositionTree extends tableMixin {
     dialog = false
     departmentCode = ''
     // 过滤文字

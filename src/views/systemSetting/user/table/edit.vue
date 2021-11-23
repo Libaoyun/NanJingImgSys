@@ -3,14 +3,11 @@
         <card-global>
             <div>
                 <el-form ref="doForm" :inline="true" :rules="formRules" :model="baseInfo" size="mini" label-position="right" label-width="80px">
-                    <el-form-item label="编号:" prop="userCode">
-                        <el-input disabled v-model="baseInfo.userCode" placeholder="请输入编号"></el-input>
+                    <el-form-item label="用户编号:" prop="userCode">
+                        <el-input v-model="baseInfo.userCode" placeholder="请输入用户编号"></el-input>
                     </el-form-item>
-                    <el-form-item label="姓名:" prop="userName">
-                        <el-input  v-model="baseInfo.userName" placeholder="请输入姓名"></el-input>
-                    </el-form-item>
-                    <el-form-item label="英文名:" prop="englishUserName">
-                        <el-input  v-model="baseInfo.englishUserName" placeholder="请输入英文名"></el-input>
+                    <el-form-item label="用户名称:" prop="userName">
+                        <el-input  v-model="baseInfo.userName" placeholder="请输入用户名称"></el-input>
                     </el-form-item>
                     <el-form-item label="性别:" prop="genderCode">
                         <el-select v-model="baseInfo.genderCode" placeholder="请选择性别" @change="baseInfo.gender = GET_DICTIONARY_TEXT(genderList,baseInfo.genderCode)">
@@ -28,8 +25,11 @@
                             <el-option v-for="item in educationList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="婚姻状况:" prop="maritalStatus">
-                        <el-switch v-model="baseInfo.maritalStatus" active-value="1" inactive-value="0"></el-switch>
+                    <el-form-item label="是否已婚:" prop="maritalStatus">
+                        <el-select v-model="baseInfo.maritalStatus" placeholder="请选择">
+                            <el-option label="是" value="1"></el-option>
+                            <el-option label="否" value="0"></el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="血型:" prop="bloodTypeCode">
                         <el-select v-model="baseInfo.bloodTypeCode" placeholder="请选择血型" @change="baseInfo.bloodType = GET_DICTIONARY_TEXT(bloodTypeList,baseInfo.bloodTypeCode)">
@@ -83,25 +83,22 @@
         </div>
         <card-global cardTitle='其他信息' style="margin-top:15px">
             <el-form ref="otherForm" :inline="true" :rules="formRules" :model="baseInfo" size="mini" label-position="right" label-width="80px">
-                <el-form-item label="移动电话:" prop="mobilePhone">
+                <el-form-item label="手机号码:" prop="mobilePhone">
                     <el-input v-model="baseInfo.mobilePhone" placeholder="请输入移动电话"></el-input>
-                </el-form-item>
-                <el-form-item label="办公电话:" prop="officeTelephone">
-                    <el-input  v-model="baseInfo.officeTelephone" placeholder="请输入办公电话"></el-input>
                 </el-form-item>
                 <el-form-item label="电子邮箱:" prop="email">
                     <el-input  v-model="baseInfo.email" placeholder="请输入电子邮箱"></el-input>
                 </el-form-item>
-                <el-form-item label="传真:" prop="fax">
-                    <el-input  v-model="baseInfo.fax" placeholder="请输入传真"></el-input>
+                <el-form-item label="其他:" prop="fax">
+                    <el-input  v-model="baseInfo.fax" placeholder="请输入其他联系方式"></el-input>
                 </el-form-item>
-                <el-form-item label="用户状态:" prop="employeeStatusCode">
-                    <el-select v-model="baseInfo.employeeStatusCode" placeholder="请选择用户状态" @change="baseInfo.employeeStatus = GET_DICTIONARY_TEXT(employeeStatusList,baseInfo.employeeStatusCode)">
+                <el-form-item label="员工状态:" prop="employeeStatusCode">
+                    <el-select v-model="baseInfo.employeeStatusCode" placeholder="请选择员工状态" @change="baseInfo.employeeStatus = GET_DICTIONARY_TEXT(employeeStatusList,baseInfo.employeeStatusCode)">
                         <el-option v-for="item in employeeStatusList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="用户类型:" prop="employeeTypeCode">
-                    <el-select v-model="baseInfo.employeeTypeCode" placeholder="请选择用户类型" @change="baseInfo.employeeType = GET_DICTIONARY_TEXT(employeeTypeList,baseInfo.employeeTypeCode)">
+                <el-form-item label="员工类型:" prop="employeeTypeCode">
+                    <el-select v-model="baseInfo.employeeTypeCode" placeholder="请选择员工类型" @change="baseInfo.employeeType = GET_DICTIONARY_TEXT(employeeTypeList,baseInfo.employeeTypeCode)">
                         <el-option v-for="item in employeeTypeList" :label="item.label" :value="item.value" :key='item.value'></el-option>
                     </el-select>
                 </el-form-item>
@@ -161,8 +158,22 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     disabled = false
     isShow = true
     formRules = {
-        userCode: [{ required: true, message: '请输入编号', trigger: 'change' }],
-        userName: [{ required: true, message: '请输入姓名', trigger: 'change' }],
+        userCode: [{ required: true, message: '请输入用户编号', trigger: 'change' }],
+        userName: [{ required: true, message: '请输入用户名称', trigger: 'change' }],
+        mobilePhone:[
+            {
+                pattern: /^[1]([3-9])[0-9]{9}$/,
+                message: "请输入正确的手机号码",
+                trigger: "change"
+            }
+        ],
+        email:[
+            {
+                pattern:/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
+                message:'请输入正确的邮箱',
+                trigger:'change'
+            }
+        ],
         departmentCode: [{ required: true, message: '请选择部门', trigger: 'change' }],
         postCode: [{ required: true, message: '请选择职务', trigger: 'change' }]
     }
@@ -172,18 +183,23 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
             userCode: '',
             userName: '',
             englishUserName: '',
-            gender: '',
+            genderCode: '',
+            gender:'',
             birthDate: '',
             height: '',
-            education: '',
-            maritalStatus: '0',
-            bloodType: '',
+            education:'',
+            educationCode: '',
+            maritalStatus: '',
+            bloodType:'',
+            bloodTypeCode: '',
             mobilePhone: '',
             officeTelephone: '',
             email: '',
             fax: '',
-            employeeStatus: '',
-            employeeType: '',
+            employeeStatus:'',
+            employeeStatusCode: '',
+            employeeType:'',
+            employeeTypeCode: '',
             participationDate: '',
             entryDate: '',
             confirmationDate: '',
