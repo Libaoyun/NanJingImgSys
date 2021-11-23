@@ -95,7 +95,7 @@ export default class extends Vue {
             this.$store.commit('SET_ACTIVE_TAB', this.multiTabList[this.multiTabList.length-1].route);
             this.$router.push({path: this.activeTab});
         }else{
-            this.$router.push({path: '/overview'});
+            this.$router.push({path: '/weclome'});
         }
     }
 
@@ -109,7 +109,7 @@ export default class extends Vue {
 
     closeAll(item){
         this.$store.commit('CLEAR_TAB_LIST');
-        this.$router.push({path: '/overview'});
+        this.$router.push({path: '/weclome'});
     }
 
     closeAllOutSelf(item){

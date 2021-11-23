@@ -13,6 +13,15 @@ export function apiUserLogin(data) {
     })
 }
 
+// 用户退出
+export function apiLogout(data) {
+  return fetch({
+    url: '/rdexpense/login/logout',
+    method: 'post',
+    data
+  })
+}
+
 // 获取用户信息
 export function apiGetUserInfo(data) {
   return fetch({

@@ -7,10 +7,6 @@
         @close="closeDialog"
         append-to-body
         width="1000px">
-        <!-- 这里的插槽会替换title显示的内容 -->
-        <div slot="title">
-            <span>功能菜单授权</span>
-        </div>
         <div class="content">
             <el-table
                 :data="tableData"
@@ -18,6 +14,7 @@
                 row-key="id"
                 class="global-table-default"
                 border
+                v-loading="loadingTree"
                 default-expand-all
                 :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
                 <el-table-column prop="title" label="授权菜单" width="300">
@@ -28,10 +25,10 @@
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[0]) && scope.row.parentCode"
                             v-model="scope.row.selected[menuButtons[0]]"
-                            @change="changeChild($event,scope.row,menuButtons[0])"
+                            @change="changeChild(scope.row,menuButtons[0])"
                         ></el-checkbox>
                         <el-checkbox 
-                            v-if="scope.row.comButton.includes(menuButtons[0]) && !scope.row.parentCode"
+                            v-if="!scope.row.parentCode"
                             :indeterminate="scope.row.isIndeterminate[menuButtons[0]]"
                             v-model="scope.row.selected[menuButtons[0]]"
                             @change="changeParent($event,scope.row,menuButtons[0])"
@@ -43,10 +40,10 @@
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[1]) && scope.row.parentCode"
                             v-model="scope.row.selected[menuButtons[1]]"
-                            @change="changeChild($event,scope.row,menuButtons[1])"
+                            @change="changeChild(scope.row,menuButtons[1])"
                         ></el-checkbox>
                         <el-checkbox 
-                            v-if="scope.row.comButton.includes(menuButtons[1]) && !scope.row.parentCode"
+                            v-if="!scope.row.parentCode"
                             :indeterminate="scope.row.isIndeterminate[menuButtons[1]]"
                             v-model="scope.row.selected[menuButtons[1]]"
                             @change="changeParent($event,scope.row,menuButtons[1])"
@@ -58,13 +55,13 @@
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[2]) && scope.row.parentCode"
                             v-model="scope.row.selected[menuButtons[2]]"
-                            @change="changeChild($event,scope.row,menuButtons[2])"
+                            @change="changeChild(scope.row,menuButtons[2])"
                         ></el-checkbox>
                         <el-checkbox 
-                            v-if="scope.row.comButton.includes(menuButtons[2]) && !scope.row.parentCode"
+                            v-if="!scope.row.parentCode"
                             :indeterminate="scope.row.isIndeterminate[menuButtons[2]]"
                             v-model="scope.row.selected[menuButtons[2]]"
-                            @change="changeParent($event,scope.row,menuButtons[2])"
+                            @change="changeParent(scope.row,menuButtons[2])"
                         ></el-checkbox>
                     </template>
                 </el-table-column>
@@ -73,10 +70,10 @@
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[3]) && scope.row.parentCode"
                             v-model="scope.row.selected[menuButtons[3]]"
-                            @change="changeChild($event,scope.row,menuButtons[3])"
+                            @change="changeChild(scope.row,menuButtons[3])"
                         ></el-checkbox>
                         <el-checkbox 
-                            v-if="scope.row.comButton.includes(menuButtons[3]) && !scope.row.parentCode"
+                            v-if="!scope.row.parentCode"
                             :indeterminate="scope.row.isIndeterminate[menuButtons[3]]"
                             v-model="scope.row.selected[menuButtons[3]]"
                             @change="changeParent($event,scope.row,menuButtons[3])"
@@ -87,7 +84,7 @@
         </div>
         <span slot="footer" class="dialog-footer">
             <el-button size="mini" @click="closeDialog">取消</el-button>
-            <el-button size="mini" type="primary" @click="submit" :loading="loadingBtn == 1">确定</el-button>
+            <el-button size="mini" type="primary" @click="submit" :loading="loadingBtn == 1">授权</el-button>
         </span> 
     </el-dialog>
 </template>
@@ -106,6 +103,7 @@ export default class extends tableMixin {
     @Prop() editParams
 
     loadingBtn = 0;
+    loadingTree = false
     tableData = []
     menuButtons = ['a10001','a10002','a10003','a10004']
     menuButtonParams = []
@@ -118,9 +116,12 @@ export default class extends tableMixin {
         let data = {
             menuCode:this.MENU_CODE_LIST.routerMenuList
         }
+        this.loadingTree = true
         this.$API.apiGetRouterMenuTree(data).then(res=>{
             this.tableData = this.filterTree(res.data)
             this.getAuthUserMenu()
+        }).catch(()=>{
+            this.loadingTree = false
         })
     }
     getAuthUserMenu() {
@@ -129,24 +130,33 @@ export default class extends tableMixin {
             userId:this.editParams.userId
         }
         this.$API.apiGetAuthUserMenu(data).then(res=>{
+            this.loadingTree = false
             res.data.forEach(item=>{
                 var obj = this.findOne(this.tableData,item.menuCode)
-                obj.comButton.split(',').forEach((o,index)=>{
+                obj?.comButton.split(',').forEach((o,index)=>{
                     if(o && item.authorityButtonCode.includes(o)) {
                         obj.selected[o] = true
                     }
                 })
             })
+            // 勾选父级
+            this.tableData.forEach(item=>{
+                this.changeChild({parentCode:item.menuCode},this.menuButtons[0])
+                this.changeChild({parentCode:item.menuCode},this.menuButtons[1])
+                this.changeChild({parentCode:item.menuCode},this.menuButtons[2])
+                this.changeChild({parentCode:item.menuCode},this.menuButtons[3])
+            })
+        }).catch(()=>{
+            this.loadingTree = false
         })
     }
     findOne(objects, menuCode) {
         const queue = [...objects]
         while (queue.length) {
             const o = queue.shift()
-            if (o.menuCode== menuCode) return o
+            if (o.menuCode == menuCode) return o
             queue.push(...(o.children || []))
         }
-        return queue
     }
     filterTree(arr) {
         const newArr = arr.filter(item => item.hidden === '0')
@@ -178,7 +188,7 @@ export default class extends tableMixin {
             })
         }
     }
-    changeChild(e,row,menuCode) {
+    changeChild(row,menuCode) {
         let parentData = this.tableData.filter(item=>item.menuCode == row.parentCode)[0]
         
         let curFilter = parentData.children.filter(item=>item.comButton&&item.comButton.includes(menuCode))
@@ -220,6 +230,12 @@ export default class extends tableMixin {
         var data = JSON.parse(JSON.stringify(this.tableData))
         this.menuButtonParams = []
         this.getParams(data)
+        if(this.menuButtonParams.length<=0) {
+            this.$message({
+                message:'请先选择授权菜单'
+            })
+            return
+        }
         const params = {
             menuCode:this.MENU_CODE_LIST.authorizationList,
             creatorOrgId : this.$store.getters.currentOrganization.organizationId,

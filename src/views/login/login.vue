@@ -58,8 +58,9 @@ export default class extends Vue {
             this.$store.dispatch('Login', this.loginInfo).then((res) => {
                 this.loadingBtn = 0
                 if(res.data.firstLogin){
-                    this.$router.push({ path: '/' })
+                    this.$router.push({ path: '/updatePassword' })
                 }else{
+                    console.log(11111111)
                     this.$router.push({ path: '/' })
                 }
             }).catch(()=>{

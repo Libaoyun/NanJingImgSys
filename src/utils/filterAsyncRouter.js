@@ -18,7 +18,7 @@ export function filterAsyncRouter(asyncRouterMap) { //遍历后台传来的路�
       }
       return true
     })
-    // console.log('accessedRouters',accessedRouters)
+    console.log('accessedRouters',accessedRouters)
     return accessedRouters
   }
 

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import { Message } from 'element-ui'
 import { ACCESS_TOKEN } from '@/utils/storage'
 import { resetRouter } from '@/router/index'
-import { apiUserLogin, apiGetUserInfo } from '@/api/modules/app'
+import { apiUserLogin, apiGetUserInfo, apiLogout } from '@/api/modules/app'
 
 const user = {
     state: {
@@ -47,18 +47,15 @@ const user = {
         },
         Logout ({ commit }) {
             return new Promise((resolve, reject) => {
-            //     logout().then(res => {
-            //         Vue.ls.remove(ACCESS_TOKEN)
-            //         Vue.ls.clear()
-            //         resolve()
-            //   }).catch(error => {
-            //     reject(error)
-            //   })
-                Vue.ls.remove(ACCESS_TOKEN)
-                Vue.ls.clear()
-                commit('CLEAR_TAB_LIST')
-                resetRouter()
-                resolve()
+                apiLogout().then(res => {
+                    Vue.ls.remove(ACCESS_TOKEN)
+                    Vue.ls.clear()
+                    commit('CLEAR_TAB_LIST')
+                    resetRouter()
+                    resolve()
+              }).catch(error => {
+                reject(error)
+              })
             })
         }
     }

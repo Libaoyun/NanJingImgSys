@@ -5,7 +5,7 @@ export const apiRouteList = [
             redirect: '/overview',
             icon: 'icon-shouye1',
             noDropdown: true,
-            meta:{role: ['admin','projectAdmin']},
+            meta:{},
             children: [{ path: 'overview', component: 'overview/overview', name: 'overview',meta:{title: '首页'}}]
         },
         {
@@ -14,6 +14,7 @@ export const apiRouteList = [
             name: 'systemSetting',
             meta:{title: '系统管理'},
             icon: 'icon-xitong',
+            redirect: '/systemSetting/organizationList',
             children: [
                 { path: 'organizationList', component: 'systemSetting/organization/organizationList', name: 'organizationList',meta:{title: '组织管理',btnPermissions:[] }},
                 { path: 'projectList', component: 'systemSetting/project/projectList', name: 'projectList',meta:{title: '项目管理',btnPermissions:[{menuButtonCode:'create'},{menuButtonCode:'edit'},{menuButtonCode:'delete'}] }},
