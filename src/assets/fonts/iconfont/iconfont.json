@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "18170999",
+      "name": "地图连线,连线,连接",
+      "font_class": "map-connect",
+      "unicode": "ea02",
+      "unicode_decimal": 59906
+    },
+    {
+      "icon_id": "2439690",
+      "name": "人员",
+      "font_class": "fl-renyuan",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "980890",
+      "name": "结束",
+      "font_class": "weibiaoti517",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "18289155",
+      "name": "开始1",
+      "font_class": "kaishi1",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
       "icon_id": "8871307",
       "name": "系统",
       "font_class": "xitong",
