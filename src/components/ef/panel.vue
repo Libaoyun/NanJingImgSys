@@ -285,17 +285,17 @@
                         this.activeElement.sourceId = conn.sourceId
                         this.activeElement.targetId = conn.targetId
                     })
-                    this.jsPlumb.bind('dblclick', (conn, originalEvent) => {
-                        this.editDialog = true
-                        this.activeElement.type = 'line'
-                        this.activeElement.sourceId = conn.sourceId
-                        this.activeElement.targetId = conn.targetId
-                        this.$refs.nodeForm.lineInit({
-                            from: conn.sourceId,
-                            to: conn.targetId,
-                            label: conn.getLabel()
-                        })
-                    })
+                    // this.jsPlumb.bind('dblclick', (conn, originalEvent) => {
+                    //     this.editDialog = true
+                    //     this.activeElement.type = 'line'
+                    //     this.activeElement.sourceId = conn.sourceId
+                    //     this.activeElement.targetId = conn.targetId
+                    //     this.$refs.nodeForm.lineInit({
+                    //         from: conn.sourceId,
+                    //         to: conn.targetId,
+                    //         label: conn.getLabel()
+                    //     })
+                    // })
                     // 连线
                     this.jsPlumb.bind("connection", (evt) => {
                         let from = evt.source.id
