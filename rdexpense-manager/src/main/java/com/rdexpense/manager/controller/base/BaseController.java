@@ -451,7 +451,7 @@ public class BaseController extends BaseUtil {
                 }else {
                     value = valueObj.toString();
                 }
-                System.out.println(value+"------------//////////////----------------");
+
             } else if (!valueObj.equals("") && valueObj != null) {
                 value = valueObj.toString();
             }

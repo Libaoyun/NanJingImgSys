@@ -21,7 +21,7 @@ public class SequenceUtil {
      * 流水号key全局唯一
      */
     private static final String SEQUENCE_NO_KEY = "serial:no:auto";
-    private static final String PREFIX = "JDSB";
+    private static final String PREFIX = "YFHT";
 
     private static RedisTemplate redisTemplate;
 
