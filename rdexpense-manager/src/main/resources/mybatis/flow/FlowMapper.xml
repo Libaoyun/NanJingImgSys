@@ -186,7 +186,9 @@
            create_time,
            approve_time,
            status,
-           handle_strategy
+           handle_strategy,
+           back_flag
+
            )
         VALUES (  #{processInstId},
                   #{approveNodeId},
@@ -202,7 +204,8 @@
                   getDate(),
                   #{approveTime},
                   #{status},
-                  #{handleStrategy}
+                  #{handleStrategy},
+                  #{backFlag}
 
                   )
     </insert>
@@ -225,7 +228,8 @@
             next_approve_node_name as nextApproveNodeName,
             create_time as createTime,
             approve_time as approveTime,
-               handle_strategy as handleStrategy
+               handle_strategy as handleStrategy,
+               back_flag as backFlag
         from bpm_approval_not_done d
         left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 1
@@ -248,7 +252,8 @@
             next_approve_node_name as nextApproveNodeName,
             create_time as createTime,
             approve_time as approveTime,
-            handle_strategy as handleStrategy
+            handle_strategy as handleStrategy,
+            back_flag as backFlag
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 0 and u.status = 0
@@ -288,7 +293,8 @@
             next_approve_node_name as nextApproveNodeName,
             create_time as createTime,
             approve_time as approveTime,
-            handle_strategy as handleStrategy
+            handle_strategy as handleStrategy,
+            back_flag as backFlag
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where d.id = #{waitId} and u.user_id = #{createUserId}
