@@ -224,7 +224,8 @@
             next_approve_node_id as nextApproveNodeId,
             next_approve_node_name as nextApproveNodeName,
             create_time as createTime,
-            approve_time as approveTime
+            approve_time as approveTime,
+               handle_strategy as handleStrategy
         from bpm_approval_not_done d
         left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 1
@@ -246,7 +247,8 @@
             next_approve_node_id as nextApproveNodeId,
             next_approve_node_name as nextApproveNodeName,
             create_time as createTime,
-            approve_time as approveTime
+            approve_time as approveTime,
+            handle_strategy as handleStrategy
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 0 and u.status = 0
@@ -285,7 +287,8 @@
             next_approve_node_id as nextApproveNodeId,
             next_approve_node_name as nextApproveNodeName,
             create_time as createTime,
-            approve_time as approveTime
+            approve_time as approveTime,
+            handle_strategy as handleStrategy
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where d.id = #{waitId} and u.user_id = #{createUserId}
@@ -324,7 +327,7 @@
 
 
     <update id="updateApproveStatus" parameterType="pd">
-        update bpm_approval_schedule
+        update bpm_approval_not_done
         set approve_time = getDate(),
             status = 1
         where id = #{id,jdbcType=BIGINT}

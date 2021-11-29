@@ -240,7 +240,7 @@ public class FlowController extends BaseController {
             flowService.approveFlow(pd);
             return ResponseEntity.success("成功");
         } catch (Exception e) {
-            throw new MyException("启动流程失败:"+e.getMessage());
+            throw new MyException("审批流程失败:"+e.getMessage());
         }
     }
 
@@ -252,7 +252,7 @@ public class FlowController extends BaseController {
             flowService.backPreviousNode(pd);
             return ResponseEntity.success("成功");
         } catch (Exception e) {
-            throw new MyException("启动流程失败:"+e.getMessage());
+            throw new MyException("退回上一个节点失败:"+e.getMessage());
         }
     }
 
@@ -264,7 +264,7 @@ public class FlowController extends BaseController {
             flowService.backOriginalNode(pd);
             return ResponseEntity.success("成功");
         } catch (Exception e) {
-            throw new MyException("启动流程失败:"+e.getMessage());
+            throw new MyException("退回发起人失败:"+e.getMessage());
         }
     }
 }

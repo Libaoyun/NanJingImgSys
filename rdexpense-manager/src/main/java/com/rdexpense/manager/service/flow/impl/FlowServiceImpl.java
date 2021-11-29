@@ -269,7 +269,6 @@ public class FlowServiceImpl implements FlowService {
                     if(nextApproveNode.getString("type").equals("end")){
                         throw new MyException("审批流配置错误，没有审批中间节点");
                     }
-
                 }else {
                     throw new MyException("未配置下一个审批节点");
 
@@ -356,6 +355,7 @@ public class FlowServiceImpl implements FlowService {
 
         }
         pd.put("processInstId",waitData.getString("processInstId"));
+        pd.put("serialNumber",waitData.getString("serialNumber"));
         //2、查询流程活动表获取当前单据正在使用的流程
         PageData flowData = (PageData) baseDao.findForObject("FlowMapper.queryByProcessInstId", waitData);
         if (flowData == null) {
@@ -422,13 +422,6 @@ public class FlowServiceImpl implements FlowService {
         currentApproveNode.put("id",currentApproveNodeId);
         currentApproveNode.put("name",waitData.getString("nextApproveNodeName"));
 
-        //查询上个同一个单据流程履历表的最近一次的结束时间
-        PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",waitData);
-        if(scheduleData == null){
-            pd.put("approveStartTime",format.format(new Date()));
-        }else {
-            pd.put("approveStartTime",scheduleData.getString("approveEndTime"));
-        }
 
         insertApproveSchedule(pd,currentApproveNode,nextApproveNode,nextUser,
                 ConstantValUtil.APPROVAL_RESULT_NAME[1],ConstantValUtil.APPROVAL_RESULT[1],ConstantValUtil.APPROVAL_RESULT_NAME[1]);
@@ -437,7 +430,7 @@ public class FlowServiceImpl implements FlowService {
         String handleStrategy = waitData.getString("handleStrategy");
         waitData.put("createUserId",pd.getString("createUserId"));
         Boolean bool = false;//是否该节点已经审批完成 false表示没有审完 true表示已审完
-        if(handleStrategy.equals(1)){
+        if(handleStrategy.equals("1")){
             //修改待办表的数据为 已办
             baseDao.update("FlowMapper.updateApproveStatus",waitData);
 
@@ -449,7 +442,12 @@ public class FlowServiceImpl implements FlowService {
             for (PageData nodeData : nodeList) {
                 //把下一个节点改成待审批
                 if (nodeData.getString("id").equals(nextApproveNode.getString("id"))) {
-                    nodeData.put("handleStatus",2);
+                    if(nodeData.getString("type").equals("end")){
+                        nodeData.put("handleStatus",1);
+                    }else {
+                        nodeData.put("handleStatus",2);
+                    }
+
                 }
 
             }
@@ -469,7 +467,11 @@ public class FlowServiceImpl implements FlowService {
                 for (PageData nodeData : nodeList) {
                     //把下一个节点改成待审批
                     if (nodeData.getString("id").equals(nextApproveNode.getString("id"))) {
-                        nodeData.put("handleStatus",2);
+                        if(nodeData.getString("type").equals("end")){
+                            nodeData.put("handleStatus",1);
+                        }else {
+                            nodeData.put("handleStatus",2);
+                        }
                     }
 
                 }
@@ -518,6 +520,7 @@ public class FlowServiceImpl implements FlowService {
 
         }
         pd.put("processInstId",waitData.getString("processInstId"));
+        pd.put("serialNumber",waitData.getString("serialNumber"));
         //2、查询流程活动表获取当前单据正在使用的流程
         PageData flowData = (PageData) baseDao.findForObject("FlowMapper.queryByProcessInstId", waitData);
         if (flowData == null) {
@@ -554,14 +557,6 @@ public class FlowServiceImpl implements FlowService {
             currentApproveNode.put("id",currentApproveNodeId);
             currentApproveNode.put("name",waitData.getString("nextApproveNodeName"));
 
-            //查询上个同一个单据流程履历表的最近一次的结束时间
-            PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",waitData);
-            if(scheduleData == null){
-                pd.put("approveStartTime",format.format(new Date()));
-            }else {
-                pd.put("approveStartTime",scheduleData.getString("approveEndTime"));
-            }
-
             insertApproveSchedule(pd,currentApproveNode,new PageData(),new PageData(),
                     ConstantValUtil.APPROVAL_RESULT_NAME[3],ConstantValUtil.APPROVAL_RESULT[3],ConstantValUtil.APPROVAL_RESULT_NAME[3]);
 
@@ -579,10 +574,28 @@ public class FlowServiceImpl implements FlowService {
             List<PageData> approvalUserList = new ArrayList<>();
             PageData data = new PageData();
             data.put("userCode",flowData.getString("createUserId"));
+            data.put("userName",flowData.getString("createUser"));
             approvalUserList.add(data);
 
+            //封装当前节点的审批人
+            PageData currentUser = transforNextUser(approvalUserList);
+
             currentApproveNode.put("backFlag",1);
-            insertApproveDone(pd,currentApproveNode,new PageData(),new PageData(),approvalUserList);
+
+
+            PageData startData = null;
+            for (PageData nodeData : nodeList) {
+                //type是start表示是开始节点，找到节点后，找下一个节点
+                String type1 = nodeData.getString("type");
+                if (type1.equals("start")) {
+                    startData = nodeData;
+                    break;
+                }
+
+            }
+
+
+            insertApproveDone(pd,currentApproveNode,startData,currentUser,approvalUserList);
 
             //8、删除审批流程实例表
             baseDao.delete("FlowMapper.deleteActivityData",waitData);
@@ -614,19 +627,8 @@ public class FlowServiceImpl implements FlowService {
             baseDao.update("FlowMapper.updateActivityData",activityData);
 
             //5\插入审批履历表
-//            PageData currentApproveNode = new PageData();
-//            currentApproveNode.put("id",currentApproveNodeId);
-//            currentApproveNode.put("name",waitData.getString("nextApproveNodeName"));
 
-            //查询上个同一个单据流程履历表的最近一次的结束时间
-            PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",waitData);
-            if(scheduleData == null){
-                pd.put("approveStartTime",format.format(new Date()));
-            }else {
-                pd.put("approveStartTime",scheduleData.getString("approveEndTime"));
-            }
-
-            insertApproveSchedule(pd,previousApproveNode,currentApproveNode,currentUser,
+            insertApproveSchedule(pd,currentApproveNode,previousApproveNode,currentUser,
                     ConstantValUtil.APPROVAL_RESULT_NAME[2],ConstantValUtil.APPROVAL_RESULT[2],ConstantValUtil.APPROVAL_RESULT_NAME[2]);
 
             //6、先修改待办信息
@@ -639,7 +641,7 @@ public class FlowServiceImpl implements FlowService {
             baseDao.update("FlowMapper.updateApproveUserStatus", waitData);
 
             //7、插入新的待办信息
-            insertApproveDone(pd,previousApproveNode,currentApproveNode,currentUser,approvalUserList);
+            insertApproveDone(pd,currentApproveNode,previousApproveNode,currentUser,approvalUserList);
 
         }
 
@@ -667,55 +669,21 @@ public class FlowServiceImpl implements FlowService {
 
         }
         pd.put("processInstId",waitData.getString("processInstId"));
+        pd.put("serialNumber",waitData.getString("serialNumber"));
         //2、查询流程活动表获取当前单据正在使用的流程
         PageData flowData = (PageData) baseDao.findForObject("FlowMapper.queryByProcessInstId", waitData);
         if (flowData == null) {
             throw new MyException("当前单据使用的流程记录不存在");
         }
 
-//        String flowContent = flowData.getString("flowContent");
-//        if (flowContent == null) {
-//            throw new MyException("当前单据使用的流程内容不存在");
-//        }
-
-//        JSONObject jSONObject = JSONObject.parseObject(flowContent);
-
-//        List<PageData> nodeList = JSONObject.parseArray(jSONObject.getString("nodeList"), PageData.class);
-
-        //修改
 
         String currentApproveNodeId = waitData.getString("nextApproveNodeId");
-        //3、修改当前节点的状态为已审批
-//        for (PageData nodeData : nodeList) {
-//            if (nodeData.getString("id").equals(currentApproveNodeId)) {
-//                nodeData.put("handleStatus",1);
-//                break;
-//            }
-//
-//        }
-
-        //4、修改活动表中的流程状态
-//        PageData activityData = new PageData();
-//        jSONObject.put("nodeList",JSONArray.parseArray(JSON.toJSONString(nodeList)));
-//        activityData.put("flowContent",jSONObject.toString());
-//        activityData.put("id",flowData.getString("id"));
-//        activityData.put("status", 3);
-//        activityData.put("endTime", format.format(new Date()));
-//
-//        baseDao.update("FlowMapper.updateActivityData",activityData);
 
         //5、插入审批履历表
         PageData currentApproveNode = new PageData();
         currentApproveNode.put("id",currentApproveNodeId);
         currentApproveNode.put("name",waitData.getString("nextApproveNodeName"));
 
-        //查询上个同一个单据流程履历表的最近一次的结束时间
-        PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",waitData);
-        if(scheduleData == null){
-            pd.put("approveStartTime",format.format(new Date()));
-        }else {
-            pd.put("approveStartTime",scheduleData.getString("approveEndTime"));
-        }
 
         insertApproveSchedule(pd,currentApproveNode,new PageData(),new PageData(),
                 ConstantValUtil.APPROVAL_RESULT_NAME[3],ConstantValUtil.APPROVAL_RESULT[3],ConstantValUtil.APPROVAL_RESULT_NAME[3]);
@@ -734,10 +702,36 @@ public class FlowServiceImpl implements FlowService {
         List<PageData> approvalUserList = new ArrayList<>();
         PageData data = new PageData();
         data.put("userCode",flowData.getString("createUserId"));
+        data.put("userName",flowData.getString("createUser"));
         approvalUserList.add(data);
 
+        //封装当前节点的审批人
+        PageData currentUser = transforNextUser(approvalUserList);
+
         currentApproveNode.put("backFlag",1);
-        insertApproveDone(pd,currentApproveNode,new PageData(),new PageData(),approvalUserList);
+
+        //3、找到开始节点
+        String flowContent = flowData.getString("flowContent");
+        if (flowContent == null) {
+            throw new MyException("当前单据使用的流程内容不存在");
+        }
+
+        JSONObject jSONObject = JSONObject.parseObject(flowContent);
+
+        List<PageData> nodeList = JSONObject.parseArray(jSONObject.getString("nodeList"), PageData.class);
+        PageData startData = null;
+        for (PageData nodeData : nodeList) {
+            //type是start表示是开始节点，找到节点后，找下一个节点
+            String type = nodeData.getString("type");
+            if (type.equals("start")) {
+                startData = nodeData;
+                break;
+            }
+
+        }
+
+
+        insertApproveDone(pd,currentApproveNode,startData,currentUser,approvalUserList);
 
         //8、删除审批流程实例表
         baseDao.delete("FlowMapper.deleteActivityData",waitData);
@@ -804,6 +798,15 @@ public class FlowServiceImpl implements FlowService {
      */
     private void insertApproveSchedule(PageData pd,PageData currentApproveNode,PageData nextApproveNode,PageData nextUser,
                                        String approveComment,String approveResultId,String approveResultName){
+
+
+        //查询上个同一个单据流程履历表的最近一次的结束时间
+        String approveStartTime = format.format(new Date());
+        PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",pd);
+        if(scheduleData != null){
+            approveStartTime = scheduleData.getString("approveEndTime");
+        }
+
         PageData nextApprove = new PageData();
         nextApprove.put("processInstId",pd.getString("processInstId"));//审批实例ID
         nextApprove.put("approveComment",approveComment);
@@ -823,7 +826,7 @@ public class FlowServiceImpl implements FlowService {
         nextApprove.put("nextApproveNodeId",nextApproveNode.getString("id"));
         nextApprove.put("nextApproveNodeName",nextApproveNode.getString("name"));
         nextApprove.put("fileId",pd.getString("fileId"));
-        nextApprove.put("approveStartTime",pd.getString("approveStartTime"));
+        nextApprove.put("approveStartTime",approveStartTime);
 
         baseDao.insert("FlowMapper.insertApprovalSchedule", nextApprove);
     }
@@ -853,9 +856,6 @@ public class FlowServiceImpl implements FlowService {
                 String type = nodeData.getString("type");
                 String status = nodeData.getString("status");
                 if (nodeData.getString("id").equals(nextNode)) {
-                    if (type.equals("end")) {
-                        throw new MyException("流程配置异常，没有审批中间节点，或者未启用");
-                    }
                     //当该节点是禁用的，则继续往下寻找
                     if(status.equals("0")){
                         getNextApproveNode(lineList,nodeList,nextNode);
