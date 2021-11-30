@@ -258,19 +258,21 @@ public class FlowServiceImpl implements FlowService {
 
                 //4、获取下一个节点
                 PageData nextApproveNode = null;
+                List<PageData> nextApproveNodeList = new ArrayList<>();
                 if (startData != null) {
-                    nextApproveNode = getNextApproveNode(lineList,nodeList,startData.getString("id"));
+                    getNextApproveNode(lineList,nodeList,startData.getString("id"),nextApproveNodeList);
                 }else {
                     throw new MyException("审批流配置错误，没有开始节点");
                 }
 
 
-                if(nextApproveNode != null){
+                if(!CollectionUtils.isEmpty(nextApproveNodeList)){
+                    nextApproveNode = nextApproveNodeList.get(0);
                     if(nextApproveNode.getString("type").equals("end")){
                         throw new MyException("审批流配置错误，没有审批中间节点");
                     }
                 }else {
-                    throw new MyException("未配置下一个审批节点");
+                    throw new MyException("未配置下一个审批节点，或者未启用");
 
                 }
 
@@ -317,6 +319,12 @@ public class FlowServiceImpl implements FlowService {
 
                 }
 
+                pd.put("approveUserId",pd.getString("createUserId"));
+                pd.put("approveUserName",pd.getString("createUser"));
+                pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[1]);
+                pd.put("nextApproveUserId",nextUser.getString("userCode"));
+                pd.put("nextApproveUserName",nextUser.getString("userName"));
+
 
                 //5、插入待办信息
                 if(processInstId != null){
@@ -330,6 +338,8 @@ public class FlowServiceImpl implements FlowService {
             throw new MyException("未配置审批流");
         }
 
+
+
         return pd;
     }
 
@@ -341,7 +351,7 @@ public class FlowServiceImpl implements FlowService {
      */
     @Override
     @Transactional
-    public int approveFlow(PageData pd) {
+    public PageData approveFlow(PageData pd) {
         int result = 1;
         //校验参数
         CheckParameter.stringLengthAndEmpty(pd.getString("menuCode"), "菜单编码", 128);
@@ -375,8 +385,14 @@ public class FlowServiceImpl implements FlowService {
 
         String currentApproveNodeId = waitData.getString("nextApproveNodeId");
         //3、获取下一个节点
-        PageData nextApproveNode = getNextApproveNode(lineList, nodeList, currentApproveNodeId);
-
+        List<PageData> nextApproveNodeList = new ArrayList<>();
+        PageData nextApproveNode = null;
+                getNextApproveNode(lineList, nodeList, currentApproveNodeId,nextApproveNodeList);
+        if(!CollectionUtils.isEmpty(nextApproveNodeList)){
+            throw new MyException("下一个审批节点不存在，或者未启用");
+        }else {
+            nextApproveNode = nextApproveNodeList.get(0);
+        }
 
         PageData activityData = new PageData();
 
@@ -397,6 +413,8 @@ public class FlowServiceImpl implements FlowService {
             activityData.put("status", 3);
             activityData.put("endTime", format.format(new Date()));
 
+            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[4]);
+
         }else {
             //当还有下一个审批节点时，继续查找下一个审批人
             approvalUserList = getApprovalUserList(nextApproveNode);
@@ -410,6 +428,8 @@ public class FlowServiceImpl implements FlowService {
 
             activityData.put("status", 2);
             activityData.put("endTime", null);
+
+            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[1]);
         }
 
         //封装下一个审批人
@@ -452,6 +472,8 @@ public class FlowServiceImpl implements FlowService {
 
             }
 
+
+
         }else {
             //查询该待办的人员是否都审批完成
             List<PageData> approvedList = (List<PageData>) baseDao.findForList("FlowMapper.queryNotApproveUser",waitData);
@@ -476,6 +498,8 @@ public class FlowServiceImpl implements FlowService {
 
                 }
 
+
+
             }else {//表示该节点还有其他人需要审批，则只需要该自己的状态即可
                 //修改待办人员表中自己的状态
                 baseDao.update("FlowMapper.updateApproveUserStatus",waitData);
@@ -498,7 +522,13 @@ public class FlowServiceImpl implements FlowService {
         }
 
 
-        return result;
+        pd.put("approveUserId",pd.getString("createUserId"));
+        pd.put("approveUserName",pd.getString("createUser"));
+        pd.put("nextApproveUserId",nextUser.getString("userCode"));
+        pd.put("nextApproveUserName",nextUser.getString("userName"));
+
+
+        return pd;
     }
 
 
@@ -507,7 +537,7 @@ public class FlowServiceImpl implements FlowService {
      * @param pd
      */
     @Override
-    public void backPreviousNode(PageData pd) {
+    public PageData backPreviousNode(PageData pd) {
         //校验参数
         CheckParameter.stringLengthAndEmpty(pd.getString("menuCode"), "菜单编码", 128);
         CheckParameter.stringLengthAndEmpty(pd.getString("waitId"), "待办表主键ID", 128);
@@ -544,7 +574,14 @@ public class FlowServiceImpl implements FlowService {
 
 
         //5、找上一个节点
-        PageData previousApproveNode = getPreviousApproveNode(lineList, nodeList, currentApproveNodeId);
+        List<PageData> previousApproveNodeList = new ArrayList<>();
+        PageData previousApproveNode = null;
+                getPreviousApproveNode(lineList, nodeList, currentApproveNodeId,previousApproveNodeList);
+        if(!CollectionUtils.isEmpty(previousApproveNodeList)){
+            previousApproveNode = previousApproveNodeList.get(0);
+        }else {
+            throw new MyException("上一个审批节点不存在，或者未启用");
+        }
 
         PageData activityData = new PageData();
         //判断上一个节点是否是开始节点 ，如果是开始节点则相当于打回，该流程结束，发起人需编辑后重新提交
@@ -600,6 +637,10 @@ public class FlowServiceImpl implements FlowService {
             //8、删除审批流程实例表
             baseDao.delete("FlowMapper.deleteActivityData",waitData);
 
+            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
+            pd.put("nextApproveUserId",currentUser.getString("userCode"));
+            pd.put("nextApproveUserName",currentUser.getString("userName"));
+
         }else {
             //找到当前节点
             PageData currentApproveNode = getCurrentApproveNode( nodeList, currentApproveNodeId);
@@ -643,10 +684,17 @@ public class FlowServiceImpl implements FlowService {
             //7、插入新的待办信息
             insertApproveDone(pd,currentApproveNode,previousApproveNode,currentUser,approvalUserList);
 
+            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[1]);
+            pd.put("nextApproveUserId",currentUser.getString("userCode"));
+            pd.put("nextApproveUserName",currentUser.getString("userName"));
+
         }
 
+        pd.put("approveUserId",pd.getString("createUserId"));
+        pd.put("approveUserName",pd.getString("createUser"));
 
 
+        return pd;
 
     }
 
@@ -656,7 +704,7 @@ public class FlowServiceImpl implements FlowService {
      * @param pd
      */
     @Override
-    public void backOriginalNode(PageData pd) {
+    public PageData backOriginalNode(PageData pd) {
         //校验参数
         CheckParameter.stringLengthAndEmpty(pd.getString("menuCode"), "菜单编码", 128);
         CheckParameter.stringLengthAndEmpty(pd.getString("waitId"), "待办表主键ID", 128);
@@ -736,6 +784,13 @@ public class FlowServiceImpl implements FlowService {
         //8、删除审批流程实例表
         baseDao.delete("FlowMapper.deleteActivityData",waitData);
 
+        pd.put("approveUserId",pd.getString("createUserId"));
+        pd.put("approveUserName",pd.getString("createUser"));
+        pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
+        pd.put("nextApproveUserId",currentUser.getString("userCode"));
+        pd.put("nextApproveUserName",currentUser.getString("userName"));
+
+        return pd;
 
     }
 
@@ -771,6 +826,7 @@ public class FlowServiceImpl implements FlowService {
         doneData.put("status",0);
         doneData.put("handleStrategy",nextApproveNode.getString("handleStrategy"));
         doneData.put("backFlag",currentApproveNode.getString("backFlag"));
+        doneData.put("menuCode",pd.getString("menuCode"));
         int result = baseDao.insert("FlowMapper.insertApprovalNotDone", doneData);
 
         if(result > 0){
@@ -839,9 +895,8 @@ public class FlowServiceImpl implements FlowService {
      * @param currentNodeId
      * @return
      */
-    private PageData getNextApproveNode(List<PageData> lineList,List<PageData> nodeList,String currentNodeId){
+    private void getNextApproveNode(List<PageData> lineList,List<PageData> nodeList,String currentNodeId,List<PageData> nextApproveNodeList){
 
-        PageData nextApproveNode = null;
         String nextNode = null;
         for (PageData lineData : lineList) {
             if (lineData.getString("from").equals(currentNodeId)) {
@@ -853,14 +908,13 @@ public class FlowServiceImpl implements FlowService {
 
         if (StringUtils.isNotBlank(nextNode)) {
             for (PageData nodeData : nodeList) {
-                String type = nodeData.getString("type");
                 String status = nodeData.getString("status");
                 if (nodeData.getString("id").equals(nextNode)) {
                     //当该节点是禁用的，则继续往下寻找
                     if(status.equals("0")){
-                        getNextApproveNode(lineList,nodeList,nextNode);
+                        getNextApproveNode(lineList,nodeList,nextNode,nextApproveNodeList);
                     }else{
-                        nextApproveNode = nodeData;
+                        nextApproveNodeList.add(nodeData);
                         break;
                     }
 
@@ -869,15 +923,9 @@ public class FlowServiceImpl implements FlowService {
 
             }
 
-        } else {
-            throw new MyException("下一个审批节点不存在，或者未启用");
         }
 
-        if(nextApproveNode == null){
-            throw new MyException("下一个审批节点不存在，或者未启用");
-        }
 
-        return nextApproveNode;
     }
 
     /**
@@ -887,9 +935,8 @@ public class FlowServiceImpl implements FlowService {
      * @param currentNodeId
      * @return
      */
-    private PageData getPreviousApproveNode(List<PageData> lineList,List<PageData> nodeList,String currentNodeId){
+    private void getPreviousApproveNode(List<PageData> lineList,List<PageData> nodeList,String currentNodeId,List<PageData> previousApproveNodeList){
 
-        PageData previousApproveNode = null;
         String previousNode = null;
         for (PageData lineData : lineList) {
             if (lineData.getString("to").equals(currentNodeId)) {
@@ -904,10 +951,9 @@ public class FlowServiceImpl implements FlowService {
                 if (nodeData.getString("id").equals(previousNode)) {
                     //当该节点是禁用的，则继续往下寻找
                     if(status.equals("0")){
-                        getPreviousApproveNode(lineList,nodeList,previousNode);
+                        getPreviousApproveNode(lineList,nodeList,previousNode,previousApproveNodeList);
                     }else{
-                        previousApproveNode = nodeData;
-                        break;
+                        previousApproveNodeList.add(nodeData);
                     }
 
 
@@ -915,16 +961,9 @@ public class FlowServiceImpl implements FlowService {
 
             }
 
-        } else {
-            throw new MyException("上一个审批节点不存在，或者未启用");
         }
 
 
-        if(previousApproveNode == null){
-            throw new MyException("上一个审批节点不存在，或者未启用");
-        }
-
-        return previousApproveNode;
     }
 
 

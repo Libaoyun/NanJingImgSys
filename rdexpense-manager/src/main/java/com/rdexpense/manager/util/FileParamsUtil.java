@@ -18,30 +18,28 @@ public class FileParamsUtil {
         PageData pageData = new PageData();
 
         String  createUserId = dto.getCreateUserId();
-        CheckParameter.stringLengthAndEmpty(createUserId, "上传人id",64);
+        CheckParameter.stringLengthAndEmpty(createUserId, "上传人id",128);
 
         String  createUser = dto.getCreateUser();
-        CheckParameter.stringLengthAndEmpty(createUser, "上传人姓名",64);
+        CheckParameter.stringLengthAndEmpty(createUser, "上传人姓名",128);
+
+        String  creatorOrgId = dto.getCreatorOrgId();
+        CheckParameter.stringLengthAndEmpty(creatorOrgId, "右上角项目ID",128);
+
+        String  creatorOrgName = dto.getCreatorOrgName();
+        CheckParameter.stringLengthAndEmpty(creatorOrgName, "右上角项目名称",128);
 
         String  menuCode = dto.getMenuCode();
-        CheckParameter.stringLengthAndEmpty(menuCode, "菜单编码",64);
+        CheckParameter.stringLengthAndEmpty(menuCode, "菜单编码",128);
 
         MultipartFile file = dto.getFile();
         CheckParameter.isNull(file, "上传文件");
 
-
-        String  orgCode = dto.getOrgCode();
-        CheckParameter.stringLengthAndEmpty(orgCode, "组织编码",64);
-
-        String  orgName = dto.getOrgName();
-        CheckParameter.stringLengthAndEmpty(orgName, "组织名称",256);
-
-
+        pageData.put("creatorOrgId",creatorOrgId);
+        pageData.put("creatorOrgName",creatorOrgName);
         pageData.put("createUserId",createUserId);
         pageData.put("createUser",createUser);
         pageData.put("menuCode",menuCode);
-        pageData.put("orgCode",orgCode);
-        pageData.put("orgName",orgName);
 
         return pageData;
 

@@ -61,5 +61,10 @@ public class ApproveDoneListDTO implements Serializable {
     @ApiModelProperty(value = "是否被被打回 1：是 其他：否")
     private String backFlag;
 
+    @ApiModelProperty(value = "菜单编码")
+    private String menuCode;
+
+    @ApiModelProperty(value = "待办已办状态(0：待办，1：已办)")
+    private String status;
 
 }

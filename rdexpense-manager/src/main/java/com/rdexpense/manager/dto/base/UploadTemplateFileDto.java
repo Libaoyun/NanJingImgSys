@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Data
 @ApiModel
-public class UploadTemplateFileDto implements Serializable {
+public class UploadTemplateFileDto extends  OrganizationDto implements Serializable {
 
     @ApiModelProperty(value = "文件")
     private MultipartFile file;
@@ -22,12 +22,6 @@ public class UploadTemplateFileDto implements Serializable {
 
     @ApiModelProperty(value = "菜单编码")
     private String menuCode;
-
-    @ApiModelProperty(value = "组织编码")
-    private String orgCode;
-
-    @ApiModelProperty(value = "组织名称")
-    private String orgName;
 
 
 }

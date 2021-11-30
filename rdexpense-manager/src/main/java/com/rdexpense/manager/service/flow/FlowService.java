@@ -87,20 +87,20 @@ public interface FlowService {
      * @param pd
      * @return
      */
-    int approveFlow(PageData pd);
+    PageData approveFlow(PageData pd);
 
     /**
      * 回退到上一个节点
      * @param pd
      * @return
      */
-    void backPreviousNode(PageData pd);
+    PageData backPreviousNode(PageData pd);
 
     /**
      * 回退到发起人
      * @param pd
      * @return
      */
-    void backOriginalNode(PageData pd);
+    PageData backOriginalNode(PageData pd);
 
 }

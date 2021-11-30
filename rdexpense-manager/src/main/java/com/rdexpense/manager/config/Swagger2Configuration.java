@@ -95,6 +95,33 @@ public class Swagger2Configuration {
     }
 
 
+    @Bean(value = "项目立项管理")
+    public Docket applyApi() {
+        //在配置好的配置类中增加此段代码即可
+        ParameterBuilder ticketPar = new ParameterBuilder();
+        List<Parameter> pars = new ArrayList<>();
+        ticketPar.name("token").description("系统token(登陆除外)")//name表示名称，description表示描述
+                .modelRef(new ModelRef("string")).parameterType("header")
+                .required(true).defaultValue("").build();
+        pars.add(ticketPar.build());//添加完此处一定要把下边的带***的也加上否则不生效
+
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .groupName("项目立项管理")
+                .select()
+                .apis(Predicates.or(basePackage("com.rdexpense.manager.controller")
+                ))
+                .paths(Predicates.or(
+                        //这里添加你需要展示的接口,同一包下根据url路径设置加入文档,忽略哪些文档
+                        PathSelectors.ant("/projectApply/**")//项目立项申请
+
+
+                )) // 可以根据url路径设置哪些请求加入文档，忽略哪些请求
+                .build()
+                .globalOperationParameters(pars);//************把消息头添加
+    }
+
+
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()

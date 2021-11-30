@@ -13,8 +13,9 @@ public enum DealStatus {
     LOGININ(4, "登陆系统", "DICT10111001"),
     LOGINOUT(5, "退出系统", "DICT10111002"),
     EXPORT(6, "导出", "DICT10111006"),
-    UPLOAD(7, "上传", "DICT10111007");
-
+    UPLOAD(7, "上传", "DICT10111007"),
+    APPROVE(8, "审批", "DICT10111007"),
+    ABOLISH(9, "废除", "DICT10111007");
 
 
     private int code;

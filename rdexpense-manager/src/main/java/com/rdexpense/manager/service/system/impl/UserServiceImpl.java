@@ -14,6 +14,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.rdexpense.manager.dto.base.UserInfoDTO;
+import com.rdexpense.manager.service.file.FileService;
 import com.rdexpense.manager.service.system.UserService;
 import com.rdexpense.manager.util.UseTokenInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     @Resource(name = "baseDao")
     private BaseDao baseDao;
+
+    @Autowired
+    private FileService fileService;
 
 
     /**
@@ -169,17 +173,7 @@ public class UserServiceImpl implements UserService {
 
 
         // 插入到附件表
-        String file = pd.getString("attachmentList");
-        if (StringUtils.isNotBlank(file)) {
-            List<PageData> listFile = JSONObject.parseArray(file, PageData.class);
-            if (listFile.size() > 0) {
-                for (PageData data : listFile) {
-                    data.put("businessId", businessId);
-                }
-                baseDao.batchInsert("FileMapper.saveFileDetail", listFile);
-            }
-        }
-
+        fileService.insert(pd);
 
     }
 
@@ -288,23 +282,8 @@ public class UserServiceImpl implements UserService {
 
         //编辑附件表
         //更新附件表，前端只传无id的，将这些数据入库
-        List<PageData> fileList = new ArrayList<PageData>();
-        String attachmentDetailStr = pd.getString("attachmentList");
-        if (StringUtils.isNotBlank(attachmentDetailStr)) {
-            List<PageData> listFile = JSONObject.parseArray(attachmentDetailStr, PageData.class);
-            if(!CollectionUtils.isEmpty(listFile)){
-                for (PageData data : listFile) {
-                    String frontId = data.getString("id");
-                    if (frontId == null || frontId.equals("")) {
-                        data.put("businessId", pd.getString("businessId"));
-                        fileList.add(data);
-                    }
-                }
-                if (fileList.size() > 0) {
-                    baseDao.batchInsert("FileMapper.saveFileDetail", fileList);
-                }
-            }
-        }
+        fileService.update(pd);
+
 
         //更新redis中缓存用户信息
         Set<String> keys = redisDao.getScan("EXTERNAL*");

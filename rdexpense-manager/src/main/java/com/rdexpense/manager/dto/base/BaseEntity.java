@@ -16,6 +16,12 @@ public class BaseEntity {
     @ApiModelProperty(value = "业务主键ID")
     private String businessId;
 
+    @ApiModelProperty(value = "右上角项目ID", required = true)
+    private String creatorOrgId;
+
+    @ApiModelProperty(value = "右上角项目名称", required = true)
+    private String creatorOrgName;
+
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;

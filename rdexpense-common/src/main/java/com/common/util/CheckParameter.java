@@ -465,6 +465,24 @@ public class CheckParameter {
     }
 
 
+
+    public static void stringLengthAndEmpty1(String paraValue, String paraName, Integer paraLength) {
+        if (StringUtils.isEmpty(paraValue) || "null".equals(paraValue) || "undefined".equals(paraValue)) {
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_NO_EMPTY.desc(), paraName));
+        }
+
+        String name = paraName + ";" + paraLength;
+        boolean isExist = checkStr(paraValue);
+        if(isExist && 2*(paraValue.length()) < paraLength){ //如果是汉字,那么汉字长度只能小于数据库存储长度的一半
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_MIN_LONG.desc(), name));
+        }
+        if (!StringUtils.isEmpty(paraValue) && paraValue.length() < paraLength) {
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_MIN_LONG.desc(), name));
+        }
+    }
+
+
+
     public static void checkDefaultParams(PageData pd){
         checkPositiveInt(pd.getString("menuCode"), "功能菜单编码");
         CheckParameter.stringLengthAndEmpty(pd.getString("creatorOrgId"), "右上角项目ID",128);

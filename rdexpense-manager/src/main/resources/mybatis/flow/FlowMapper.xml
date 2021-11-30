@@ -187,7 +187,8 @@
            approve_time,
            status,
            handle_strategy,
-           back_flag
+           back_flag,
+           menu_code
 
            )
         VALUES (  #{processInstId},
@@ -205,7 +206,8 @@
                   #{approveTime},
                   #{status},
                   #{handleStrategy},
-                  #{backFlag}
+                  #{backFlag},
+                  #{menuCode}
 
                   )
     </insert>
@@ -229,7 +231,9 @@
             create_time as createTime,
             approve_time as approveTime,
                handle_strategy as handleStrategy,
-               back_flag as backFlag
+               back_flag as backFlag,
+               menu_code as menuCode,
+               status
         from bpm_approval_not_done d
         left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 1
@@ -253,7 +257,9 @@
             create_time as createTime,
             approve_time as approveTime,
             handle_strategy as handleStrategy,
-            back_flag as backFlag
+            back_flag as backFlag,
+            menu_code as menuCode,
+            status
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 0 and u.status = 0
@@ -294,7 +300,9 @@
             create_time as createTime,
             approve_time as approveTime,
             handle_strategy as handleStrategy,
-            back_flag as backFlag
+            back_flag as backFlag,
+            menu_code as menuCode,
+            status
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where d.id = #{waitId} and u.user_id = #{createUserId}

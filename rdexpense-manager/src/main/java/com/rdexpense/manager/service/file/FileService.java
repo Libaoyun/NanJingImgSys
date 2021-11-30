@@ -19,4 +19,19 @@ public interface FileService {
      * @return
      */
     void delete(PageData pd);
+
+
+    /**
+     * 新增附件
+     * @param pd
+     * @return
+     */
+    void insert(PageData pd);
+
+    /**
+     * 编辑附件
+     * @param pd
+     * @return
+     */
+    void update(PageData pd);
 }

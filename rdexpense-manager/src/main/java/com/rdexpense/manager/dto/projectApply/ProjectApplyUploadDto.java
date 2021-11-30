@@ -1,5 +1,6 @@
-package com.rdexpense.manager.dto.system.login;
+package com.rdexpense.manager.dto.projectApply;
 
+import com.rdexpense.manager.dto.base.OrganizationDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -9,7 +10,7 @@ import java.io.Serializable;
 
 @Data
 @ApiModel
-public class UploadTemplateFileDto implements Serializable {
+public class ProjectApplyUploadDto extends  OrganizationDto implements Serializable {
 
     @ApiModelProperty(value = "文件")
     private MultipartFile file;
@@ -23,11 +24,8 @@ public class UploadTemplateFileDto implements Serializable {
     @ApiModelProperty(value = "菜单编码")
     private String menuCode;
 
-    @ApiModelProperty(value = "组织编码")
-    private String orgCode;
-
-    @ApiModelProperty(value = "组织名称")
-    private String orgName;
+    @ApiModelProperty(value = "模板内容 1:上传全部 2：主表信息 3：立项调研信息 4：进度计划 5：参加单位 6：研究人员 7：经费预算 8：经费预算（每月预算） 9：拨款计划")
+    private String fileType;
 
 
 }
