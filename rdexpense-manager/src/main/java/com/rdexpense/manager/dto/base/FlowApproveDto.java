@@ -25,7 +25,7 @@ public class FlowApproveDto extends OrganizationDto implements Serializable {
     private String menuCode;
 
     @ApiModelProperty(value = "审批意见")
-    private String noted;
+    private String approveComment;
 
     @ApiModelProperty(value = "审批类型 1:同意 2:回退上一个节点 3：回退到发起人")
     private String approveType;

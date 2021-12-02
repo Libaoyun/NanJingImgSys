@@ -22,7 +22,7 @@ public class BudgetSourceDto implements Serializable {
     private String businessId;
 
     @ApiModelProperty(value = "来源预算合计")
-    private String totalBudget;
+    private String totalSourceBudget;
 
     @ApiModelProperty(value = "一、股份公司计划拨款")
     private String companyAppropriation;

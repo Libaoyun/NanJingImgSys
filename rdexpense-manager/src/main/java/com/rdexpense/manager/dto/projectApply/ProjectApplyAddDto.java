@@ -215,8 +215,8 @@ public class ProjectApplyAddDto extends OrganizationDto implements Serializable 
     @ApiModelProperty(value = "十一、委托研发费用(经费预算-每月预算)")
     private String expensesCost;
 
-    @ApiModelProperty(value = "年度预算（按月填报")
-    private List<BudgetMonthDetailDto> MonthList;
+    @ApiModelProperty(value = "年度预算（按月填报)")
+    private List<BudgetMonthDetailDto> monthList;
 
     @ApiModelProperty(value = "拨款计划")
     private List<AppropriationPlanDto> appropriationPlan;

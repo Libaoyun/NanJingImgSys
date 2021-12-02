@@ -121,8 +121,11 @@ public class ProjectApplyDetailDto extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "参加单位")
     private List<AttendUnitDetailDto> attendUnit;
 
-    @ApiModelProperty(value = "研究人员")
+    @ApiModelProperty(value = "研究人员（初始）")
     private List<ResearchUserDetailDto> researchUser;
+
+    @ApiModelProperty(value = "研究人员（变更）")
+    private List<ResearchUserDetailDto> researchUserChange;
 
     @ApiModelProperty(value = "经费来源预算(只有一个元素)")
     private List<BudgetSourceDto> budgetSource;
@@ -203,7 +206,7 @@ public class ProjectApplyDetailDto extends BaseEntity implements Serializable {
     private String expensesCost;
 
     @ApiModelProperty(value = "年度预算（按月填报")
-    private List<BudgetMonthDetailDto> MonthList;
+    private List<BudgetMonthDetailDto> monthList;
 
     @ApiModelProperty(value = "拨款计划")
     private List<AppropriationPlanDetailDto> appropriationPlan;

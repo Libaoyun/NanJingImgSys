@@ -2,6 +2,31 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="FlowMapper">
 
+
+    <sql id="Base_Column">
+                d.id,
+                d.id as waitId,
+    activity_id as processInstId,
+    approve_node_id as approveNodeId,
+    approve_node_name as approveNodeName,
+    serial_number as serialNumber,
+    title_name as titleName,
+    create_user_id as createUserId,
+    create_user_name as createUser,
+    next_approve_user_id as nextApproveUserId,
+    next_approve_user_name as nextApproveUserName,
+    next_approve_node_id as nextApproveNodeId,
+    next_approve_node_name as nextApproveNodeName,
+    create_time as createTime,
+    approve_time as approveTime,
+    handle_strategy as handleStrategy,
+    back_flag as backFlag,
+    menu_code as menuCode,
+    status,
+    business_id as businessId
+    </sql>
+
+
     <!-- 新增流程 -->
     <insert id="insertData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO bpm_approval_design
@@ -188,7 +213,8 @@
            status,
            handle_strategy,
            back_flag,
-           menu_code
+           menu_code,
+           business_id
 
            )
         VALUES (  #{processInstId},
@@ -207,7 +233,8 @@
                   #{status},
                   #{handleStrategy},
                   #{backFlag},
-                  #{menuCode}
+                  #{menuCode},
+                  #{businessId}
 
                   )
     </insert>
@@ -215,25 +242,7 @@
 
     <select id="queryIsDone" resultType="pd" parameterType="pd">
         select
-               d.id,
-               d.id as waitId,
-            activity_id as processInstId,
-            approve_node_id as approveNodeId,
-            approve_node_name as approveNodeName,
-            serial_number as serialNumber,
-            title_name as titleName,
-            create_user_id as createUserId,
-            create_user_name as createUser,
-            next_approve_user_id as nextApproveUserId,
-            next_approve_user_name as nextApproveUserName,
-            next_approve_node_id as nextApproveNodeId,
-            next_approve_node_name as nextApproveNodeName,
-            create_time as createTime,
-            approve_time as approveTime,
-               handle_strategy as handleStrategy,
-               back_flag as backFlag,
-               menu_code as menuCode,
-               status
+        <include refid="Base_Column"/>
         from bpm_approval_not_done d
         left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 1
@@ -241,25 +250,7 @@
 
     <select id="queryWaitDone" resultType="pd" parameterType="pd">
         select
-            d.id,
-            d.id as waitId,
-            activity_id as processInstId,
-            approve_node_id as approveNodeId,
-            approve_node_name as approveNodeName,
-            serial_number as serialNumber,
-            title_name as titleName,
-            create_user_id as createUserId,
-            create_user_name as createUser,
-            next_approve_user_id as nextApproveUserId,
-            next_approve_user_name as nextApproveUserName,
-            next_approve_node_id as nextApproveNodeId,
-            next_approve_node_name as nextApproveNodeName,
-            create_time as createTime,
-            approve_time as approveTime,
-            handle_strategy as handleStrategy,
-            back_flag as backFlag,
-            menu_code as menuCode,
-            status
+        <include refid="Base_Column"/>
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 0 and u.status = 0
@@ -284,25 +275,7 @@
 
     <select id="queryApproveWaitData" resultType="pd" parameterType="pd">
         select
-            d.id,
-            d.id as waitId,
-            activity_id as processInstId,
-            approve_node_id as approveNodeId,
-            approve_node_name as approveNodeName,
-            serial_number as serialNumber,
-            title_name as titleName,
-            create_user_id as createUserId,
-            create_user_name as createUser,
-            next_approve_user_id as nextApproveUserId,
-            next_approve_user_name as nextApproveUserName,
-            next_approve_node_id as nextApproveNodeId,
-            next_approve_node_name as nextApproveNodeName,
-            create_time as createTime,
-            approve_time as approveTime,
-            handle_strategy as handleStrategy,
-            back_flag as backFlag,
-            menu_code as menuCode,
-            status
+        <include refid="Base_Column"/>
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where d.id = #{waitId} and u.user_id = #{createUserId}

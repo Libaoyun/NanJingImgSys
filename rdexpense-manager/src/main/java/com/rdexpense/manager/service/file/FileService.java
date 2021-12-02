@@ -34,4 +34,20 @@ public interface FileService {
      * @return
      */
     void update(PageData pd);
+
+    /**
+     * 查询附件详情
+     * @param pd
+     * @return
+     */
+    PageData queryFileByBusinessId(PageData pd);
+
+
+    /**
+     * 插入审批的附件，并返回i拼接的ID字符串
+     * @param pd
+     * @return
+     */
+    String insertApproveFile(PageData pd);
+
 }

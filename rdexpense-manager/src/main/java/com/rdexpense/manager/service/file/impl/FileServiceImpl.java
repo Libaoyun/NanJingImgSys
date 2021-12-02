@@ -3,6 +3,8 @@ package com.rdexpense.manager.service.file.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.common.base.dao.mysql.BaseDao;
 import com.common.entity.PageData;
+import com.common.util.AwsUtil;
+import com.common.util.ConstantValUtil;
 import com.rdexpense.manager.service.file.FileService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,5 +88,54 @@ public class FileServiceImpl implements FileService {
                 }
             }
         }
+    }
+
+
+    /**
+     * 查询附件详情
+     * @param pd
+     * @return
+     */
+    @Override
+    public PageData queryFileByBusinessId(PageData pd) {
+        List<PageData> attachmentList = (List<PageData>) dao.findForList("FileMapper.queryFile", pd);
+        if(!CollectionUtils.isEmpty(attachmentList)){
+            AwsUtil.queryOneUrl(attachmentList, ConstantValUtil.BUCKET_PRIVATE);
+            pd.put("attachmentList", attachmentList);
+
+        }
+
+        return pd;
+    }
+
+
+    /**
+     *
+     * @param pd
+     * @return
+     */
+    @Override
+    public String insertApproveFile(PageData pd) {
+        StringBuffer buffer = new StringBuffer();
+
+        String file = pd.getString("attachmentList");
+        if (StringUtils.isNotBlank(file)) {
+            List<PageData> listFile = JSONObject.parseArray(file, PageData.class);
+            if (listFile.size() > 0) {
+                for (PageData data : listFile) {
+                    data.put("businessId", pd.getString("businessId"));
+                    dao.insert("FileMapper.saveFile", data);
+
+                    buffer.append(data.getString("id")).append("、");
+                }
+
+            }
+        }
+
+        String bufferStr = buffer.toString();
+
+        return bufferStr.substring(0,bufferStr.length() - 1);
+
+
     }
 }

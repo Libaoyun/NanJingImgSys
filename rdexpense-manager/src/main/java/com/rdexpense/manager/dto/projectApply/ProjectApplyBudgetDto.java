@@ -1,25 +1,43 @@
 package com.rdexpense.manager.dto.projectApply;
 
+import com.rdexpense.manager.dto.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author rdexpense
  * @version 1.0
- * @date 2020/3/31 18:51
+ * @date 2020/3/31 16:00
  */
 @Data
-@ApiModel(value = "经费支出预算")
-public class BudgetExpensesDto implements Serializable {
+@ApiModel(value = "项目立项申请经费预算")
+public class ProjectApplyBudgetDto extends BaseEntity implements Serializable {
+    
 
-    @ApiModelProperty(value = "主键ID")
-    private String id;
+    @ApiModelProperty(value = "来源预算合计")
+    private String totalSourceBudget;
 
-    @ApiModelProperty(value = "业务主键ID")
-    private String businessId;
+    @ApiModelProperty(value = "一、股份公司计划拨款")
+    private String companyAppropriation;
+
+    @ApiModelProperty(value = "二、国家拨款")
+    private String stateAppropriation;
+
+    @ApiModelProperty(value = "三、省市拨款")
+    private String provincesAppropriation;
+
+    @ApiModelProperty(value = "四、单位自筹款")
+    private String unitFunds;
+
+    @ApiModelProperty(value = "五、银行贷款")
+    private String bankLoans;
+
+    @ApiModelProperty(value = "六、其他来源款")
+    private String otherSource;
 
     @ApiModelProperty(value = "支出预算合计")
     private String totalExpenseBudget;
@@ -72,6 +90,9 @@ public class BudgetExpensesDto implements Serializable {
     @ApiModelProperty(value = "十一、委托研发费用")
     private String expensesCost;
 
-    @ApiModelProperty(value = "类型 1：预算数 2：变更数 3：每月预算(查询时显示)")
-    private String status;
+    @ApiModelProperty(value = "年度预算（按月填报")
+    private List<BudgetMonthDetailDto> monthList;
+
+
+
 }

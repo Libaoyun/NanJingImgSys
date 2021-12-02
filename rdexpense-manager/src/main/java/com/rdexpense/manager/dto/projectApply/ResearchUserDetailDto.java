@@ -79,4 +79,10 @@ public class ResearchUserDetailDto implements Serializable {
     @ApiModelProperty(value = "编制时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
+
+    @ApiModelProperty(value = "人员类型 1：初始 2：变更")
+    private String userType;
+
+    @ApiModelProperty(value = "人员状态 1：正常 2：调离")
+    private String userStatus;
 }

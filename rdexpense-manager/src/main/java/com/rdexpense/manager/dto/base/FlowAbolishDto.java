@@ -17,13 +17,13 @@ import java.io.Serializable;
 public class FlowAbolishDto extends OrganizationDto implements Serializable {
 
 
-    @ApiModelProperty(value = "待办列表-单据号")
+    @ApiModelProperty(value = "单据号")
     private String serialNumber;
 
     @ApiModelProperty(value = "菜单编码")
     private String menuCode;
 
-    @ApiModelProperty(value = "废除意见")
+    @ApiModelProperty(value = "废除说明")
     private String noted;
 
 }

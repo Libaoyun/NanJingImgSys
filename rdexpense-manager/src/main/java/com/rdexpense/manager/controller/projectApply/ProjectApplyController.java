@@ -19,7 +19,6 @@ import com.rdexpense.manager.dto.base.FlowAbolishDto;
 import com.rdexpense.manager.dto.base.FlowApproveDto;
 import com.rdexpense.manager.dto.base.UploadTemplateFileDto;
 import com.rdexpense.manager.dto.projectApply.*;
-import com.rdexpense.manager.dto.system.user.*;
 import com.rdexpense.manager.service.projectApply.ProjectApplyService;
 import com.rdexpense.manager.util.FileParamsUtil;
 import com.rdexpense.manager.util.LogUtil;
@@ -94,7 +93,12 @@ public class ProjectApplyController extends BaseController {
     @PostMapping("/add")
     public ResponseEntity addApply(ProjectApplyAddDto projectApplyAddDto) {
         PageData pd = this.getParams();
-        checkParam(pd);
+        CheckParameter.checkDefaultParams(pd);
+        String operationType = pd.getString("operationType");
+        if(operationType.equals("2")){
+            checkParam(pd,2);
+        }
+
         ResponseEntity result = null;
         try {
 
@@ -117,7 +121,11 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID", 256);
-        checkParam(pd);
+        CheckParameter.checkDefaultParams(pd);
+        String operationType = pd.getString("operationType");
+        if(operationType.equals("2")){
+            checkParam(pd,2);
+        }
 
         ResponseEntity result = null;
         try {
@@ -165,8 +173,9 @@ public class ProjectApplyController extends BaseController {
     }
 
 
+
+    @ApiOperation(value = "查询申请详情")
     @PostMapping("/queryDetail")
-    @ApiOperation(value = "查询申请详情", notes = "查询申请详情")
     @ApiImplicitParam(name = "businessId", value = "业务主键ID", required = true, dataType = "String")
     public ResponseEntity<ProjectApplyDetailDto> getApplyDetail() {
         PageData pd = this.getParams();
@@ -191,16 +200,16 @@ public class ProjectApplyController extends BaseController {
         CheckParameter.checkPositiveInt(pd.getString("menuCode"), "菜单编码");
         ResponseEntity result = null;
         // 编辑时，状态只能为已保存
-        PageData recordData = (PageData) dao.findForObject("OtherCheckMapper.queryOneRecord", pd);
+        PageData recordData = projectApplyService.getApplyDetail(pd);
         String requestStatus = recordData.getString("processStatus");
         if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0])) {
             throw new MyException(ConstantMsgUtil.ERR_SUBMIT_FAIL.desc());
         }
-        checkParam(recordData);
+
+        checkParam(recordData,1);
 
         try {
             pd.put("serialNumber",recordData.getString("serialNumber"));
-            pd.put("creatorOrgId",recordData.getString("creatorOrgId"));
             projectApplyService.submitRecord(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_SUBMIT_SUCCESS.desc());
             return result;
@@ -218,11 +227,7 @@ public class ProjectApplyController extends BaseController {
     @PostMapping(value = "/approve")
     public ResponseEntity approveRecord(FlowApproveDto flowApproveDto){
         PageData pd = this.getParams();
-        CheckParameter.checkPositiveInt(pd.getString("menuCode"), "菜单编码");
-        String noted = pd.getString("noted");
-        CheckParameter.stringLengthAndEmpty(noted, "审批意见", 1024);
-        String strProcessInstId = String.valueOf(pd.getInt("processInstId"));
-        CheckParameter.checkPositiveInt(strProcessInstId, "工作流ID");
+        checkApprove(pd);
         ResponseEntity result = null;
         try {
             projectApplyService.approveRecord(pd);
@@ -237,15 +242,12 @@ public class ProjectApplyController extends BaseController {
         }
     }
 
-    @ApiOperation(value = "废除")
+
+    @ApiOperation(value = "废除（未开发）")
     @PostMapping(value = "/abolish")
     public ResponseEntity abolishRecord(FlowAbolishDto flowAbolishDto){
         PageData pd = this.getParams();
-        CheckParameter.checkPositiveInt(pd.getString("menuCode"), "菜单编码");
-        String noted = pd.getString("noted");
-        CheckParameter.stringLengthAndEmpty(noted, "审批意见", 1024);
-        String strProcessInstId = String.valueOf(pd.getInt("processInstId"));
-        CheckParameter.checkPositiveInt(strProcessInstId, "工作流ID");
+        CheckParameter.checkDefaultParams(pd);
         ResponseEntity result = null;
         try {
             projectApplyService.approveRecord(pd);
@@ -261,26 +263,170 @@ public class ProjectApplyController extends BaseController {
     }
 
 
-    @ApiOperation(value = "上传模板")
-    @PostMapping(value = "/upload")
-    public ResponseEntity upload(ProjectApplyUploadDto projectApplyUploadDto) {
-        PageData pd = transforParams(projectApplyUploadDto);
 
+    @ApiOperation(value = "导入全部数据")
+    @PostMapping(value = "/uploadAll")
+    public ResponseEntity upload(UploadTemplateFileDto dto) {
+        PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-   //         lineConfigService.upload(dto.getFile(),pd);
-            result = ResponseEntity.success(null, INFO_SAVE_SUCCESS.desc());
+            projectApplyService.uploadAll(dto.getFile(),pd);
+            result = ResponseEntity.success(null, INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            result = ResponseEntity.failure(ConstantMsgUtil.ERR_SAVE_FAIL.val(), e.getMessage());
-            logger.error("上传模板,request=[{}]", pd);
-            throw new MyException(ERR_SAVE_FAIL.desc(), e);
+            result = ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
+            logger.error("导入立项申请全部数据失败,request=[{}]", pd);
+            throw new MyException(ERR_UPLOAD_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 9, "线路模板", pd);
+            logUtil.saveLogData(result.getCode(), 7, "立项申请全部数据", pd);
         }
 
     }
 
+
+
+    @ApiOperation(value = "导入主信息")
+    @PostMapping("/uploadMain")
+    public ResponseEntity<ProjectApplyDetailDto> uploadMain(UploadTemplateFileDto dto) throws Exception{
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            PageData pageData = projectApplyService.uploadMain(dto.getFile(),pd);
+
+            result = PropertyUtil.pushData(pageData, ProjectApplyDetailDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (MyException e) {
+            logger.error("导入立项申请主信息失败,request=[{}]", pd);
+            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "立项申请主信息", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "导入立项调研信息")
+    @PostMapping("/uploadSurvey")
+    public ResponseEntity<ProjectApplyDetailDto> uploadSurvey(UploadTemplateFileDto dto) throws Exception{
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            PageData pageData = projectApplyService.uploadSurvey(dto.getFile(),pd);
+            result = PropertyUtil.pushData(pageData, ProjectApplyDetailDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (MyException e) {
+            logger.error("导入立项调研信息失败,request=[{}]", pd);
+            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "立项调研信息", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "导入进度计划")
+    @PostMapping(value = "/uploadProgress")
+    public ResponseEntity<List<ProgressPlanDto>> uploadProgress(UploadTemplateFileDto dto) {
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            List<PageData> list = projectApplyService.uploadProgress(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ProgressPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (Exception e) {
+            logger.error("导入进度计划失败,request=[{}]", pd);
+            return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "进度计划", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "导入参加单位")
+    @PostMapping(value = "/uploadUnit")
+    public ResponseEntity<List<ProgressPlanDto>> uploadUnit(UploadTemplateFileDto dto) {
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            List<PageData> list = projectApplyService.uploadUnit(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ProgressPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (Exception e) {
+            logger.error("导入参加单位失败,request=[{}]", pd);
+            return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "参加单位", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "导入研究人员（初始）")
+    @PostMapping(value = "/uploadUser")
+    public ResponseEntity<List<ResearchUserDto>> uploadUser(UploadTemplateFileDto dto) {
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            List<PageData> list = projectApplyService.uploadUser(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ResearchUserDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (Exception e) {
+            logger.error("导入研究人员（初始）失败,request=[{}]", pd);
+            return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "研究人员（初始）", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "导入经费预算")
+    @PostMapping("/uploadBudget")
+    public ResponseEntity<ProjectApplyBudgetDto> uploadBudget(UploadTemplateFileDto dto) throws Exception{
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            PageData pageData = projectApplyService.uploadBudget(dto.getFile(),pd);
+            result = PropertyUtil.pushData(pageData, ProjectApplyBudgetDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (MyException e) {
+            logger.error("导入经费预算失败,request=[{}]", pd);
+            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "经费预算", pd);
+        }
+    }
+
+    @ApiOperation(value = "导入经费预算（每月预算）")
+    @PostMapping("/uploadMonth")
+    public ResponseEntity<ProjectApplyBudgetDto> uploadMonth(UploadTemplateFileDto dto) throws Exception{
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            PageData pageData = projectApplyService.uploadMonth(dto.getFile(),pd);
+            result = PropertyUtil.pushData(pageData, ProjectApplyBudgetDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (MyException e) {
+            logger.error("导入经费预算（每月预算）失败,request=[{}]", pd);
+            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "经费预算（每月预算）", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "导入拨款计划")
+    @PostMapping(value = "/uploadAppropriation")
+    public ResponseEntity<List<AppropriationPlanDto>> uploadAppropriation(UploadTemplateFileDto dto) {
+        PageData pd = FileParamsUtil.checkParams(dto);
+        ResponseEntity result = null;
+        try {
+            List<PageData> list = projectApplyService.uploadAppropriation(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, AppropriationPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (Exception e) {
+            logger.error("导入拨款计划失败,request=[{}]", pd);
+            return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
+        }finally {
+            logUtil.saveLogData(result.getCode(), 7, "拨款计划", pd);
+        }
+    }
 
 
 
@@ -386,60 +532,32 @@ public class ProjectApplyController extends BaseController {
 
 
 
-    private PageData transforParams(ProjectApplyUploadDto dto){
-        PageData pageData = new PageData();
+    private void checkApprove(PageData pd){
+        CheckParameter.checkDefaultParams(pd);
 
-        String  createUserId = dto.getCreateUserId();
-        CheckParameter.stringLengthAndEmpty(createUserId, "上传人id",128);
+        CheckParameter.stringLengthAndEmpty(pd.getString("waitId"), "待办列表waitId", 256);
+        CheckParameter.stringLengthAndEmpty(pd.getString("approveComment"), "审批意见", 256);
+        CheckParameter.stringLengthAndEmpty(pd.getString("approveType"), "审批类型", 256);
 
-        String  createUser = dto.getCreateUser();
-        CheckParameter.stringLengthAndEmpty(createUser, "上传人姓名",128);
-
-        String  creatorOrgId = dto.getCreatorOrgId();
-        CheckParameter.stringLengthAndEmpty(creatorOrgId, "右上角项目ID",128);
-
-        String  creatorOrgName = dto.getCreatorOrgName();
-        CheckParameter.stringLengthAndEmpty(creatorOrgName, "右上角项目名称",128);
-
-        String  menuCode = dto.getMenuCode();
-        CheckParameter.stringLengthAndEmpty(menuCode, "菜单编码",128);
-
-        String  fileType = dto.getFileType();
-        CheckParameter.stringLengthAndEmpty(fileType, "文件类型",128);
-
-        MultipartFile file = dto.getFile();
-        CheckParameter.isNull(file, "上传文件");
-
-        pageData.put("creatorOrgId",creatorOrgId);
-        pageData.put("creatorOrgName",creatorOrgName);
-        pageData.put("createUserId",createUserId);
-        pageData.put("createUser",createUser);
-        pageData.put("menuCode",menuCode);
-        pageData.put("fileType",fileType);
-
-        return pageData;
     }
 
-    private void checkParam(PageData pd) {
-        CheckParameter.checkDefaultParams(pd);
-        String operationType = pd.getString("operationType");
-        if(operationType.equals("1")){
-            return;
-        }
+
+
+    private void checkParam(PageData pd,int flag) {
 
         CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserId"), "编制人ID", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserName"), "编制人", 256);
+        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUser"), "编制人", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("createdDate"), "编制日期", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectName"), "项目名称", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("unitName"), "单位名称", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("unitAddress"), "单位地址", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("applyUserName"), "申请人", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("applyUserId"), "申请人ID", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("applyUserId"), "申请人ID", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("gender"), "性别", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("genderCode"), "性别编码", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("age"), "年龄", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("postName"), "职务", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("postCode"), "职务编码", 256);
+//        CheckParameter.stringLengthAndEmpty(pd.getString("postCode"), "职务编码", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("telephone"), "电话号码", 256);
         CheckParameter.checkDecimal(pd.getString("applyAmount"), "申请经费",20,2);
         CheckParameter.stringLengthAndEmpty(pd.getString("startYear"), "起始年度", 256);
@@ -465,8 +583,16 @@ public class ProjectApplyController extends BaseController {
         CheckParameter.stringLengthAndEmpty1(pd.getString("feasibilityAnalysis"), "成果转化的可行性分析", 200);
 
 
+
+
         //校验进度计划
-        List<PageData> progressPlanList = JSONObject.parseArray(pd.getString("progressPlan"), PageData.class);
+        List<PageData> progressPlanList = null;
+        if(flag == 1){
+            progressPlanList = (List<PageData>) pd.get("progressPlan");
+        }else {
+            progressPlanList = JSONObject.parseArray(pd.getString("progressPlan"), PageData.class);
+        }
+
         if(!CollectionUtils.isEmpty(progressPlanList)){
             for(PageData progressPlan : progressPlanList){
                 CheckParameter.stringLengthAndEmpty(progressPlan.getString("years"), "年度", 256);
@@ -482,7 +608,13 @@ public class ProjectApplyController extends BaseController {
         }
 
         //校验参加单位
-        List<PageData> attendUnitList = JSONObject.parseArray(pd.getString("attendUnit"), PageData.class);
+        List<PageData> attendUnitList = null;
+        if(flag == 1){
+            attendUnitList = (List<PageData>) pd.get("attendUnit");
+        }else {
+            attendUnitList = JSONObject.parseArray(pd.getString("attendUnit"), PageData.class);
+        }
+
         if(!CollectionUtils.isEmpty(attendUnitList)){
             for(PageData attendUnit : attendUnitList){
                 CheckParameter.stringLengthAndEmpty(attendUnit.getString("unitName"), "单位名称", 256);
@@ -498,7 +630,13 @@ public class ProjectApplyController extends BaseController {
         }
 
         //校验研究人员
-        List<PageData> researchUserList = JSONObject.parseArray(pd.getString("researchUser"), PageData.class);
+        List<PageData> researchUserList = null;
+        if(flag == 1){
+            researchUserList = (List<PageData>) pd.get("researchUser");
+        }else {
+            researchUserList = JSONObject.parseArray(pd.getString("researchUser"), PageData.class);
+        }
+
         if(!CollectionUtils.isEmpty(researchUserList)){
             for(PageData researchUser : researchUserList){
                 CheckParameter.stringLengthAndEmpty(researchUser.getString("userName"), "姓名", 256);
@@ -527,7 +665,13 @@ public class ProjectApplyController extends BaseController {
         }
 
         //校验经费来源预算
-        List<PageData> budgetSourceList = JSONObject.parseArray(pd.getString("budgetSource"), PageData.class);
+        List<PageData> budgetSourceList = null;
+        if(flag == 1){
+            budgetSourceList = (List<PageData>) pd.get("budgetSource");
+        }else {
+            budgetSourceList = JSONObject.parseArray(pd.getString("budgetSource"), PageData.class);
+        }
+
         if(!CollectionUtils.isEmpty(budgetSourceList)){
             for(PageData budgetSource : budgetSourceList){
                 CheckParameter.checkDecimal(budgetSource.getString("totalBudget"), "来源预算合计",20,2);
@@ -540,7 +684,13 @@ public class ProjectApplyController extends BaseController {
         }
 
         //校验经费支出预算
-        List<PageData> budgetExpensesList = JSONObject.parseArray(pd.getString("budgetExpenses"), PageData.class);
+        List<PageData> budgetExpensesList = null;
+        if(flag == 1){
+            budgetExpensesList = (List<PageData>) pd.get("budgetExpenses");
+        }else {
+            budgetExpensesList = JSONObject.parseArray(pd.getString("budgetExpenses"), PageData.class);
+        }
+
         if(!CollectionUtils.isEmpty(budgetExpensesList)){
             for(PageData budgetExpenses : budgetExpensesList){
                 CheckParameter.checkDecimal(budgetExpenses.getString("totalBudget"), "支出预算合计",20,2);
@@ -562,9 +712,15 @@ public class ProjectApplyController extends BaseController {
 
 
         //校验年度预算（按月填报）
-        List<PageData> MonthList = JSONObject.parseArray(pd.getString("MonthList"), PageData.class);
-        if(!CollectionUtils.isEmpty(MonthList)){
-            for(PageData month : MonthList){
+        List<PageData> monthList = null;
+        if(flag == 1){
+            monthList = (List<PageData>) pd.get("monthList");
+        }else {
+            monthList = JSONObject.parseArray(pd.getString("monthList"), PageData.class);
+        }
+
+        if(!CollectionUtils.isEmpty(monthList)){
+            for(PageData month : monthList){
                 CheckParameter.checkDecimal(month.getString("january"), "1月",20,2);
                 CheckParameter.checkDecimal(month.getString("february"), "2月",20,2);
                 CheckParameter.checkDecimal(month.getString("march"), "3月",20,2);
@@ -588,7 +744,13 @@ public class ProjectApplyController extends BaseController {
 
 
         //校验拨款计划
-        List<PageData> appropriationList = JSONObject.parseArray(pd.getString("appropriationPlan"), PageData.class);
+        List<PageData> appropriationList = null;
+        if(flag == 1){
+            appropriationList = (List<PageData>) pd.get("appropriationPlan");
+        }else {
+            appropriationList = JSONObject.parseArray(pd.getString("appropriationPlan"), PageData.class);
+        }
+
         if(!CollectionUtils.isEmpty(appropriationList)){
             for(PageData appropriationPlan : appropriationList){
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("years"), "年度", 256);

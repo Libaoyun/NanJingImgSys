@@ -123,4 +123,14 @@
         update_time = getdate()
         where id = #{id}
     </update>
+
+
+    <select id="getDicValue" parameterType="java.util.List" resultType="pd">
+        select id,dic_enum_id as dicEnumId,dic_enum_name as dicEnumName
+        from uq_dictionary
+        where 1=1 and dic_type_id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

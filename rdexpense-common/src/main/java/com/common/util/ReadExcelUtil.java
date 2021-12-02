@@ -19,13 +19,13 @@ public class ReadExcelUtil {
      * 读取字符串类型的单元格数据
      *
      * @param cell      单元格对象
-     * @param rowNum    行数
+     * @param rowNum    行数 从1开始
      * @param cellName  单元格名称
      * @param flag      标识是否必填 false:否 true:是
      * @param length 校验字符串最大长度
      * @return
      */
-    public String readCellStr(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length) {
+    public static String readCellStr(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length) {
         String value = "";
         if (cell != null && (cell.getCellType() == HSSFCell.CELL_TYPE_STRING || cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC)) {
             if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
@@ -56,14 +56,14 @@ public class ReadExcelUtil {
      * 读取数值类型的单元格数据
      *
      * @param cell      单元格对象
-     * @param rowNum    行数
+     * @param rowNum    行数 从1开始
      * @param cellName  单元格名称
      * @param flag      标识是否必填 false:否 true:是
      * @param length 字符串最大长度
      * @param point 小数点位数
      * @return
      */
-    public String readCellDecimal(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length) {
+    public static String readCellDecimal(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length, Integer point) {
         String value = "";
         if (cell != null && cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
             value = cell.getNumericCellValue()+"";
@@ -72,7 +72,7 @@ public class ReadExcelUtil {
 
         //校验数字类型的长度及小数点位数
         if (StringUtils.isNotBlank(value)) {
-            CheckParameter.stringLength(value, rowNum, cellName, length);
+            CheckParameter.checkDecimal(value, rowNum, cellName, length, point);
         }
 
         if (flag == true && StringUtils.isBlank(value)) {
@@ -87,25 +87,57 @@ public class ReadExcelUtil {
     /**
      * 读取需要格式化的单元格数据
      * @param cell      单元格对象
-     * @param rowNum    行数
+     * @param rowNum    行数 从1开始
      * @param cellName  单元格名称
      * @param flag      标识是否必填 false:否 true:是
      * @param length 校验字符串最大长度
      * @return
      */
-    public String readCellFormat(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length, Integer point) {
+    public static String readCellFormat(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length) {
         DataFormatter dataFormatter = new DataFormatter();
         String value = dataFormatter.formatCellValue(cell);
 
-        //校验数字类型的长度及小数点位数
+
         if (StringUtils.isNotBlank(value)) {
-            CheckParameter.checkDecimal(value, rowNum, cellName, length, point);
+            CheckParameter.stringLength(value, rowNum, cellName, length);
         }
 
         if (flag == true && StringUtils.isBlank(value)) {
             String error = rowNum + ";" + cellName;
             throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_EMPTY.desc(), error));
         }
+
+        return value;
+    }
+
+
+
+    /**
+     * 读取字符串类型的单元格数据
+     *
+     * @param cell      单元格对象
+     * @param rowNum    行数 从1开始
+     * @param cellName  单元格名称
+     * @param flag      标识是否必填 false:否 true:是
+     * @param length 校验字符串最大长度
+     * @return
+     */
+    public static String readCellMinStr(XSSFCell cell, Integer rowNum, String cellName,Integer length) {
+        String value = "";
+        if (cell != null && (cell.getCellType() == HSSFCell.CELL_TYPE_STRING || cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC)) {
+            if (cell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
+                value = cell.getStringCellValue().trim();
+            } else {
+                value = cell.getNumericCellValue() + "";
+            }
+
+        }
+
+        //校验字符串最小长度
+        if (StringUtils.isNotBlank(value)) {
+            CheckParameter.stringMinLength(value, rowNum, cellName, length);
+        }
+
 
         return value;
     }

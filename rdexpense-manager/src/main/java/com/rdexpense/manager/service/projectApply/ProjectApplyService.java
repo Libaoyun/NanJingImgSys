@@ -4,6 +4,7 @@ package com.rdexpense.manager.service.projectApply;
 import com.common.entity.PageData;
 import com.itextpdf.text.Document;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -63,10 +64,90 @@ public interface ProjectApplyService {
     void submitRecord(PageData pd);
 
     /**
+     * 导入全部数据
+     *
+     * @param pd
+     * @return
+     */
+    void uploadAll(MultipartFile file, PageData pd) throws Exception;
+
+
+
+    /**
      * 导出excel
      */
-    HSSFWorkbook exportExcel(PageData pd);
+    HSSFWorkbook exportExcel(PageData pd) throws Exception;
 
+    /**
+     * 导入主信息
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    PageData uploadMain(MultipartFile file, PageData pd) throws Exception;
 
+    /**
+     * 导入调查信息
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    PageData uploadSurvey(MultipartFile file, PageData pd) throws Exception;
+
+    /**
+     * 导入进度计划
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    List<PageData> uploadProgress(MultipartFile file, PageData pd) throws Exception;
+
+    /**
+     * 导入参加单位
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    List<PageData> uploadUnit(MultipartFile file, PageData pd) throws Exception;
+
+    /**
+     * 导入研究人员
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    List<PageData> uploadUser(MultipartFile file, PageData pd) throws Exception;
+
+    /**
+     * 导入经费预算
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    PageData uploadBudget(MultipartFile file, PageData pd) throws Exception;
+
+    /**
+     * 导入经费预算-每月预算
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    PageData uploadMonth(MultipartFile file, PageData pd) throws Exception;
+
+    /**
+     * 导入拨款计划
+     * @param file
+     * @param pd
+     * @return
+     * @throws Exception
+     */
+    List<PageData> uploadAppropriation(MultipartFile file, PageData pd)throws Exception;
 
 }

@@ -3,12 +3,14 @@ package com.rdexpense.manager.dto.flow;
 import com.common.entity.PageData;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rdexpense.manager.dto.base.OrganizationDto;
+import com.rdexpense.manager.dto.file.CreateFileDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author luxiangbao
@@ -41,5 +43,8 @@ public class FlowSerialDataDTO extends OrganizationDto implements Serializable {
     @ApiModelProperty(value = "结束时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date endTime;
+
+    @ApiModelProperty(value = "附件列表")
+    private List<CreateFileDto> attachmentList;
 
 }

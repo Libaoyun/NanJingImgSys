@@ -224,6 +224,7 @@ public class FlowServiceImpl implements FlowService {
     @Transactional
     public PageData startFlow(PageData pd) {
         //校验参数
+        CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID", 128);
         CheckParameter.stringLengthAndEmpty(pd.getString("menuCode"), "菜单编码", 128);
         CheckParameter.stringLengthAndEmpty(pd.getString("serialNumber"), "单据号", 128);
 
@@ -319,11 +320,12 @@ public class FlowServiceImpl implements FlowService {
 
                 }
 
-                pd.put("approveUserId",pd.getString("createUserId"));
-                pd.put("approveUserName",pd.getString("createUser"));
+                pd.put("approveUserId",null);
+                pd.put("approveUserName",null);
                 pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[1]);
                 pd.put("nextApproveUserId",nextUser.getString("userCode"));
                 pd.put("nextApproveUserName",nextUser.getString("userName"));
+                pd.put("approveTime",null);
 
 
                 //5、插入待办信息
@@ -526,7 +528,7 @@ public class FlowServiceImpl implements FlowService {
         pd.put("approveUserName",pd.getString("createUser"));
         pd.put("nextApproveUserId",nextUser.getString("userCode"));
         pd.put("nextApproveUserName",nextUser.getString("userName"));
-
+        pd.put("approveResult",result);
 
         return pd;
     }
@@ -827,6 +829,7 @@ public class FlowServiceImpl implements FlowService {
         doneData.put("handleStrategy",nextApproveNode.getString("handleStrategy"));
         doneData.put("backFlag",currentApproveNode.getString("backFlag"));
         doneData.put("menuCode",pd.getString("menuCode"));
+        doneData.put("businessId",pd.getString("businessId"));
         int result = baseDao.insert("FlowMapper.insertApprovalNotDone", doneData);
 
         if(result > 0){
