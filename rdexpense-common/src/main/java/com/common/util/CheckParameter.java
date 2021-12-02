@@ -541,6 +541,30 @@ public class CheckParameter {
         }
     }
 
+
+
+
+
+    /**
+     * 校验单元格字符串类型以及长度
+     * @param paraValue  参数值
+     * @param rowNumber  表格行数
+     * @param paraName 参数名
+     * @param paraLength 参数长度
+     */
+    public static void stringMinLength(String paraValue, Integer rowNumber,String paraName, Integer paraLength) {
+        String name = rowNumber +";" + paraName + ";" + paraLength;
+        boolean isExist = checkStr(paraValue);
+        if(isExist && 2*(paraValue.length()) < paraLength){ //如果是汉字,那么汉字长度只能小于数据库存储长度的一半
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_CELL_MIN_LONG.desc(), name));
+        }
+        if (!StringUtils.isEmpty(paraValue) && paraValue.length() < paraLength) {
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_CELL_MIN_LONG.desc(), name));
+        }
+    }
+
+
+
     /**
      * 判断整个字符串都由汉字组成
      * @param str 字符串

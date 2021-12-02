@@ -163,8 +163,9 @@ public enum ConstantMsgUtil {
     WAN_CELL_DECIMAL(30022, "第{0}行,{1}应包含{2}个小数"),
     WAN_FLOAT_LONG1(30023, "{0}需保留{1}位小数"),
     WAN_MIN_LONG(30034, "{0}不得少于{1}字"),
+    WAN_CELL_MIN_LONG(30035, "第{0}行,{1}至少输入{2}个字"),
     WAN_EXISTING_CODE(30035, "{0}编码数据已存在"),
-    ;
+    WAN_CELL_MIN_LONG(30036, "第{0}行,{1}至少输入{2}个字"),
     private Integer val;
 
     private String desc;

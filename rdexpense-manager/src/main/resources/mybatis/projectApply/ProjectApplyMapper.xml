@@ -1,7 +1,587 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="ProjectApplicationMapper">
+<mapper namespace="ProjectApplyMapper">
 
+    <sql id="record">
+        id,business_id,serial_number,creator_org_id,creator_org_name,creator_user_id,creator_user,created_date,project_name,
+        unit_name,unit_address,apply_user_name,apply_user_id,gender,gender_code,age,post_code,post_name,create_time,update_time,
+        update_user,update_user_id,telephone,apply_amount,start_year,end_year,zip_code,professional_category_code,professional_category,
+        project_type_code,project_type,identify,research_contents,review_comments,approve_user_id,approve_user_name,approve_time,
+         process_inst_id,process_status,next_approve_user_id,next_approve_user_name
+    </sql>
+
+    <sql id="recordAndDic">
+        r.id,r.business_id as businessId,r.serial_number as serialNumber,r.creator_org_id as creatorOrgId,r.creator_org_name as creatorOrgName ,
+         r.creator_user_id as creatorUserId,r.creator_user as creatorUser,r.created_date as createdDate,r.project_name as projectName,
+        r.unit_name as unitName,r.unit_address as unitAddress,r.apply_user_name as applyUserName,r.apply_user_id as applyUserId,r.gender,r.gender_code as genderCode,
+        r.age,r.post_code as postCode,r.post_name as postName,r.create_time as createTime,r.update_time as updateTime ,r.update_user as updateUser,
+         r.update_user_id as updateUserId,r.telephone,r.apply_amount as applyAmount,r.start_year as startYear,r.end_year as endYear,r.zip_code as zipCode,
+            r.professional_category_code as professionalCategoryCode,r.professional_category as professionalCategory,r.project_type_code as projectTypeCode,
+            r.project_type as projectType,r.identify,r.research_contents as researchContents,r.review_comments as reviewComments,
+            r.approve_user_id as approveUserId,r.approve_user_name as approveUserName,r.approve_time as approveTime,r.process_inst_id as processInstId,
+            r.process_status as processStatus,r.next_approve_user_id as nextApproveUserId,r.next_approve_user_name as nextApproveUserName,d.dic_enum_name as processName
+    </sql>
+
+
+    <select id="queryByParams" parameterType="pd" resultType="pd">
+        select
+        <include refid="recordAndDic"></include>
+        FROM (
+        select
+        <include refid="record"></include>
+        from project_apply_main
+        where process_status != #{processStatus} or creator_user_id=#{createUserId}) as r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                r.creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="approveUserName!=null and approveUserName!=''">
+                and r.next_approve_user_name LIKE concat ('%',#{approveUserName},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and r.apply_user_name LIKE concat ('%',#{applyUserName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and r.post_name like concat('%',#{postName},'%')
+            </if>
+
+            <if test="unitName!=null and unitName!=''">
+                and r.unit_name LIKE concat('%',#{unitName},'%')
+            </if>
+            <if test="researchContents!=null and researchContents!=''">
+                and r.research_contents LIKE concat('%',#{researchContents},'%')
+            </if>
+            <if test="creatorUser!=null and creatorUser!=''">
+                and r.creator_user LIKE concat ('%',#{creatorUser},'%')
+            </if>
+
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
+            </if>
+            <if test="startYear!=null and startYear!=''">
+                and convert(varchar,start_year,120) LIKE concat('%',#{startYear},'%')
+            </if>
+            <if test="endYear!=null and endYear!=''">
+                and convert(varchar,end_year,120) LIKE concat('%',#{endYear},'%')
+            </if>
+
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="projectTypeCodeList != null and projectTypeCodeList.size()>0">
+                and r.project_type_code in
+                <foreach item="item" index="index" collection="projectTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="professionalCategoryCodeList != null and professionalCategoryCodeList.size()>0">
+                and r.professional_category_code in
+                <foreach item="item" index="index" collection="professionalCategoryCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC
+    </select>
+
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into project_apply_main
+        (business_id,serial_number,creator_org_id,creator_org_name,creator_user_id,creator_user,created_date,project_name,
+         unit_name,unit_address,apply_user_name,apply_user_id,gender,gender_code,age,post_code,post_name,create_time,update_time,
+         update_user,update_user_id,telephone,apply_amount,start_year,end_year,zip_code,professional_category_code,professional_category,
+         project_type_code,project_type,identify,research_contents,review_comments,approve_user_id,approve_user_name,approve_time,
+         process_inst_id,process_status,next_approve_user_id,next_approve_user_name)
+        values (#{businessId},#{serialNumber},#{creatorOrgId},#{creatorOrgName} ,
+                #{creatorUserId},#{creatorUserName},#{createdDate,jdbcType=DATE},#{projectName},
+                #{unitName},#{unitAddress},#{applyUserName},#{applyUserId},#{gender},#{genderCode},
+                #{age},#{postCode},#{postName},getDate(),getDate() ,#{creatorUser},
+                #{creatorUserId},#{telephone},#{applyAmount, jdbcType=DECIMAL},#{startYear,jdbcType=DATE},#{endYear,jdbcType=DATE},#{zipCode},
+                #{professionalCategoryCode},#{professionalCategory},#{projectTypeCode},
+                #{projectType},#{identify},#{researchContents},#{reviewComments},
+                #{approveUserId},#{approveUserName},#{approveTime},#{processInstId},
+                #{processStatus},#{nextApproveUserId},#{nextApproveUserName})
+    </insert>
+
+
+    <insert id="insertSurvey" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into project_apply_survey_info
+            (business_id, current_situation, purpose_significance, content_method,
+                                              target_results, basic_conditions,innovation_points,feasibility_analysis)
+        values (#{businessId}, #{currentSituation}, #{purposeSignificance}, #{contentMethod}, #{targetResults},
+                #{basicConditions},#{innovationPoints},#{feasibilityAnalysis})
+    </insert>
+
+    <insert id="batchInsertProgressPlan" parameterType="java.util.List">
+        INSERT INTO project_apply_progress_plan
+        (business_id,years, plan_target,creator_user_id,creator_user,create_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.years},
+            #{item.planTarget},#{item.creatorUserId},#{item.creatorUser},#{item.createTime,jdbcType=DATE}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="batchInsertAttendUnit" parameterType="java.util.List">
+        INSERT INTO project_apply_attend_unit
+        (business_id,unit_name, task_division,creator_user_id,creator_user,create_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.unitName},
+            #{item.taskDivision},#{item.creatorUserId},#{item.creatorUser},#{item.createTime,jdbcType=DATE}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="batchInsertResearchUser" parameterType="java.util.List">
+        INSERT INTO project_apply_research_user
+        (  business_id,user_name,id_card,age,gender,education,belong_department,belong_post,major_studied,
+            major_worked,belong_unit,task_division,work_rate,telephone,create_time,creator_user,creator_user_id,
+              start_date,end_date,user_type,user_status
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.userName},#{item.idCard},#{item.age},#{item.gender},#{item.education},#{item.belongDepartment},#{item.belongPost},
+            #{item.majorStudied}, #{item.majorWorked},#{item.belongUnit},#{item.taskDivision},#{item.workRate},#{item.telephone},#{item.createTime,jdbcType=DATE},
+            #{item.creatorUser},#{item.creatorUserId}, #{item.startDate,jdbcType=DATE},#{item.endDate,jdbcType=DATE},1,1
+            )
+        </foreach>
+    </insert>
+
+
+
+    <insert id="batchAppropriationPlan" parameterType="java.util.List">
+        INSERT INTO project_apply_appropriation_plan
+        (  business_id,years,plan_amount,creator_user_id,creator_user,create_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.years},#{item.planAmount, jdbcType=DECIMAL},#{item.creatorUserId},#{item.creatorUser},#{item.createTime,jdbcType=DATE}
+            )
+        </foreach>
+    </insert>
+
+
+
+    <insert id="batchInsertBudget" parameterType="java.util.List">
+        INSERT INTO project_apply_funds_budget
+        (  business_id,source_account,source_budget,expense_account,expense_budget
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceAccount},#{item.sourceBudget, jdbcType=DECIMAL},#{item.expenseAccount},#{item.expenseBudget, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertBudgetMonth" parameterType="java.util.List">
+        INSERT INTO project_apply_budget_month
+        (  business_id,source_account,source_budget,expense_account,expense_budget
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceAccount},#{item.sourceBudget, jdbcType=DECIMAL},#{item.expenseAccount},#{item.expenseBudget, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="batchInsertBudgetMonthDetail" parameterType="java.util.List">
+        INSERT INTO project_apply_budget_month_detail
+        (  business_id,january,february,march,april,may,june,
+        july,august,september,october,november,december,years,expense_account
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.january, jdbcType=DECIMAL},#{item.february, jdbcType=DECIMAL},#{item.march, jdbcType=DECIMAL},
+            #{item.april, jdbcType=DECIMAL},#{item.may, jdbcType=DECIMAL},#{item.june, jdbcType=DECIMAL},#{item.july, jdbcType=DECIMAL}
+            ,#{item.august, jdbcType=DECIMAL},#{item.september, jdbcType=DECIMAL},#{item.october, jdbcType=DECIMAL},#{item.november, jdbcType=DECIMAL}
+            ,#{item.december, jdbcType=DECIMAL},#{item.years},#{item.expenseAccount}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateMain" parameterType="pd">
+        update project_apply_main
+        set project_name = #{projectName},
+            unit_name = #{unitName},
+            unit_address = #{unitAddress},
+            apply_user_name = #{applyUserName},
+            apply_user_id = #{applyUserId},
+            gender = #{gender},
+            gender_code = #{genderCode},
+            age = #{age},
+            post_code = #{postCode},
+            post_name = #{postName},
+            telephone = #{telephone},
+            apply_amount = #{applyAmount, jdbcType=DECIMAL},
+            start_year = #{startYear,jdbcType=DATE},
+            end_year = #{endYear,jdbcType=DATE},
+            zip_code = #{zipCode},
+            professional_category_code = #{professionalCategoryCode},
+            professional_category = #{professionalCategory},
+            project_type_code = #{projectTypeCode},
+            project_type = #{projectType},
+            identify = #{identify},
+            research_contents = #{researchContents},
+            review_comments = #{reviewComments},
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = #{approveTime},
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+
+    <update id="updateSurvey" parameterType="pd">
+        update project_apply_survey_info
+        set current_situation = #{currentSituation},
+            purpose_significance = #{purposeSignificance},
+            content_method = #{contentMethod},
+            target_results = #{targetResults},
+            basic_conditions = #{basicConditions},
+            innovation_points = #{innovationPoints},
+            feasibility_analysis = #{feasibilityAnalysis}
+        where business_id = #{businessId}
+    </update>
+
+
+    <delete id="deleteProgressPlan" parameterType="java.util.List">
+        delete from project_apply_progress_plan
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAttendUnit" parameterType="java.util.List">
+        delete from project_apply_attend_unit
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteResearchUser" parameterType="java.util.List">
+        delete from project_apply_research_user
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBudget" parameterType="java.util.List">
+        delete from project_apply_funds_budget
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteBudgetMonth" parameterType="java.util.List">
+        delete from project_apply_budget_month
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteBudgetMonthDetail" parameterType="java.util.List">
+        delete from project_apply_budget_month_detail
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteAppropriationPlan" parameterType="java.util.List">
+        delete from project_apply_progress_plan
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="selectByBusinessId" parameterType="java.util.List" resultType="pd">
+        SELECT
+        business_id as businessId,
+        process_status as processStatus
+        FROM  project_apply_main
+        where business_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <delete id="deleteMain" parameterType="java.util.List">
+        delete from project_apply_main
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteSurvey" parameterType="java.util.List">
+        delete from project_apply_survey_info
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="queryApplyDetail" parameterType="pd" resultType="pd">
+        SELECT
+            r.id,
+            r.business_id AS businessId,
+            r.serial_number AS serialNumber,
+            r.creator_org_id AS creatorOrgId,
+            r.creator_org_name AS creatorOrgName,
+            r.creator_user_id AS creatorUserId,
+            r.creator_user AS creatorUser,
+            r.created_date AS createdDate,
+            r.project_name AS projectName,
+            r.unit_name AS unitName,
+            r.unit_address AS unitAddress,
+            r.apply_user_name AS applyUserName,
+            r.apply_user_id AS applyUserId,
+            r.gender,
+            r.gender_code AS genderCode,
+            r.age,
+            r.post_code AS postCode,
+            r.post_name AS postName,
+            r.create_time AS createTime,
+            r.update_time AS updateTime,
+            r.update_user AS updateUser,
+            r.update_user_id AS updateUserId,
+            r.telephone,
+            r.apply_amount AS applyAmount,
+            r.start_year AS startYear,
+            r.end_year AS endYear,
+            r.zip_code AS zipCode,
+            r.professional_category_code AS professionalCategoryCode,
+            r.professional_category AS professionalCategory,
+            r.project_type_code AS projectTypeCode,
+            r.project_type AS projectType,
+            r.identify,
+            r.research_contents AS researchContents,
+            r.review_comments AS reviewComments,
+            r.approve_user_id AS approveUserId,
+            r.approve_user_name AS approveUserName,
+            r.approve_time AS approveTime,
+            r.process_inst_id AS processInstId,
+            r.process_status AS processStatus,
+            r.next_approve_user_id AS nextApproveUserId,
+            r.next_approve_user_name AS nextApproveUserName,
+            i.current_situation AS currentSituation,
+            i.purpose_significance AS purposeSignificance,
+            i.content_method AS contentMethod,
+            i.target_results AS targetResults,
+            i.basic_conditions AS basicConditions,
+            i.innovation_points AS innovationPoints,
+            i.feasibility_analysis AS feasibilityAnalysis
+        FROM
+            project_apply_main r
+                LEFT JOIN project_apply_survey_info i ON i.business_id = r.business_id
+        WHERE  r.business_id = #{businessId}
+    </select>
+
+
+    <select id="queryProgressPlan" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            years,
+            plan_target as planTarget,
+            creator_user_id as creatorUserId,
+            creator_user as creatorUser,
+            create_time as createTime
+        FROM  project_apply_progress_plan
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryAttendUnit" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            unit_name as unitName,
+            task_division as taskDivision,
+            creator_user_id as creatorUserId,
+            creator_user as creatorUser,
+            create_time as createTime
+        FROM  project_apply_attend_unit
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryBudget" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            source_budget_change as sourceBudgetChange,
+            expense_account as expenseAccount,
+            expense_budget as expenseBudget,
+            expense_budget_change as expenseBudgetChange
+        FROM  project_apply_funds_budget
+        where business_id = #{businessId}
+    </select>
+
+
+
+    <select id="queryResearchUser" parameterType="pd" resultType="pd">
+        SELECT id,
+               business_id as businessId,
+               user_name as userName,
+               id_card as idCard,
+               age,
+               gender,
+               education,
+               belong_department as belongDepartment,
+               belong_post as belongPost,
+               major_studied as majorStudied,
+               major_worked as majorWorked,
+               belong_unit as belongUnit,
+               task_division as taskDivision,
+               work_rate as workRate,
+               telephone,
+               create_time as createTime,
+               creator_user as creatorUser,
+               creator_user_id as creatorUserId,
+               start_date as startDate,
+               end_date as endDate,
+               user_type as userType,
+               user_status as userStatus
+        FROM project_apply_research_user
+        where business_id = #{businessId} and user_type = 1
+    </select>
+
+    <select id="queryRsearchUserChange" parameterType="pd" resultType="pd">
+        SELECT id,
+               business_id as businessId,
+               user_name as userName,
+               id_card as idCard,
+               age,
+               gender,
+               education,
+               belong_department as belongDepartment,
+               belong_post as belongPost,
+               major_studied as majorStudied,
+               major_worked as majorWorked,
+               belong_unit as belongUnit,
+               task_division as taskDivision,
+               work_rate as workRate,
+               telephone,
+               create_time as createTime,
+               creator_user as creatorUser,
+               creator_user_id as creatorUserId,
+               start_date as startDate,
+               end_date as endDate,
+               user_type as userType,
+               user_status as userStatus
+        FROM project_apply_research_user
+        where business_id = #{businessId} and user_type = 2
+    </select>
+
+
+    <select id="queryMonthList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            expense_account as expenseAccount,
+            expense_budget as expenseBudget
+        FROM  project_apply_budget_month
+        where business_id = #{businessId}
+        order by id
+    </select>
+
+
+    <select id="queryMonthDetailList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            january,february,march,april,may,june,
+            july,august,september,october,november,december,years
+        FROM  project_apply_budget_month_detail
+        where business_id = #{businessId}
+        order by id
+    </select>
+
+
+    <select id="queryAppropriationPlan" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            years,
+            plan_amount as planAmount,
+            create_time as createTime,
+            creator_user as creatorUser,
+            creator_user_id as creatorUserId
+
+        FROM  project_apply_appropriation_plan
+        where business_id = #{businessId}
+    </select>
+
+    <update id="updateApproveStatus" parameterType="pd">
+        update project_apply_main
+        set approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = #{approveTime},
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
 
 
 </mapper>

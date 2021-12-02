@@ -1,8 +1,8 @@
 package com.rdexpense.manager.dto.projectApply;
 
+import com.common.entity.PageData;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rdexpense.manager.dto.base.BaseEntity;
-import com.rdexpense.manager.dto.base.OrganizationDto;
 import com.rdexpense.manager.dto.file.CreateFileDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -121,89 +121,17 @@ public class ProjectApplyDetailDto extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "参加单位")
     private List<AttendUnitDetailDto> attendUnit;
 
-    @ApiModelProperty(value = "研究人员")
+    @ApiModelProperty(value = "研究人员（初始）")
     private List<ResearchUserDetailDto> researchUser;
 
-    @ApiModelProperty(value = "经费来源预算(只有一个元素)")
-    private List<BudgetSourceDto> budgetSource;
+    @ApiModelProperty(value = "研究人员（变更）")
+    private List<ResearchUserDetailDto> researchUserChange;
 
-    @ApiModelProperty(value = "经费支出预算(只有一个元素)")
-    private List<BudgetExpensesDto> budgetExpenses;
+    @ApiModelProperty(value = "经费预算(只有一个元素)")
+    private List<BudgetDetailDto> budgetList;
 
-    @ApiModelProperty(value = "来源预算合计(经费预算-每月预算)")
-    private String totalSourceBudget;
-
-    @ApiModelProperty(value = "一、股份公司计划拨款(经费预算-每月预算)")
-    private String companyAppropriation;
-
-    @ApiModelProperty(value = "二、国家拨款(经费预算-每月预算)")
-    private String stateAppropriation;
-
-    @ApiModelProperty(value = "三、省市拨款(经费预算-每月预算)")
-    private String provincesAppropriation;
-
-    @ApiModelProperty(value = "四、单位自筹款(经费预算-每月预算)")
-    private String unitFunds;
-
-    @ApiModelProperty(value = "五、银行贷款(经费预算-每月预算)")
-    private String bankLoans;
-
-    @ApiModelProperty(value = "六、其他来源款(经费预算-每月预算)")
-    private String otherSource;
-
-    @ApiModelProperty(value = "支出预算合计(经费预算-每月预算)")
-    private String totalExpenseBudget;
-
-    @ApiModelProperty(value = "一、人员费(经费预算-每月预算)")
-    private String staffCost;
-
-    @ApiModelProperty(value = "二、设备费(经费预算-每月预算)")
-    private String equipmentCost;
-
-    @ApiModelProperty(value = "三、材料费(经费预算-每月预算)")
-    private String materialCost;
-
-    @ApiModelProperty(value = "四、燃料及动力费(经费预算-每月预算)")
-    private String fuelCost;
-
-    @ApiModelProperty(value = "五、测试及化验费(经费预算-每月预算)")
-    private String assayCost;
-
-    @ApiModelProperty(value = "六、差旅费(经费预算-每月预算)")
-    private String travelCost;
-
-    @ApiModelProperty(value = "七、会议费(经费预算-每月预算)")
-    private String meetingCost;
-
-    @ApiModelProperty(value = "八、课题管理费(经费预算-每月预算)")
-    private String managementCost;
-
-    @ApiModelProperty(value = "九、其他费用(经费预算-每月预算)")
-    private String otherCost;
-
-    @ApiModelProperty(value = "1、国际合作交流费(经费预算-每月预算)")
-    private String exchangeCost;
-
-    @ApiModelProperty(value = "2、出版/文献/信息传播(经费预算-每月预算)")
-    private String communicationCost;
-
-    @ApiModelProperty(value = "3、知识产权事务(经费预算-每月预算)")
-    private String propertyCost;
-
-    @ApiModelProperty(value = "4、专家费(经费预算-每月预算)")
-    private String expertCost;
-
-    @ApiModelProperty(value = "5、其他(经费预算-每月预算)")
-    private String other;
-
-    @ApiModelProperty(value = "十、新产品设计费(经费预算-每月预算)")
-    private String designCost;
-
-    @ApiModelProperty(value = "十一、委托研发费用(经费预算-每月预算)")
-    private String expensesCost;
-
-    @ApiModelProperty(value = "年度预算（按月填报")
-    private List<BudgetMonthDetailDto> MonthList;
+    @ApiModelProperty(value = "经费预算（每月预算）")
+    private List<PageData> monthList;
 
     @ApiModelProperty(value = "拨款计划")
     private List<AppropriationPlanDetailDto> appropriationPlan;

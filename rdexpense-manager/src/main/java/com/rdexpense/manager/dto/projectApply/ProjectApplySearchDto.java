@@ -63,7 +63,7 @@ public class ProjectApplySearchDto implements Serializable {
     private String updateTime;
 
     @ApiModelProperty(value = "编制人")
-    private String createUser;
+    private String creatorUser;
 
     @ApiModelProperty(value = "当前页码,值需大于等于1",required=true)
     private Integer pageNum;
