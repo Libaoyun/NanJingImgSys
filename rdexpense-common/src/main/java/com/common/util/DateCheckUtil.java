@@ -1,6 +1,9 @@
 package com.common.util;
 
 
+import com.common.base.exception.MyException;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,7 +16,6 @@ import java.util.Date;
 public class DateCheckUtil {
 
     public final static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
 
 
     //判断选择的日期是否是本周
@@ -188,6 +190,43 @@ public class DateCheckUtil {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * 判断两个日期的前后顺序
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static String checkOrder(String date1,String date2) {
+
+        String result = "";
+        try {
+            Date formatDate1 = format.parse(date1);
+            Date formatDate2 = format.parse(date2);
+
+            //比较两个日期
+            int index = formatDate2.compareTo(formatDate1);
+
+            //如果日期相等返回0
+            if (index == 0) {
+                result = "equal";
+            } else if (index < 0) {
+                //小于0，参数date1就是在date2之后,date1大于date2
+                result = "than";
+            } else {
+                //大于0，参数date1就是在date2之前,date1小于date2
+                result = "less";
+            }
+
+        } catch (ParseException e) {
+            throw new MyException("时间格式错误");
+
+        }
+
+        return result;
+
     }
 
 }
