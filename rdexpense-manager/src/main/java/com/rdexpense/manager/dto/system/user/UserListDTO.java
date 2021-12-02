@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @ApiModel(value = "员工管理列表")
@@ -115,6 +116,9 @@ public class UserListDTO extends  BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "宗教信仰")
     private String religion;
+
+    @ApiModelProperty(value = "部门列表")
+    private List<UserDepartmentDto> departmentList;
 
 }
 

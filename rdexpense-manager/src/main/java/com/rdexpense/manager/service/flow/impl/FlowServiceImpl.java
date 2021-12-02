@@ -186,6 +186,28 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public List<PageData> queryFlowUser(PageData pd) {
         List<PageData> list = (List<PageData>) baseDao.findForList("FlowMapper.queryFlowUser", pd);
+
+        if (!CollectionUtils.isEmpty(list)) {
+            //查询部门职务表
+            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData", list);
+            if (!CollectionUtils.isEmpty(postList)) {
+                for (PageData data : list) {
+                    List<PageData> departmentList = new ArrayList<>();
+                    String userCode = data.getString("userCode");
+                    for (PageData postData : postList) {
+                        if (userCode.equals(postData.getString("userCode"))) {
+                            departmentList.add(postData);
+                        }
+                    }
+
+                    data.put("departmentList",departmentList);
+
+                }
+            }
+        }
+
+
+
         return list;
     }
 

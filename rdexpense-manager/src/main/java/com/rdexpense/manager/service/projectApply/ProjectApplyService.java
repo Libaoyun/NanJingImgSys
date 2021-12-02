@@ -130,7 +130,7 @@ public interface ProjectApplyService {
      * @return
      * @throws Exception
      */
-    PageData uploadBudget(MultipartFile file, PageData pd) throws Exception;
+    List<PageData> uploadBudget(MultipartFile file, PageData pd) throws Exception;
 
     /**
      * 导入经费预算-每月预算
@@ -139,7 +139,7 @@ public interface ProjectApplyService {
      * @return
      * @throws Exception
      */
-    PageData uploadMonth(MultipartFile file, PageData pd) throws Exception;
+    List<PageData> uploadMonth(MultipartFile file, PageData pd) throws Exception;
 
     /**
      * 导入拨款计划

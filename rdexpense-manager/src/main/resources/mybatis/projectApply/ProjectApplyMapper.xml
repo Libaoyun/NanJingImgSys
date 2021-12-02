@@ -58,8 +58,8 @@
             <if test="researchContents!=null and researchContents!=''">
                 and r.research_contents LIKE concat('%',#{researchContents},'%')
             </if>
-            <if test="createUser!=null and createUser!=''">
-                and r.creator_user LIKE concat ('%',#{createUser},'%')
+            <if test="creatorUser!=null and creatorUser!=''">
+                and r.creator_user LIKE concat ('%',#{creatorUser},'%')
             </if>
 
             <if test="createTime!=null and createTime!=''">
@@ -158,7 +158,7 @@
     <insert id="batchInsertResearchUser" parameterType="java.util.List">
         INSERT INTO project_apply_research_user
         (  business_id,user_name,id_card,age,gender,education,belong_department,belong_post,major_studied,
-            major_worked,belong_unit,task_division,work_rate,telephone,create_time,create_user,create_user_id,
+            major_worked,belong_unit,task_division,work_rate,telephone,create_time,creator_user,creator_user_id,
               start_date,end_date,user_type,user_status
         )
         VALUES
@@ -170,47 +170,7 @@
         </foreach>
     </insert>
 
-    <insert id="insertBudgetSource" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO project_apply_budget_source
-        (  business_id,total_source_budget,company_appropriation,state_appropriation,provinces_appropriation,unit_funds,bank_loans,other_source,status
-        )
-        VALUES
-            (#{businessId},#{totalSourceBudget, jdbcType=DECIMAL},#{companyAppropriation, jdbcType=DECIMAL},#{stateAppropriation, jdbcType=DECIMAL},
-            #{provincesAppropriation, jdbcType=DECIMAL},#{unitFunds, jdbcType=DECIMAL},#{bankLoans, jdbcType=DECIMAL},#{otherSource, jdbcType=DECIMAL},#{status}
-            )
 
-    </insert>
-
-
-    <insert id="insertBudgetExpenses" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO project_apply_budget_expenses
-        (  business_id,total_expense_budget,staff_cost,equipment_cost,material_cost,fuel_cost,assay_cost,travel_cost,meeting_cost,management_cost,
-             other_cost,exchange_cost,communication_cost,property_cost,expert_cost,other,design_cost, expenses_cost,status
-        )
-        VALUES
-            (#{businessId},#{totalExpenseBudget, jdbcType=DECIMAL},#{staffCost, jdbcType=DECIMAL},#{equipmentCost, jdbcType=DECIMAL},
-            #{materialCost, jdbcType=DECIMAL},#{fuelCost, jdbcType=DECIMAL},#{assayCost, jdbcType=DECIMAL},#{travelCost, jdbcType=DECIMAL}
-            ,#{meetingCost, jdbcType=DECIMAL},#{managementCost, jdbcType=DECIMAL},#{otherCost, jdbcType=DECIMAL},#{exchangeCost, jdbcType=DECIMAL}
-            ,#{communicationCost, jdbcType=DECIMAL},#{propertyCost, jdbcType=DECIMAL},#{expertCost, jdbcType=DECIMAL}
-            ,#{other, jdbcType=DECIMAL},#{designCost, jdbcType=DECIMAL},#{expensesCost, jdbcType=DECIMAL},#{status}
-            )
-    </insert>
-
-
-    <insert id="batchInsertMonthList" parameterType="java.util.List">
-        INSERT INTO project_apply_budget_month
-        (  business_id,january,february,march,april,may,june,
-        july,august,september,october,november,december,years
-        )
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (#{item.businessId},#{item.january, jdbcType=DECIMAL},#{item.february, jdbcType=DECIMAL},#{item.march, jdbcType=DECIMAL},
-            #{item.april, jdbcType=DECIMAL},#{item.may, jdbcType=DECIMAL},#{item.june, jdbcType=DECIMAL},#{item.july, jdbcType=DECIMAL}
-            ,#{item.august, jdbcType=DECIMAL},#{item.september, jdbcType=DECIMAL},#{item.october, jdbcType=DECIMAL},#{item.november, jdbcType=DECIMAL}
-            ,#{item.december, jdbcType=DECIMAL},#{item.years}
-            )
-        </foreach>
-    </insert>
 
     <insert id="batchAppropriationPlan" parameterType="java.util.List">
         INSERT INTO project_apply_appropriation_plan
@@ -222,6 +182,47 @@
             )
         </foreach>
     </insert>
+
+
+
+    <insert id="batchInsertBudget" parameterType="java.util.List">
+        INSERT INTO project_apply_funds_budget
+        (  business_id,source_account,source_budget,expense_account,expense_budget
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceAccount},#{item.sourceBudget, jdbcType=DECIMAL},#{item.expenseAccount},#{item.expenseBudget, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertBudgetMonth" parameterType="java.util.List">
+        INSERT INTO project_apply_budget_month
+        (  business_id,source_account,source_budget,expense_account,expense_budget
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceAccount},#{item.sourceBudget, jdbcType=DECIMAL},#{item.expenseAccount},#{item.expenseBudget, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="batchInsertBudgetMonthDetail" parameterType="java.util.List">
+        INSERT INTO project_apply_budget_month_detail
+        (  business_id,january,february,march,april,may,june,
+        july,august,september,october,november,december,years,expense_account
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.january, jdbcType=DECIMAL},#{item.february, jdbcType=DECIMAL},#{item.march, jdbcType=DECIMAL},
+            #{item.april, jdbcType=DECIMAL},#{item.may, jdbcType=DECIMAL},#{item.june, jdbcType=DECIMAL},#{item.july, jdbcType=DECIMAL}
+            ,#{item.august, jdbcType=DECIMAL},#{item.september, jdbcType=DECIMAL},#{item.october, jdbcType=DECIMAL},#{item.november, jdbcType=DECIMAL}
+            ,#{item.december, jdbcType=DECIMAL},#{item.years},#{item.expenseAccount}
+            )
+        </foreach>
+    </insert>
+
 
     <update id="updateMain" parameterType="pd">
         update project_apply_main
@@ -298,67 +299,26 @@
         </foreach>
     </delete>
 
-
-    <delete id="deleteBudgetSource" parameterType="pd">
-        delete from project_apply_budget_source
+    <delete id="deleteBudget" parameterType="java.util.List">
+        delete from project_apply_funds_budget
         where 1=1 and business_id in
-        <foreach item="item" index="index" collection="removeList" open="(" separator="," close=")">
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
         </foreach>
-        <if test="status!=null and status!=''">
-            and status = #{status}
-        </if>
     </delete>
 
-    <delete id="deleteBudgetExpenses" parameterType="pd">
-        delete from project_apply_budget_expenses
-        where 1=1 and business_id in
-        <foreach item="item" index="index" collection="removeList" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        <if test="status!=null and status!=''">
-            and status = #{status}
-        </if>
-    </delete>
 
-    <update id="updateBudgetSource" parameterType="pd">
-        update project_apply_budget_source
-        set total_source_budget = #{totalSourceBudget, jdbcType=DECIMAL},
-            company_appropriation = #{companyAppropriation, jdbcType=DECIMAL},
-            state_appropriation = #{stateAppropriation, jdbcType=DECIMAL},
-            provinces_appropriation = #{provincesAppropriation, jdbcType=DECIMAL},
-            unit_funds = #{unitFunds, jdbcType=DECIMAL},
-            bank_loans = #{bankLoans, jdbcType=DECIMAL},
-            other_source = #{otherSource, jdbcType=DECIMAL}
-        where business_id = #{businessId} and status = #{status}
-    </update>
-
-
-    <update id="updateBudgetExpenses" parameterType="pd">
-        update project_apply_budget_expenses
-        set total_expense_budget = #{totalExpenseBudget, jdbcType=DECIMAL},
-            staff_cost = #{staffCost, jdbcType=DECIMAL},
-            equipment_cost = #{equipmentCost, jdbcType=DECIMAL},
-            material_cost = #{materialCost, jdbcType=DECIMAL},
-            fuel_cost = #{fuelCost, jdbcType=DECIMAL},
-            assay_cost = #{assayCost, jdbcType=DECIMAL},
-            travel_cost = #{travelCost, jdbcType=DECIMAL},
-            meeting_cost = #{meetingCost, jdbcType=DECIMAL},
-            management_cost = #{managementCost, jdbcType=DECIMAL},
-            other_cost = #{otherCost, jdbcType=DECIMAL},
-            exchange_cost = #{exchangeCost, jdbcType=DECIMAL},
-            communication_cost = #{communicationCost, jdbcType=DECIMAL},
-            property_cost = #{propertyCost, jdbcType=DECIMAL},
-            expert_cost = #{expertCost, jdbcType=DECIMAL},
-            other = #{other, jdbcType=DECIMAL},
-            design_cost = #{designCost, jdbcType=DECIMAL},
-            expenses_cost = #{expensesCost, jdbcType=DECIMAL}
-        where business_id = #{businessId} and status = #{status}
-    </update>
-
-
-    <delete id="deleteMonthList" parameterType="java.util.List">
+    <delete id="deleteBudgetMonth" parameterType="java.util.List">
         delete from project_apply_budget_month
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteBudgetMonthDetail" parameterType="java.util.List">
+        delete from project_apply_budget_month_detail
         where 1=1 and business_id in
         <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
@@ -416,28 +376,58 @@
 
     <select id="queryApplyDetail" parameterType="pd" resultType="pd">
         SELECT
-            r.id,r.business_id as businessId,r.serial_number as serialNumber,r.creator_org_id as creatorOrgId,r.creator_org_name as creatorOrgName ,
-            r.creator_user_id as creatorUserId,r.creator_user as creatorUser,r.created_date as createdDate,r.project_name as projectName,
-            r.unit_name as unitName,r.unit_address as unitAddress,r.apply_user_name as applyUserName,r.apply_user_id as applyUserId,r.gender,r.gender_code as genderCode,
-            r.age,r.post_code as postCode,r.post_name as postName,r.create_time as createTime,r.update_time as updateTime ,r.update_user as updateUser,
-            r.update_user_id as updateUserId,r.telephone,r.apply_amount as applyAmount,r.start_year as startYear,r.end_year as endYear,r.zip_code as zipCode,
-            r.professional_category_code as professionalCategoryCode,r.professional_category as professionalCategory,r.project_type_code as projectTypeCode,
-            r.project_type as projectType,r.identify,r.research_contents as researchContents,r.review_comments as reviewComments,
-            r.approve_user_id as approveUserId,r.approve_user_name as approveUserName,r.approve_time as approveTime,r.process_inst_id as processInstId,
-            r.process_status as processStatus,r.next_approve_user_id as nextApproveUserId,r.next_approve_user_name as nextApproveUserName,
-            i.current_situation as currentSituation,i.purpose_significance as purposeSignificance,i.content_method as contentMethod,
-            i.target_results as targetResults,i.basic_conditions as basicConditions,i.innovation_points as innovationPoints,i.feasibility_analysis as feasibilityAnalysis,
-            s.total_source_budget as totalSourceBudget,s.company_appropriation as companyAppropriation,s.state_appropriation as stateAppropriation,
-            s.provinces_appropriation as provincesAppropriation,s.unit_funds as unitFunds,s.bank_loans as bankLoans,s.other_source as otherSource,
-            e.total_expense_budget as totalExpenseBudget,e.staff_cost as staffCost,e.equipment_cost as equipmentCost, e.material_cost as materialCost,
-            e.fuel_cost as fuelCost,e.assay_cost as assayCost,e.travel_cost as travelCost,e.meeting_cost as meetingCost,e.management_cost as managementCost,
-            e.other_cost as otherCost, e.exchange_cost as exchangeCost, e.communication_cost as communicationCost, e.property_cost as propertyCost,
-            e.expert_cost as expertCost,e.other as other, e.design_cost as designCost, e.expenses_cost as expensesCost
-        FROM project_apply_main r
-                 LEFT JOIN project_apply_survey_info i on i.business_id = r.business_id
-                 LEFT JOIN project_apply_budget_source s on s.business_id = r.business_id
-                 LEFT JOIN project_apply_budget_expenses e on e.business_id = r.business_id
-        WHERE s.status = 3 and e.status = 3 and r.business_id = #{businessId}
+            r.id,
+            r.business_id AS businessId,
+            r.serial_number AS serialNumber,
+            r.creator_org_id AS creatorOrgId,
+            r.creator_org_name AS creatorOrgName,
+            r.creator_user_id AS creatorUserId,
+            r.creator_user AS creatorUser,
+            r.created_date AS createdDate,
+            r.project_name AS projectName,
+            r.unit_name AS unitName,
+            r.unit_address AS unitAddress,
+            r.apply_user_name AS applyUserName,
+            r.apply_user_id AS applyUserId,
+            r.gender,
+            r.gender_code AS genderCode,
+            r.age,
+            r.post_code AS postCode,
+            r.post_name AS postName,
+            r.create_time AS createTime,
+            r.update_time AS updateTime,
+            r.update_user AS updateUser,
+            r.update_user_id AS updateUserId,
+            r.telephone,
+            r.apply_amount AS applyAmount,
+            r.start_year AS startYear,
+            r.end_year AS endYear,
+            r.zip_code AS zipCode,
+            r.professional_category_code AS professionalCategoryCode,
+            r.professional_category AS professionalCategory,
+            r.project_type_code AS projectTypeCode,
+            r.project_type AS projectType,
+            r.identify,
+            r.research_contents AS researchContents,
+            r.review_comments AS reviewComments,
+            r.approve_user_id AS approveUserId,
+            r.approve_user_name AS approveUserName,
+            r.approve_time AS approveTime,
+            r.process_inst_id AS processInstId,
+            r.process_status AS processStatus,
+            r.next_approve_user_id AS nextApproveUserId,
+            r.next_approve_user_name AS nextApproveUserName,
+            i.current_situation AS currentSituation,
+            i.purpose_significance AS purposeSignificance,
+            i.content_method AS contentMethod,
+            i.target_results AS targetResults,
+            i.basic_conditions AS basicConditions,
+            i.innovation_points AS innovationPoints,
+            i.feasibility_analysis AS feasibilityAnalysis
+        FROM
+            project_apply_main r
+                LEFT JOIN project_apply_survey_info i ON i.business_id = r.business_id
+        WHERE  r.business_id = #{businessId}
     </select>
 
 
@@ -466,6 +456,21 @@
         FROM  project_apply_attend_unit
         where business_id = #{businessId}
     </select>
+
+    <select id="queryBudget" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            source_budget_change as sourceBudgetChange,
+            expense_account as expenseAccount,
+            expense_budget as expenseBudget,
+            expense_budget_change as expenseBudgetChange
+        FROM  project_apply_funds_budget
+        where business_id = #{businessId}
+    </select>
+
 
 
     <select id="queryResearchUser" parameterType="pd" resultType="pd">
@@ -522,44 +527,30 @@
         where business_id = #{businessId} and user_type = 2
     </select>
 
-    <select id="queryBudgetSource" parameterType="pd" resultType="pd">
-        SELECT
-            id,
-            business_id as businessId,
-            total_source_budget as totalSourceBudget,
-            company_appropriation as companyAppropriation,
-            state_appropriation as stateAppropriation,
-            provinces_appropriation as provincesAppropriation,
-            unit_funds as unitFunds,
-            bank_loans as bankLoans,
-            other_source as otherSource,
-            status
-        FROM  project_apply_budget_source
-        where business_id = #{businessId} and status != 3
-    </select>
-
-    <select id="queryBudgetExpenses" parameterType="pd" resultType="pd">
-        SELECT
-            id,
-            business_id as businessId,
-            total_expense_budget as totalExpenseBudget,staff_cost as staffCost,equipment_cost as equipmentCost, material_cost as materialCost,
-            fuel_cost as fuelCost,assay_cost as assayCost,travel_cost as travelCost,meeting_cost as meetingCost,management_cost as managementCost,
-            other_cost as otherCost, exchange_cost as exchangeCost, communication_cost as communicationCost, property_cost as propertyCost,
-            expert_cost as expertCost,other as other, design_cost as designCost, expenses_cost as expensesCost,
-            status
-        FROM  project_apply_budget_expenses
-        where business_id = #{businessId} and status != 3
-    </select>
-
 
     <select id="queryMonthList" parameterType="pd" resultType="pd">
         SELECT
             id,
             business_id as businessId,
-            january,february,march,april,may,june,
-            july,august,september,october,november,december,years
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            expense_account as expenseAccount,
+            expense_budget as expenseBudget
         FROM  project_apply_budget_month
         where business_id = #{businessId}
+        order by id
+    </select>
+
+
+    <select id="queryMonthDetailList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            january,february,march,april,may,june,
+            july,august,september,october,november,december,years
+        FROM  project_apply_budget_month_detail
+        where business_id = #{businessId}
+        order by id
     </select>
 
 

@@ -10,6 +10,7 @@ import com.common.util.*;
 import com.rdexpense.manager.service.file.FileService;
 import com.rdexpense.manager.service.flow.FlowService;
 import com.rdexpense.manager.service.projectApply.ProjectApplyService;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
@@ -55,6 +56,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
     SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private  static final String[] arr = {"january","february","march","april","may","june","july","august","september","october","november","december"};
+
     /**
      * 查询列表
      *
@@ -87,7 +90,6 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @param pd
      * @return
      */
-    @Override
     @Transactional
     public void addApply(PageData pd) {
 
@@ -145,52 +147,40 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             dao.batchInsert("ProjectApplyMapper.batchInsertResearchUser", researchUserList);
         }
 
-        //6、经费来源预算
-        String budgetSource = pd.getString("budgetSource");
-        List<PageData> budgetSourceList = JSONObject.parseArray(budgetSource, PageData.class);
-        if (!CollectionUtils.isEmpty(budgetSourceList)) {
-            for (PageData detailData : budgetSourceList) {
+        //6、插入经费预算
+        String budgetListStr = pd.getString("budgetList");
+        List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
+        if (!CollectionUtils.isEmpty(budgetList)) {
+            for (PageData detailData : budgetList) {
                 detailData.put("businessId", businessId);
-                detailData.put("status", 1);
 
-                dao.insert("ProjectApplyMapper.insertBudgetSource", detailData);
             }
 
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudget", budgetList);
 
         }
 
-        //7、经费支出预算
-        String budgetExpenses = pd.getString("budgetExpenses");
-        List<PageData> budgetExpensesList = JSONObject.parseArray(budgetExpenses, PageData.class);
-        if (!CollectionUtils.isEmpty(budgetExpensesList)) {
-            for (PageData detailData : budgetExpensesList) {
-                detailData.put("businessId", businessId);
-                detailData.put("status", 1);
-
-                dao.insert("ProjectApplyMapper.insertBudgetExpenses", detailData);
-            }
-
-        }
-
-        pd.put("status", 3);
-        //8、插入经费来源每月预算
-        dao.insert("ProjectApplyMapper.insertBudgetSource", pd);
-
-        //9、插入经费支出每月预算
-        dao.insert("ProjectApplyMapper.insertBudgetExpenses", pd);
-
-        //10、插入年度预算（按月填报）
+        //7、插入经费预算-每月预算
         String monthListStr = pd.getString("monthList");
         List<PageData> monthList = JSONObject.parseArray(monthListStr, PageData.class);
         if (!CollectionUtils.isEmpty(monthList)) {
+
+            //处理按月填写的预算，进行列转行的封装
+            List<PageData> detailList = getMonthDetailList(monthList,businessId);
+            if(!CollectionUtils.isEmpty(detailList)){
+                dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonthDetail", detailList);
+            }
+
             for (PageData detailData : monthList) {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchInsert("ProjectApplyMapper.batchInsertMonthList", monthList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+
         }
 
-        //11、插入拨款计划
+
+        //8、插入拨款计划
         String appropriationPlan = pd.getString("appropriationPlan");
         List<PageData> appropriationPlanList = JSONObject.parseArray(appropriationPlan, PageData.class);
         if (!CollectionUtils.isEmpty(appropriationPlanList)) {
@@ -269,61 +259,41 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             dao.batchInsert("ProjectApplyMapper.batchInsertResearchUser", researchUserList);
         }
 
-        //6、经费来源预算
-        PageData deleteData = new PageData();
-        deleteData.put("removeList", removeList);
-        deleteData.put("status", 1);
-
-        String budgetSource = pd.getString("budgetSource");
-        List<PageData> budgetSourceList = JSONObject.parseArray(budgetSource, PageData.class);
-        if (!CollectionUtils.isEmpty(budgetSourceList)) {
-
-            dao.delete("ProjectApplyMapper.deleteBudgetSource", deleteData);
-            for (PageData detailData : budgetSourceList) {
+        //6、插入经费预算
+        String budgetListStr = pd.getString("budgetList");
+        List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
+        if (!CollectionUtils.isEmpty(budgetList)) {
+            for (PageData detailData : budgetList) {
                 detailData.put("businessId", businessId);
-                detailData.put("status", 1);
 
-                dao.insert("ProjectApplyMapper.insertBudgetSource", detailData);
             }
-
+            dao.batchDelete("ProjectApplyMapper.deleteBudget", removeList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudget", budgetList);
 
         }
 
-        //7、经费支出预算
-        String budgetExpenses = pd.getString("budgetExpenses");
-        List<PageData> budgetExpensesList = JSONObject.parseArray(budgetExpenses, PageData.class);
-        if (!CollectionUtils.isEmpty(budgetExpensesList)) {
-
-            dao.delete("ProjectApplyMapper.deleteBudgetExpenses", deleteData);
-            for (PageData detailData : budgetExpensesList) {
-                detailData.put("businessId", businessId);
-                detailData.put("status", 1);
-
-                dao.insert("ProjectApplyMapper.insertBudgetExpenses", detailData);
-            }
-
-
-        }
-
-
-        //8、编辑经费来源每月预算
-        pd.put("status", 3);
-        dao.update("ProjectApplyMapper.updateBudgetSource", pd);
-
-        //9、编辑经费支出每月预算
-        dao.update("ProjectApplyMapper.updateBudgetExpenses", pd);
-
-        //10、插入年度预算（按月填报）
+        //7、插入经费预算-每月预算
         String monthListStr = pd.getString("monthList");
         List<PageData> monthList = JSONObject.parseArray(monthListStr, PageData.class);
         if (!CollectionUtils.isEmpty(monthList)) {
+
+            //处理按月填写的预算，进行列转行的封装
+            List<PageData> detailList = getMonthDetailList(monthList,businessId);
+            dao.batchInsert("ProjectApplyMapper.deleteBudgetMonthDetail", monthList);
+            if(!CollectionUtils.isEmpty(detailList)){
+                dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonthDetail", detailList);
+            }
+
             for (PageData detailData : monthList) {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchDelete("ProjectApplyMapper.deleteMonthList", removeList);
-            dao.batchInsert("ProjectApplyMapper.batchInsertMonthList", monthList);
+            dao.batchInsert("ProjectApplyMapper.deleteBudgetMonth", monthList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+
+
         }
+
 
         //11、插入拨款计划
         String appropriationPlan = pd.getString("appropriationPlan");
@@ -342,6 +312,62 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         fileService.update(pd);
 
     }
+
+
+    /**
+     * 封装前端传来的每月预算
+     * @param monthList
+     * @param businessId
+     * @return
+     */
+    private List<PageData> getMonthDetailList(List<PageData> monthList,String businessId){
+        List<PageData> detailList = new ArrayList<>();
+        //遍历出年份
+        Set<String> yearSet = new TreeSet<>(new Comparator<String>(){
+            @Override
+            public int compare(String s1,String s2){
+                return s1.compareTo(s2);
+            }
+        });
+
+        if (!CollectionUtils.isEmpty(monthList)) {
+            for (PageData detailData : monthList) {
+                for (Object key : detailData.keySet()) {
+                    String keyStr = (String)key;
+                    yearSet.add(keyStr.substring(5,9));
+                }
+            }
+        }
+
+
+        for (PageData detailData : monthList) {
+            if(!CollectionUtils.isEmpty(yearSet)){
+
+                for(String year : yearSet){
+                    for(int i=0;i<12;i++){
+                        PageData data = new PageData();
+                        String key = "month"+year+""+(i+1);
+                        String value = detailData.getString(key);
+
+                        data.put("expenseAccount", detailData.getString("expenseAccount"));
+                        data.put("businessId", businessId);
+                        data.put("years", year);
+                        if(StringUtils.isBlank(value)){
+                            value = "0";
+                        }
+                        data.put(arr[i], value);
+
+                        detailList.add(data);
+                    }
+                }
+
+            }
+        }
+
+
+        return detailList;
+    }
+
 
     /**
      * 删除立项申请
@@ -391,14 +417,14 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         //5、删除研究人员
         dao.batchDelete("ProjectApplyMapper.deleteResearchUser", removeList);
 
-        //6、删除来源预算
-        dao.delete("ProjectApplyMapper.deleteBudgetSource", pd);
+        //6、删除预算
+        dao.batchDelete("ProjectApplyMapper.deleteBudget", removeList);
 
-        //7、删除经费支出预算
-        dao.delete("ProjectApplyMapper.deleteBudgetExpenses", pd);
+        //7、删除预算-每月预算
+        dao.batchDelete("ProjectApplyMapper.deleteBudgetMonth", removeList);
 
         //8、删除年度预算（按月填报）
-        dao.batchDelete("ProjectApplyMapper.deleteMonthList", removeList);
+        dao.batchDelete("ProjectApplyMapper.deleteBudgetMonthDetail", removeList);
 
         //9、删除拨款计划
         dao.batchDelete("ProjectApplyMapper.deleteAppropriationPlan", removeList);
@@ -445,22 +471,16 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             }
 
             // 6、经费来源预算
-            List<PageData> budgetSource = (List<PageData>) dao.findForList("ProjectApplyMapper.queryBudgetSource", request);
-            if (!CollectionUtils.isEmpty(budgetSource)) {
-                request.put("budgetSource", budgetSource);
+            List<PageData> budgetList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryBudget", request);
+            if (!CollectionUtils.isEmpty(budgetList)) {
+                request.put("budgetList", budgetList);
             }
 
-            // 7、经费支出预算
-            List<PageData> budgetExpenses = (List<PageData>) dao.findForList("ProjectApplyMapper.queryBudgetExpenses", request);
-            if (!CollectionUtils.isEmpty(budgetExpenses)) {
-                request.put("budgetExpenses", budgetExpenses);
-            }
 
-            // 8、年度预算（按月填报
+            // 8、经费预算（每月预算) 年度预算（按月填报)
             List<PageData> monthList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryMonthList", request);
-            if (!CollectionUtils.isEmpty(monthList)) {
-                request.put("monthList", monthList);
-            }
+            List<PageData> monthDetailList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryMonthDetailList", request);
+            packageMonthList(monthList,monthDetailList);
 
             // 9、拨款计划
             List<PageData> appropriationPlan = (List<PageData>) dao.findForList("ProjectApplyMapper.queryAppropriationPlan", request);
@@ -564,19 +584,15 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         //5、读取研究人员（初始）
         List<PageData> researchUserList = getResearchUser(wb,pd);
 
-        //6、读取经费来源预算
-        PageData budgetSource = new PageData();
-        getBudgetSource(wb,pd,budgetSource);
+        //6、读取经费预算
+        List<PageData> budgetList = getBudget(wb,pd);
 
-        //7、读取经费支出预算
-        PageData budgetExpenses = new PageData();
-        getBudgetExpenses(wb,pd,budgetExpenses);
-
-        //8、读取经费预算-每月预算
-        getBudgetMonth(wb,pd);
+        //9、经费预算（每月预算
+        List<PageData> monthList = getBudgetMonth(wb,pd);
 
         //9、年度预算（按月填报)
-        List<PageData> monthList = getMonthList(wb,pd);
+        List<PageData> monthDetailList = getBudgetMonthDetail(wb,pd,monthList);
+
 
         //10、读取拨款
         List<PageData> appropriationPlanList = getAppropriationPlan(wb,pd);
@@ -607,12 +623,20 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         }
 
-        //6、经费来源预算
-        dao.insert("ProjectApplyMapper.insertBudgetSource", budgetSource);
+        //6、插入经费预算
+        if (!CollectionUtils.isEmpty(budgetList)) {
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudget", budgetList);
 
+        }
 
-        //7、经费支出预算
-        dao.insert("ProjectApplyMapper.insertBudgetExpenses", budgetExpenses);
+        //7、插入经费预算-每月预算
+        if(!CollectionUtils.isEmpty(monthDetailList)){
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonthDetail", monthDetailList);
+        }
+
+        if(!CollectionUtils.isEmpty(monthList)){
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+        }
 
 
         //8、插入经费来源每月预算
@@ -726,17 +750,14 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @return
      */
     @Override
-    public PageData uploadBudget(MultipartFile file, PageData pd) throws Exception{
+    public List<PageData> uploadBudget(MultipartFile file, PageData pd) throws Exception{
         XSSFWorkbook wb = getWorkbook(file);
 
-        PageData data = new PageData();
-        //读取经费来源预算
-        getBudgetSource(wb,pd,data);
+        List<PageData> budgetList = getBudget(wb,pd);
 
-        //读取经费支出预算
-        getBudgetExpenses(wb,pd,data);
+        return budgetList;
 
-        return data;
+
     }
 
     /**
@@ -747,16 +768,42 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @return
      */
     @Override
-    public PageData uploadMonth(MultipartFile file, PageData pd) throws Exception{
+    public List<PageData> uploadMonth(MultipartFile file, PageData pd) throws Exception{
         XSSFWorkbook wb = getWorkbook(file);
 
-        //读取经费预算
-        getBudgetMonth(wb,pd);
+        //9、经费预算（每月预算
+        List<PageData> monthList = getBudgetMonth(wb,pd);
 
-        List<PageData> monthList = getMonthList(wb,pd);
-        pd.put("monthList",monthList);
+        //9、年度预算（按月填报)
+        List<PageData> monthDetailList = getBudgetMonthDetail(wb,pd,monthList);
 
-        return pd;
+        packageMonthList(monthList,monthDetailList);
+
+        return monthList;
+    }
+
+
+    private List<PageData> packageMonthList(List<PageData> monthList,List<PageData> monthDetailList){
+        if(!CollectionUtils.isEmpty(monthDetailList)){
+            for(PageData data : monthList){
+                String expenseAccount = data.getString("expenseAccount");
+                for (PageData detailData : monthDetailList) {
+                    String year = detailData.getString("years");
+                    if (detailData.getString("expenseAccount").equals(expenseAccount)) {
+                        for(int i=0;i<12;i++){
+                            String key = "month"+year+""+(i+1);
+                            data.put(key,detailData.getString(arr[0]));
+
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+
+        return monthList;
     }
 
 
@@ -1170,349 +1217,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
     }
 
 
-    /**
-     * 读取经费来源预算
-     * @return
-     */
-    private PageData getBudgetSource(XSSFWorkbook wb,PageData pd,PageData data) {
 
-        //判断有无sheet页
-        XSSFSheet sheet = wb.getSheet("经费预算");
-        if (sheet == null) {
-            throw new MyException("请上传正确的模板，检查经费预算sheet页是否正确");
-        }
 
-        String[] head = {"一、股份公司计划拨款","二、国家拨款","三、省市拨款","四、单位自筹款","五、银行贷款","六、其他来源款","来源预算合计"};
-        checkHead(sheet,head);
-
-
-        data.put("businessId", pd.getString("businessId"));
-        data.put("status", 1);
-
-        XSSFRow row = sheet.getRow(2);
-
-        //解析第1个单元格 一、股份公司计划拨款
-        XSSFCell cell = row.getCell(1);
-        String companyAppropriation = ReadExcelUtil.readCellDecimal(cell, 3, "一、股份公司计划拨款", false, 20, 2);
-        data.put("companyAppropriation", companyAppropriation);
-
-        //解析第2个单元格 二、国家拨款
-        cell = row.getCell(2);
-        String stateAppropriation = ReadExcelUtil.readCellDecimal(cell, 3, "二、国家拨款", false, 20, 2);
-        data.put("stateAppropriation", stateAppropriation);
-
-        //解析第3个单元格 三、省市拨款
-        cell = row.getCell(3);
-        String provincesAppropriation = ReadExcelUtil.readCellDecimal(cell, 3, "三、省市拨款", false, 20, 2);
-        data.put("provincesAppropriation", provincesAppropriation);
-
-        //解析第4个单元格 四、单位自筹款
-        cell = row.getCell(4);
-        String unitFunds = ReadExcelUtil.readCellDecimal(cell, 3, "四、单位自筹款", false, 20, 2);
-        data.put("unitFunds", unitFunds);
-
-        //解析第5个单元格 五、银行贷款
-        cell = row.getCell(5);
-        String bankLoans = ReadExcelUtil.readCellDecimal(cell, 3, "五、银行贷款", false, 20, 2);
-        data.put("bankLoans", bankLoans);
-
-        //解析第6个单元格 六、其他来源款
-        cell = row.getCell(6);
-        String otherSource = ReadExcelUtil.readCellDecimal(cell, 3, "六、其他来源款", false, 20, 2);
-        data.put("otherSource", otherSource);
-
-        //解析第7个单元格 来源预算合计
-        cell = row.getCell(7);
-        String totalSourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, "来源预算合计", false, 20, 2);
-        data.put("totalSourceBudget", totalSourceBudget);
-
-
-        return data;
-    }
-
-
-    /**
-     * 读取经费支出预算
-     * @return
-     */
-    private PageData getBudgetExpenses(XSSFWorkbook wb,PageData pd,PageData data) {
-
-        //判断有无sheet页
-        XSSFSheet sheet = wb.getSheet("经费预算");
-        if (sheet == null) {
-            throw new MyException("请上传正确的模板，检查经费预算sheet页是否正确");
-        }
-
-        String[] head = {"一、人员费","二、设备费","三、材料费","四、燃料及动力费","五、测试及化验费","六、差旅费","七、会议费",
-                "八、课题管理费","九、其他费用","9.1、国际合作交流费","9.2、出版/文献/信息传播","9.3、知识产权事务","9.4、专家费","9.5其他",
-                "十、新产品设计费","十一、委托研发费用","支出预算合计"};
-        checkHead(sheet,head);
-
-
-        data.put("businessId", pd.getString("businessId"));
-        data.put("status", 1);
-
-        XSSFRow row = sheet.getRow(2);
-
-        //解析第1个单元格 一、人员费
-        XSSFCell cell = row.getCell(8);
-        String staffCost = ReadExcelUtil.readCellDecimal(cell, 3, "一、人员费", false, 20, 2);
-        data.put("staffCost", staffCost);
-
-        //解析第2个单元格 二、设备费
-        cell = row.getCell(9);
-        String equipmentCost = ReadExcelUtil.readCellDecimal(cell, 3, "二、设备费", false, 20, 2);
-        data.put("equipmentCost", equipmentCost);
-
-        //解析第3个单元格 三、材料费
-        cell = row.getCell(10);
-        String materialCost = ReadExcelUtil.readCellDecimal(cell, 3, "三、材料费", false, 20, 2);
-        data.put("materialCost", materialCost);
-
-        //解析第4个单元格  四、燃料及动力费
-        cell = row.getCell(11);
-        String fuelCost = ReadExcelUtil.readCellDecimal(cell, 3, "四、燃料及动力费", false, 20, 2);
-        data.put("fuelCost", fuelCost);
-
-        //解析第5个单元格 五、测试及化验费
-        cell = row.getCell(12);
-        String assayCost = ReadExcelUtil.readCellDecimal(cell, 3, "五、测试及化验费", false, 20, 2);
-        data.put("assayCost", assayCost);
-
-        //解析第6个单元格 六、差旅费
-        cell = row.getCell(13);
-        String travelCost = ReadExcelUtil.readCellDecimal(cell, 3, "六、差旅费", false, 20, 2);
-        data.put("travelCost", travelCost);
-
-        //解析第7个单元格 七、会议费
-        cell = row.getCell(14);
-        String meetingCost = ReadExcelUtil.readCellDecimal(cell, 3, "七、会议费", false, 20, 2);
-        data.put("meetingCost", meetingCost);
-
-        //解析第8个单元格 八、课题管理费
-        cell = row.getCell(15);
-        String managementCost = ReadExcelUtil.readCellDecimal(cell, 3, "八、课题管理费", false, 20, 2);
-        data.put("managementCost", managementCost);
-
-
-        //解析第9个单元格 九、其他费用
-        cell = row.getCell(16);
-        String otherCost = ReadExcelUtil.readCellDecimal(cell, 3, "九、其他费用", false, 20, 2);
-        data.put("otherCost", otherCost);
-
-
-        //解析第10个单元格 9.1、国际合作交流费
-        cell = row.getCell(17);
-        String exchangeCost = ReadExcelUtil.readCellDecimal(cell, 3, "9.1、国际合作交流费", false, 20, 2);
-        data.put("exchangeCost", exchangeCost);
-
-
-        //解析第11个单元格 9.2、出版/文献/信息传播
-        cell = row.getCell(18);
-        String communicationCost = ReadExcelUtil.readCellDecimal(cell, 3, "9.2、出版/文献/信息传播", false, 20, 2);
-        data.put("communicationCost", communicationCost);
-
-        //解析第12个单元格 9.3、知识产权事务
-        cell = row.getCell(19);
-        String propertyCost = ReadExcelUtil.readCellDecimal(cell, 3, "9.3、知识产权事务", false, 20, 2);
-        data.put("propertyCost", propertyCost);
-
-        //解析第13个单元格 9.4、专家费
-        cell = row.getCell(20);
-        String expertCost = ReadExcelUtil.readCellDecimal(cell, 3, "9.4、专家费", false, 20, 2);
-        data.put("expertCost", expertCost);
-
-        //解析第14个单元格 9.5其他
-        cell = row.getCell(21);
-        String other = ReadExcelUtil.readCellDecimal(cell, 3, "9.5其他", false, 20, 2);
-        data.put("other", other);
-
-        //解析第15个单元格 十、新产品设计费
-        cell = row.getCell(22);
-        String designCost = ReadExcelUtil.readCellDecimal(cell, 3, "十、新产品设计费", false, 20, 2);
-        data.put("designCost", designCost);
-
-        //解析第16个单元格 十一、委托研发费用
-        cell = row.getCell(23);
-        String expensesCost = ReadExcelUtil.readCellDecimal(cell, 3, "十一、委托研发费用", false, 20, 2);
-        data.put("expensesCost", expensesCost);
-
-        //解析第17个单元格 支出预算合计
-        cell = row.getCell(24);
-        String totalExpenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, "支出预算合计", false, 20, 2);
-        data.put("totalExpenseBudget", totalExpenseBudget);
-
-
-        return data;
-    }
-
-
-    //读取经费每月预算
-    private PageData getBudgetMonth(XSSFWorkbook wb,PageData pd){
-        //判断有无sheet页
-        XSSFSheet sheet = wb.getSheet("经费预算");
-        if (sheet == null) {
-            throw new MyException("请上传正确的模板，检查经费预算sheet页是否正确");
-        }
-
-        pd.put("status", 3);
-
-        //来源预算
-        //来源预算合计
-        XSSFRow row = sheet.getRow(3);
-        XSSFCell cell = row.getCell(1);
-        String totalSourceBudget = ReadExcelUtil.readCellDecimal(cell, 4, "来源预算合计", false, 20, 2);
-        pd.put("totalSourceBudget",totalSourceBudget);
-
-        //一、股份公司计划拨款
-        row = sheet.getRow(4);
-        cell = row.getCell(1);
-        String companyAppropriation = ReadExcelUtil.readCellDecimal(cell, 5, "一、股份公司计划拨款", false, 20, 2);
-        pd.put("companyAppropriation",companyAppropriation);
-
-        //二、国家拨款
-        row = sheet.getRow(5);
-        cell = row.getCell(1);
-        String stateAppropriation = ReadExcelUtil.readCellDecimal(cell, 6, "二、国家拨款", false, 20, 2);
-        pd.put("stateAppropriation",stateAppropriation);
-
-        //三、省市拨款
-        row = sheet.getRow(6);
-        cell = row.getCell(1);
-        String provincesAppropriation = ReadExcelUtil.readCellDecimal(cell, 7, "三、省市拨款", false, 20, 2);
-        pd.put("provincesAppropriation",provincesAppropriation);
-
-        //四、单位自筹款
-        row = sheet.getRow(7);
-        cell = row.getCell(1);
-        String unitFunds = ReadExcelUtil.readCellDecimal(cell, 8, "四、单位自筹款", false, 20, 2);
-        pd.put("unitFunds",unitFunds);
-
-        //五、银行贷款
-        row = sheet.getRow(8);
-        cell = row.getCell(1);
-        String bankLoans = ReadExcelUtil.readCellDecimal(cell, 9, "五、银行贷款", false, 20, 2);
-        pd.put("bankLoans",bankLoans);
-
-
-        //六、其他来源款
-        row = sheet.getRow(9);
-        cell = row.getCell(1);
-        String otherSource = ReadExcelUtil.readCellDecimal(cell, 10, "六、其他来源款", false, 20, 2);
-        pd.put("otherSource",otherSource);
-
-        //支出预算
-
-        //解析第1个单元格 支出预算合计
-        row = sheet.getRow(3);
-        cell = row.getCell(3);
-        String totalExpenseBudget = ReadExcelUtil.readCellDecimal(cell, 4, "支出预算合计", false, 20, 2);
-        pd.put("totalExpenseBudget", totalExpenseBudget);
-
-
-        //解析第1个单元格 一、人员费
-        row = sheet.getRow(4);
-        cell = row.getCell(3);
-        String staffCost = ReadExcelUtil.readCellDecimal(cell, 5, "一、人员费", false, 20, 2);
-        pd.put("staffCost", staffCost);
-
-        //解析第2个单元格 二、设备费
-        row = sheet.getRow(5);
-        cell = row.getCell(3);
-        String equipmentCost = ReadExcelUtil.readCellDecimal(cell, 6, "二、设备费", false, 20, 2);
-        pd.put("equipmentCost", equipmentCost);
-
-        //解析第3个单元格 三、材料费
-        row = sheet.getRow(6);
-        cell = row.getCell(3);
-        String materialCost = ReadExcelUtil.readCellDecimal(cell, 7, "三、材料费", false, 20, 2);
-        pd.put("materialCost", materialCost);
-
-        //解析第4个单元格  四、燃料及动力费
-        row = sheet.getRow(7);
-        cell = row.getCell(3);
-        String fuelCost = ReadExcelUtil.readCellDecimal(cell, 8, "四、燃料及动力费", false, 20, 2);
-        pd.put("fuelCost", fuelCost);
-
-        //解析第5个单元格 五、测试及化验费
-        row = sheet.getRow(8);
-        cell = row.getCell(3);
-        String assayCost = ReadExcelUtil.readCellDecimal(cell, 9, "五、测试及化验费", false, 20, 2);
-        pd.put("assayCost", assayCost);
-
-        //解析第6个单元格 六、差旅费
-        row = sheet.getRow(9);
-        cell = row.getCell(3);
-        String travelCost = ReadExcelUtil.readCellDecimal(cell, 10, "六、差旅费", false, 20, 2);
-        pd.put("travelCost", travelCost);
-
-        //解析第7个单元格 七、会议费
-        row = sheet.getRow(10);
-        cell = row.getCell(3);
-        String meetingCost = ReadExcelUtil.readCellDecimal(cell, 11, "七、会议费", false, 20, 2);
-        pd.put("meetingCost", meetingCost);
-
-        //解析第8个单元格 八、课题管理费
-        row = sheet.getRow(11);
-        cell = row.getCell(3);
-        String managementCost = ReadExcelUtil.readCellDecimal(cell, 12, "八、课题管理费", false, 20, 2);
-        pd.put("managementCost", managementCost);
-
-
-        //解析第9个单元格 九、其他费用
-        row = sheet.getRow(12);
-        cell = row.getCell(3);
-        String otherCost = ReadExcelUtil.readCellDecimal(cell, 13, "九、其他费用", false, 20, 2);
-        pd.put("otherCost", otherCost);
-
-
-        //解析第10个单元格 9.1、国际合作交流费
-        row = sheet.getRow(13);
-        cell = row.getCell(3);
-        String exchangeCost = ReadExcelUtil.readCellDecimal(cell, 14, "9.1、国际合作交流费", false, 20, 2);
-        pd.put("exchangeCost", exchangeCost);
-
-
-        //解析第11个单元格 9.2、出版/文献/信息传播
-        row = sheet.getRow(14);
-        cell = row.getCell(3);
-        String communicationCost = ReadExcelUtil.readCellDecimal(cell, 15, "9.2、出版/文献/信息传播", false, 20, 2);
-        pd.put("communicationCost", communicationCost);
-
-        //解析第12个单元格 9.3、知识产权事务
-        row = sheet.getRow(15);
-        cell = row.getCell(3);
-        String propertyCost = ReadExcelUtil.readCellDecimal(cell, 16, "9.3、知识产权事务", false, 20, 2);
-        pd.put("propertyCost", propertyCost);
-
-        //解析第13个单元格 9.4、专家费
-        row = sheet.getRow(16);
-        cell = row.getCell(3);
-        String expertCost = ReadExcelUtil.readCellDecimal(cell, 17, "9.4、专家费", false, 20, 2);
-        pd.put("expertCost", expertCost);
-
-        //解析第14个单元格 9.5其他
-        row = sheet.getRow(17);
-        cell = row.getCell(3);
-        String other = ReadExcelUtil.readCellDecimal(cell, 18, "9.5其他", false, 20, 2);
-        pd.put("other", other);
-
-        //解析第15个单元格 十、新产品设计费
-        row = sheet.getRow(18);
-        cell = row.getCell(3);
-        String designCost = ReadExcelUtil.readCellDecimal(cell, 19, "十、新产品设计费", false, 20, 2);
-        pd.put("designCost", designCost);
-
-        //解析第16个单元格 十一、委托研发费用
-        row = sheet.getRow(19);
-        cell = row.getCell(3);
-        String expensesCost = ReadExcelUtil.readCellDecimal(cell, 20, "十一、委托研发费用", false, 20, 2);
-        pd.put("expensesCost", expensesCost);
-
-
-        return pd;
-
-    }
 
 
     /**
@@ -1556,11 +1262,153 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         return list;
     }
 
+
+
     /**
-     * 读取年度预算（按月填报）
+     * 读取经费预算
      * @return
      */
-    private List<PageData> getMonthList(XSSFWorkbook wb,PageData pd) {
+    private List<PageData> getBudget(XSSFWorkbook wb,PageData pd) {
+        List<PageData> list = new ArrayList<>();
+
+        //判断有无sheet页
+        XSSFSheet sheet = wb.getSheet("经费预算");
+        if (sheet == null) {
+            throw new MyException("请上传正确的模板，检查经费预算sheet页是否正确");
+        }
+
+
+        //解析第1行 支出预算合计
+        setBudgetValue(sheet,2,"来源预算合计",7,"支出预算合计",24,list,pd);
+
+        //解析第1个单元格 一、人员费
+        setBudgetValue(sheet,2,"一、股份公司计划拨款",1,"一、人员费",8,list,pd);
+
+        //解析第2个单元格 二、设备费
+        setBudgetValue(sheet,2,"二、国家拨款",2,"二、设备费",9,list,pd);
+
+        //解析第3个单元格 三、材料费
+        setBudgetValue(sheet,2,"三、省市拨款",3,"三、材料费",10,list,pd);
+
+        //解析第4个单元格  四、燃料及动力费
+        setBudgetValue(sheet,2,"四、单位自筹款",4,"四、燃料及动力费",11,list,pd);
+
+        //解析第5个单元格 五、测试及化验费
+        setBudgetValue(sheet,2,"五、银行贷款",5,"五、测试及化验费",12,list,pd);
+
+        //解析第6个单元格 六、差旅费
+        setBudgetValue(sheet,2,"六、其他来源款",6,"六、差旅费",13,list,pd);
+
+        //解析第7个单元格 七、会议费
+        setBudgetValue(sheet,2,"",0,"七、会议费",14,list,pd);
+
+        //解析第8个单元格 八、课题管理费
+        setBudgetValue(sheet,2,"",0,"八、课题管理费",15,list,pd);
+
+        //解析第9个单元格 九、其他费用
+        setBudgetValue(sheet,2,"",0,"九、其他费用",16,list,pd);
+
+        //解析第10个单元格 9.1、国际合作交流费
+        setBudgetValue(sheet,2,"",0,"9.1、国际合作交流费",17,list,pd);
+
+        //解析第11个单元格 9.2、出版/文献/信息传播
+        setBudgetValue(sheet,2,"",0,"9.2、出版/文献/信息传播",18,list,pd);
+
+        //解析第12个单元格 9.3、知识产权事务
+        setBudgetValue(sheet,2,"",0,"9.3、知识产权事务",19,list,pd);
+
+        //解析第13个单元格 9.4、专家费
+        setBudgetValue(sheet,2,"",0,"9.4、专家费",20,list,pd);
+
+        //解析第14个单元格 9.5其他
+        setBudgetValue(sheet,2,"",0,"9.5其他",21,list,pd);
+
+        //解析第15个单元格 十、新产品设计费
+        setBudgetValue(sheet,2,"",0,"十、新产品设计费",22,list,pd);
+
+        //解析第16个单元格 十一、委托研发费用
+        setBudgetValue(sheet,2,"",0,"十一、委托研发费用",23,list,pd);
+
+        return list;
+    }
+
+
+
+    /**
+     * 读取经费预算（每月预算）
+     * @return
+     */
+    private List<PageData> getBudgetMonth(XSSFWorkbook wb,PageData pd) {
+        List<PageData> list = new ArrayList<>();
+
+        //判断有无sheet页
+        XSSFSheet sheet = wb.getSheet("每月预算");
+        if (sheet == null) {
+            throw new MyException("请上传正确的模板，检查每月预算sheet页是否正确");
+        }
+
+        //解析第1行 支出预算合计
+        setBudgetValue(sheet,3,"来源预算合计",1,"支出预算合计",3,list,pd);
+
+        //解析第1个单元格 一、人员费
+        setBudgetValue(sheet,4,"一、股份公司计划拨款",1,"一、人员费",3,list,pd);
+
+        //解析第2个单元格 二、设备费
+        setBudgetValue(sheet,5,"二、国家拨款",1,"二、设备费",3,list,pd);
+
+        //解析第3个单元格 三、材料费
+        setBudgetValue(sheet,6,"三、省市拨款",1,"三、材料费",3,list,pd);
+
+        //解析第4个单元格  四、燃料及动力费
+        setBudgetValue(sheet,7,"四、单位自筹款",1,"四、燃料及动力费",3,list,pd);
+
+        //解析第5个单元格 五、测试及化验费
+        setBudgetValue(sheet,8,"五、银行贷款",1,"五、测试及化验费",3,list,pd);
+
+        //解析第6个单元格 六、差旅费
+        setBudgetValue(sheet,9,"六、其他来源款",1,"六、差旅费",3,list,pd);
+
+        //解析第7个单元格 七、会议费
+        setBudgetValue(sheet,10,"",0,"七、会议费",3,list,pd);
+
+        //解析第8个单元格 八、课题管理费
+        setBudgetValue(sheet,11,"",0,"八、课题管理费",3,list,pd);
+
+        //解析第9个单元格 九、其他费用
+        setBudgetValue(sheet,12,"",0,"九、其他费用",3,list,pd);
+
+        //解析第10个单元格 9.1、国际合作交流费
+        setBudgetValue(sheet,13,"",0,"9.1、国际合作交流费",3,list,pd);
+
+        //解析第11个单元格 9.2、出版/文献/信息传播
+        setBudgetValue(sheet,14,"",0,"9.2、出版/文献/信息传播",3,list,pd);
+
+        //解析第12个单元格 9.3、知识产权事务
+        setBudgetValue(sheet,15,"",0,"9.3、知识产权事务",3,list,pd);
+
+        //解析第13个单元格 9.4、专家费
+        setBudgetValue(sheet,16,"",0,"9.4、专家费",3,list,pd);
+
+        //解析第14个单元格 9.5其他
+        setBudgetValue(sheet,17,"",0,"9.5其他",3,list,pd);
+
+        //解析第15个单元格 十、新产品设计费
+        setBudgetValue(sheet,18,"",0,"十、新产品设计费",3,list,pd);
+
+        //解析第16个单元格 十一、委托研发费用
+        setBudgetValue(sheet,19,"",0,"十一、委托研发费用",3,list,pd);
+
+        return list;
+    }
+
+
+    /**
+     * 读取年度预算（按月填报）
+     * @param wb
+     * @param pd
+     * @return
+     */
+    List<PageData> getBudgetMonthDetail(XSSFWorkbook wb,PageData pd,List<PageData> monthList){
         List<PageData> list = new ArrayList<>();
 
         //判断有无sheet页
@@ -1583,14 +1431,16 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                 XSSFRow yearRow = sheet.getRow(2);
                 XSSFCell yearCell = yearRow.getCell(4 + i);
                 String yearValue = ReadExcelUtil.readCellStr(yearCell, 4, "年度", false, 256);
-                String years = yearValue.substring(0,4);
-
+                if(yearValue.length() >4){
+                    yearValue = yearValue.substring(0,4);
+                }
 
                 int cellNum = 4 + i;
                 for (int y = 4; y <= 19; y++) {
                     PageData data = new PageData();
                     data.put("businessId", pd.getString("businessId"));
-                    data.put("years", years);
+                    data.put("years", yearValue);
+                    data.put("expenseAccount",monthList.get(y-4));
 
                     XSSFRow row = sheet.getRow(y);
                     XSSFCell cell1 = row.getCell(cellNum);
@@ -1675,6 +1525,37 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
     }
 
 
+
+    private List<PageData> setBudgetValue(XSSFSheet sheet,int rowNum,String param1,int row1,String param2,int row2,List<PageData> list,PageData pd){
+        PageData data = new PageData();
+        data.put("sourceAccount",param1);
+        data.put("expenseAccount",param2);
+        data.put("businessId", pd.getString("businessId"));
+
+        XSSFRow row = sheet.getRow(rowNum);
+        XSSFCell cell = null;
+        if(row1 > 0){
+            cell = row.getCell(row1);
+            String sourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, param1, false, 20, 2);
+            data.put("sourceBudget", sourceBudget);
+        }else {
+            data.put("sourceBudget", "");
+        }
+
+        if(row2 > 0){
+            cell = row.getCell(row2);
+            String expenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, param2, false, 20, 2);
+            data.put("expenseBudget", expenseBudget);
+
+        }else {
+            data.put("expenseBudget", "");
+        }
+
+        list.add(data);
+
+
+        return list;
+    }
 
 
     /**
@@ -1803,6 +1684,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         sheet.setAutobreaks(true);
         return wb;
     }
+
 
 
 }

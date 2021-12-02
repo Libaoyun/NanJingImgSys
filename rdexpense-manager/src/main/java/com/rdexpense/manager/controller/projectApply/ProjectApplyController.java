@@ -378,12 +378,12 @@ public class ProjectApplyController extends BaseController {
 
     @ApiOperation(value = "导入经费预算")
     @PostMapping("/uploadBudget")
-    public ResponseEntity<ProjectApplyBudgetDto> uploadBudget(UploadTemplateFileDto dto) throws Exception{
+    public ResponseEntity<List<BudgetAddDto>> uploadBudget(UploadTemplateFileDto dto) throws Exception{
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            PageData pageData = projectApplyService.uploadBudget(dto.getFile(),pd);
-            result = PropertyUtil.pushData(pageData, ProjectApplyBudgetDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            List<PageData> list = projectApplyService.uploadBudget(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, BudgetAddDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入经费预算失败,request=[{}]", pd);
@@ -395,12 +395,12 @@ public class ProjectApplyController extends BaseController {
 
     @ApiOperation(value = "导入经费预算（每月预算）")
     @PostMapping("/uploadMonth")
-    public ResponseEntity<ProjectApplyBudgetDto> uploadMonth(UploadTemplateFileDto dto) throws Exception{
+    public ResponseEntity<PageData> uploadMonth(UploadTemplateFileDto dto) throws Exception{
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            PageData pageData = projectApplyService.uploadMonth(dto.getFile(),pd);
-            result = PropertyUtil.pushData(pageData, ProjectApplyBudgetDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            List<PageData> list = projectApplyService.uploadMonth(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, PageData.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入经费预算（每月预算）失败,request=[{}]", pd);
@@ -793,6 +793,22 @@ public class ProjectApplyController extends BaseController {
         CheckParameter.checkDecimal(pd.getString("other"), "其他",20,2);
         CheckParameter.checkDecimal(pd.getString("designCost"), "新产品设计费",20,2);
         CheckParameter.checkDecimal(pd.getString("expensesCost"), "委托研发费用",20,2);
+    }
+
+
+
+    private ResponseEntity submitCheck(PageData pd,List<PageData> userList){
+        //1、判断人员项目周期
+        String startYear = pd.getString("startYear");
+        String endYear = pd.getString("endYear");
+
+//        if(){
+//
+//        }
+//
+
+        return ResponseEntity.success(null);
+
     }
 
 }
