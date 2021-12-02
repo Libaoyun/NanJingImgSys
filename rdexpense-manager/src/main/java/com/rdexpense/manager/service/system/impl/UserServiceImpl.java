@@ -39,7 +39,7 @@ import java.util.*;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String INITIAL_PASSWORD = "CRCC123456";
+    private static final String INITIAL_PASSWORD = "YFFY123456";
 
 
     @Autowired
@@ -187,6 +187,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUser(PageData pd) {
 
+        List<PageData> userInfoList = (List<PageData>) baseDao.findForList("UserMapper.updateCheckUser", pd);
+        if (!CollectionUtils.isEmpty(userInfoList)) {
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_EXISTING_CODE.desc(),pd.getString("userCode")));
+        }
 
         //更新部门表
         List<PageData> departmentList = (List<PageData>) baseDao.findForList("UserMapper.queryUserDepartment", pd);
@@ -593,7 +597,7 @@ public class UserServiceImpl implements UserService {
     /**
      * 导出PDF
      *
-     * @param pd
+     * @param pageData
      * @param document
      * @throws Exception
      */
@@ -715,6 +719,7 @@ public class UserServiceImpl implements UserService {
         // 添加表格
         document.add(table1);
     }
+
 
 
 }

@@ -107,7 +107,6 @@ public class UserController extends BaseController {
 
         ResponseEntity result = null;
         try {
-
             userService.updateUser(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_UPDATE_SUCCESS.desc());
             return result;

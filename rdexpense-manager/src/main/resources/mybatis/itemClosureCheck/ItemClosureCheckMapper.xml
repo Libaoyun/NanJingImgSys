@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemClosureCheckMapper">
+
+    <sql id="Base_Column">
+        id,
+        serial_number as serialNumber,
+        creator_user_id as creatorUserId,
+        creator_user as creatorUser,
+        created_date as createdDate,
+        creator_org_id as creatorOrgId,
+        creator_org_name as creatorOrgName,
+        create_time as createTime,
+        update_time as updateTime,
+        update_user as updateUser,
+        update_user_id as updateUserId,
+        job_title as jobTitle,
+        apply_user_id  as applyUserId,
+        apply_user_name as applyUserName,
+        post_code as postCode,
+        post_name as postName,
+        telephone as telephone,
+        start_year as startYear,
+        end_year  as endYear,
+        check_date as checkDate,
+        task_source as taskSource,
+        project_abstract as projectAbstract,
+        directory_and_unit as directoryAndUnit,
+        check_remark as checkRemark,
+        approve_user_id as approveUserId,
+        approve_user_name as approveUserName,
+        approve_time as approveTime,
+        process_inst_id as processInstId,
+        process_status as processStatus,
+        next_approve_user_id as nextApproveUserId,
+        next_approve_user_name as nextApproveUserName
+    </sql>
+
+    <select id="queryItemClosureCheckList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from item_closure_check
+        <where>
+            status != #{save_status} or creator_user_id=#{userId}
+            and creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="jobTitle!=null and jobTitle!=''">
+                and job_title LIKE concat('%',#{jobTitle},'%')
+            </if>
+            <if test="approveUserName!=null and approveUserName!=''">
+                and approve_user_name LIKE concat('%',#{approveUserName},'%')
+            </if>
+            <if test="creatorUser!=null and creatorUser!=''">
+                and creator_user LIKE concat('%',#{creatorUser},'%')
+            </if>
+            <if test="createdDate!=null and createdDate!=''">
+                and created_date LIKE concat('%',#{createdDate},'%')
+            </if>
+            <if test="createUser!=null and createUser!=''">
+                and create_user LIKE concat('%',#{createUser},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and approve_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and post_name LIKE concat('%',#{postName},'%')
+            </if>
+            <if test="startYear!=null and startYear!=''">
+                and start_year <![CDATA[ >= ]]> #{startYear}
+            </if>
+            <if test="endYear!=null and endYear!=''">
+                and end_year <![CDATA[ <= ]]> #{endYear}
+            </if>
+
+            <if test="processStatus!=null and processStatus!=''">
+                and process_status like concat('%',#{processStatus},'%')
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+
+    <select id="queryProjectApplyList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from item_closure_check
+        <where>
+            status != #{save_status} or creator_user_id=#{userId}
+            and creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="jobTitle!=null and jobTitle!=''">
+                and job_title LIKE concat('%',#{jobTitle},'%')
+            </if>
+            <if test="approveUserName!=null and approveUserName!=''">
+                and approve_user_name LIKE concat('%',#{approveUserName},'%')
+            </if>
+            <if test="creatorUser!=null and creatorUser!=''">
+                and creator_user LIKE concat('%',#{creatorUser},'%')
+            </if>
+            <if test="createdDate!=null and createdDate!=''">
+                and created_date LIKE concat('%',#{createdDate},'%')
+            </if>
+            <if test="createUser!=null and createUser!=''">
+                and create_user LIKE concat('%',#{createUser},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and approve_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and post_name LIKE concat('%',#{postName},'%')
+            </if>
+            <if test="startYear!=null and startYear!=''">
+                and start_year <![CDATA[ >= ]]> #{startYear}
+            </if>
+            <if test="endYear!=null and endYear!=''">
+                and end_year <![CDATA[ <= ]]> #{endYear}
+            </if>
+
+            <if test="processStatus!=null and processStatus!=''">
+                and process_status like concat('%',#{processStatus},'%')
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+</mapper>
