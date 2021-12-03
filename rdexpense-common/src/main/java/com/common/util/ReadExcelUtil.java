@@ -6,6 +6,9 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+
 
 /**
  * @Auther: luxiangbao
@@ -14,6 +17,11 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
  */
 public class ReadExcelUtil {
 
+    private static DecimalFormat df = new DecimalFormat("0.00");
+
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
      * 读取字符串类型的单元格数据
@@ -72,11 +80,14 @@ public class ReadExcelUtil {
 
         //校验数字类型的长度及小数点位数
         if (StringUtils.isNotBlank(value)) {
+//            value = df.format(value);
             CheckParameter.checkDecimal(value, rowNum, cellName, length, point);
         }
 
         if (flag == true && StringUtils.isBlank(value)) {
             String error = rowNum + ";" + cellName;
+
+
             throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_EMPTY.desc(), error));
         }
 
@@ -110,6 +121,67 @@ public class ReadExcelUtil {
         return value;
     }
 
+    /**
+     * 读取日期格式的数据
+     * @param cell      单元格对象
+     * @param rowNum    行数 从1开始
+     * @param cellName  单元格名称
+     * @param flag      标识是否必填 false:否 true:是
+     * @return
+     */
+    public static String readCellDate(XSSFCell cell, Integer rowNum, String cellName, Boolean flag) {
+        DataFormatter dataFormatter = new DataFormatter();
+        String value = dataFormatter.formatCellValue(cell);
+
+
+        if (StringUtils.isNotBlank(value)) {
+            try {
+                dateFormat.parse(value);
+            } catch (Exception e) {
+                String error = rowNum + ";" + cellName;
+                throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_DATE.desc(), error));
+            }
+        }
+
+        if (flag == true && StringUtils.isBlank(value)) {
+            String error = rowNum + ";" + cellName;
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_EMPTY.desc(), error));
+        }
+
+        return value;
+    }
+
+
+    /**
+     * 读取时间格式的数据
+     * @param cell      单元格对象
+     * @param rowNum    行数 从1开始
+     * @param cellName  单元格名称
+     * @param flag      标识是否必填 false:否 true:是
+     * @param length 校验字符串最大长度
+     * @return
+     */
+    public static String readCelltime(XSSFCell cell, Integer rowNum, String cellName, Boolean flag) {
+        DataFormatter dataFormatter = new DataFormatter();
+        String value = dataFormatter.formatCellValue(cell);
+
+
+        if (StringUtils.isNotBlank(value)) {
+            try {
+                timeFormat.parse(value);
+            } catch (Exception e) {
+                String error = rowNum + ";" + cellName;
+                throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_TIME.desc(), error));
+            }
+        }
+
+        if (flag == true && StringUtils.isBlank(value)) {
+            String error = rowNum + ";" + cellName;
+            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_EMPTY.desc(), error));
+        }
+
+        return value;
+    }
 
 
     /**

@@ -301,9 +301,7 @@ public class ProjectApplyController extends BaseController {
             return result;
         } catch (MyException e) {
             logger.error("导入立项申请主信息失败,request=[{}]", pd);
-            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "立项申请主信息", pd);
+            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), e.getErrorMsg());
         }
     }
 
@@ -320,8 +318,6 @@ public class ProjectApplyController extends BaseController {
         } catch (MyException e) {
             logger.error("导入立项调研信息失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "立项调研信息", pd);
         }
     }
 
@@ -338,26 +334,22 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             logger.error("导入进度计划失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "进度计划", pd);
         }
     }
 
 
     @ApiOperation(value = "导入参加单位")
     @PostMapping(value = "/uploadUnit")
-    public ResponseEntity<List<ProgressPlanDto>> uploadUnit(UploadTemplateFileDto dto) {
+    public ResponseEntity<List<AttendUnitDto>> uploadUnit(UploadTemplateFileDto dto) {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
             List<PageData> list = projectApplyService.uploadUnit(dto.getFile(),pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ProgressPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, AttendUnitDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             logger.error("导入参加单位失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "参加单位", pd);
         }
     }
 
@@ -374,8 +366,6 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             logger.error("导入研究人员（初始）失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "研究人员（初始）", pd);
         }
     }
 
@@ -392,26 +382,23 @@ public class ProjectApplyController extends BaseController {
         } catch (MyException e) {
             logger.error("导入经费预算失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "经费预算", pd);
         }
     }
 
     @ApiOperation(value = "导入经费预算（每月预算）")
     @PostMapping("/uploadMonth")
-    public ResponseEntity<PageData> uploadMonth(UploadTemplateFileDto dto) throws Exception{
+    public ResponseEntity<PageData> uploadMonth(UploadTemplateFileDto dto) throws Exception {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            List<PageData> list = projectApplyService.uploadMonth(dto.getFile(),pd);
+            List<PageData> list = projectApplyService.uploadMonth(dto.getFile(), pd);
             result = ResponseEntity.success(PropertyUtil.covertListModel(list, PageData.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入经费预算（每月预算）失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "经费预算（每月预算）", pd);
         }
+
     }
 
 
@@ -427,8 +414,6 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             logger.error("导入拨款计划失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "拨款计划", pd);
         }
     }
 
@@ -802,7 +787,7 @@ public class ProjectApplyController extends BaseController {
         }
 
 
-        //判断研发费用
+        //判断研发费用预算是否超值
         if(!CollectionUtils.isEmpty(budgetList)){
             BigDecimal total = new BigDecimal(0);//总费用
             BigDecimal material = new BigDecimal(0);//材料

@@ -131,6 +131,8 @@ public enum ConstantMsgUtil {
     ERR_SEND_FAIL(20072, "参数发送失败"),
     ERR_TOKEN_LOGIN_FAIL(20073, "您的账号在另一个设备登录"),
     ERR_LOGIN_FAIL1(20074, "登陆失败"),
+    ERR_CELL_DATE(20075, "第{0}行,{1}日期格式不正确"),
+    ERR_CELL_TIME(20076, "第{0}行,{1}时间格式不正确"),
 
 
 
