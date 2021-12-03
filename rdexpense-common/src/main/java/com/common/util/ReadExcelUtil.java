@@ -6,6 +6,7 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
@@ -72,7 +73,7 @@ public class ReadExcelUtil {
      * @return
      */
     public static String readCellDecimal(XSSFCell cell, Integer rowNum, String cellName, Boolean flag, Integer length, Integer point) {
-        String value = "";
+        String value = null;
         if (cell != null && cell.getCellType() == HSSFCell.CELL_TYPE_NUMERIC) {
             value = cell.getNumericCellValue()+"";
 
@@ -82,15 +83,17 @@ public class ReadExcelUtil {
         if (StringUtils.isNotBlank(value)) {
 //            value = df.format(value);
             CheckParameter.checkDecimal(value, rowNum, cellName, length, point);
+            value = new BigDecimal(value).setScale(point,BigDecimal.ROUND_HALF_UP).toString();
         }
 
         if (flag == true && StringUtils.isBlank(value)) {
             String error = rowNum + ";" + cellName;
-
-
             throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.ERR_CELL_EMPTY.desc(), error));
         }
 
+        if(StringUtils.isBlank(value)){
+            value = null;
+        }
         return value;
     }
 
