@@ -39,7 +39,7 @@ public class FileController extends BaseController {
     public final static Map<Integer, String> map = new LinkedHashMap<>();
 
     static {
-        map.put(1, "土压参数预设模板.xlsx");//线路采集配置，土压模板
+        map.put(1, "立项申请导入模板.xlsx");//立项申请
 
     }
 
@@ -102,7 +102,7 @@ public class FileController extends BaseController {
 
     @ApiOperation(value = "下载模板文件")
     @PostMapping(value = "/templateDownLoad")
-    @ApiImplicitParam(name = "fileFlag", value = "文件标识 1:土压模板",
+    @ApiImplicitParam(name = "fileFlag", value = "文件标识 1:立项申请",
             required = true, dataType = "Integer")
     public void downLoad(HttpServletResponse response) {
         PageData pd = this.getParams();

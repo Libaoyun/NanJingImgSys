@@ -42,13 +42,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.common.util.ConstantMsgUtil.*;
 import static com.common.util.ConstantMsgUtil.ERR_EXPORT_FAIL;
+import static com.common.util.DateCheckUtil.checkOrder;
+import static java.math.BigDecimal.ROUND_HALF_UP;
 
 /**
  * @author rdexpense
@@ -297,9 +301,7 @@ public class ProjectApplyController extends BaseController {
             return result;
         } catch (MyException e) {
             logger.error("导入立项申请主信息失败,request=[{}]", pd);
-            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "立项申请主信息", pd);
+            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), e.getErrorMsg());
         }
     }
 
@@ -316,8 +318,6 @@ public class ProjectApplyController extends BaseController {
         } catch (MyException e) {
             logger.error("导入立项调研信息失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "立项调研信息", pd);
         }
     }
 
@@ -334,26 +334,22 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             logger.error("导入进度计划失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "进度计划", pd);
         }
     }
 
 
     @ApiOperation(value = "导入参加单位")
     @PostMapping(value = "/uploadUnit")
-    public ResponseEntity<List<ProgressPlanDto>> uploadUnit(UploadTemplateFileDto dto) {
+    public ResponseEntity<List<AttendUnitDto>> uploadUnit(UploadTemplateFileDto dto) {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
             List<PageData> list = projectApplyService.uploadUnit(dto.getFile(),pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ProgressPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, AttendUnitDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             logger.error("导入参加单位失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "参加单位", pd);
         }
     }
 
@@ -370,8 +366,6 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             logger.error("导入研究人员（初始）失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "研究人员（初始）", pd);
         }
     }
 
@@ -388,26 +382,23 @@ public class ProjectApplyController extends BaseController {
         } catch (MyException e) {
             logger.error("导入经费预算失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "经费预算", pd);
         }
     }
 
     @ApiOperation(value = "导入经费预算（每月预算）")
     @PostMapping("/uploadMonth")
-    public ResponseEntity<PageData> uploadMonth(UploadTemplateFileDto dto) throws Exception{
+    public ResponseEntity<PageData> uploadMonth(UploadTemplateFileDto dto) throws Exception {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            List<PageData> list = projectApplyService.uploadMonth(dto.getFile(),pd);
+            List<PageData> list = projectApplyService.uploadMonth(dto.getFile(), pd);
             result = ResponseEntity.success(PropertyUtil.covertListModel(list, PageData.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入经费预算（每月预算）失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "经费预算（每月预算）", pd);
         }
+
     }
 
 
@@ -423,8 +414,6 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             logger.error("导入拨款计划失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }finally {
-            logUtil.saveLogData(result.getCode(), 7, "拨款计划", pd);
         }
     }
 
@@ -664,52 +653,9 @@ public class ProjectApplyController extends BaseController {
 
         }
 
-        //校验经费来源预算
-        List<PageData> budgetSourceList = null;
-        if(flag == 1){
-            budgetSourceList = (List<PageData>) pd.get("budgetSource");
-        }else {
-            budgetSourceList = JSONObject.parseArray(pd.getString("budgetSource"), PageData.class);
-        }
 
-        if(!CollectionUtils.isEmpty(budgetSourceList)){
-            for(PageData budgetSource : budgetSourceList){
-                CheckParameter.checkDecimal(budgetSource.getString("totalBudget"), "来源预算合计",20,2);
-                checkBudgetSource(budgetSource);
-
-            }
-        }else{
-            throw new MyException("经费来源预算不能为空");
-
-        }
-
-        //校验经费支出预算
-        List<PageData> budgetExpensesList = null;
-        if(flag == 1){
-            budgetExpensesList = (List<PageData>) pd.get("budgetExpenses");
-        }else {
-            budgetExpensesList = JSONObject.parseArray(pd.getString("budgetExpenses"), PageData.class);
-        }
-
-        if(!CollectionUtils.isEmpty(budgetExpensesList)){
-            for(PageData budgetExpenses : budgetExpensesList){
-                CheckParameter.checkDecimal(budgetExpenses.getString("totalBudget"), "支出预算合计",20,2);
-                checkBudgetExpense(budgetExpenses);
-
-            }
-        }else{
-            throw new MyException("经费支出预算不能为空");
-
-        }
 
         //校验经费预算-每月预算
-
-        CheckParameter.checkDecimal(pd.getString("totalSourceBudget"), "来源预算合计", 20, 2);
-        checkBudgetSource(pd);
-
-        CheckParameter.checkDecimal(pd.getString("totalExpenseBudget"), "支出预算合计", 20, 2);
-        checkBudgetExpense(pd);
-
 
         //校验年度预算（按月填报）
         List<PageData> monthList = null;
@@ -767,45 +713,108 @@ public class ProjectApplyController extends BaseController {
 
     }
 
-    private void checkBudgetSource(PageData pd ){
-        CheckParameter.checkDecimal(pd.getString("companyAppropriation"), "股份公司计划拨款",20,2);
-        CheckParameter.checkDecimal(pd.getString("stateAppropriation"), "国家拨款",20,2);
-        CheckParameter.checkDecimal(pd.getString("provincesAppropriation"), "省市拨款",20,2);
-        CheckParameter.checkDecimal(pd.getString("unitFunds"), "单位自筹款",20,2);
-        CheckParameter.checkDecimal(pd.getString("bankLoans"), "银行贷款",20,2);
-        CheckParameter.checkDecimal(pd.getString("otherSource"), "其他来源款",20,2);
-    }
-
-    private void checkBudgetExpense(PageData pd ){
-        CheckParameter.checkDecimal(pd.getString("staffCost"), "人员费",20,2);
-        CheckParameter.checkDecimal(pd.getString("equipmentCost"), "设备费",20,2);
-        CheckParameter.checkDecimal(pd.getString("materialCost"), "材料费",20,2);
-        CheckParameter.checkDecimal(pd.getString("fuelCost"), "燃料及动力费",20,2);
-        CheckParameter.checkDecimal(pd.getString("assayCost"), "测试及化验费",20,2);
-        CheckParameter.checkDecimal(pd.getString("travelCost"), "差旅费",20,2);
-        CheckParameter.checkDecimal(pd.getString("meetingCost"), "会议费",20,2);
-        CheckParameter.checkDecimal(pd.getString("managementCost"), "课题管理费",20,2);
-        CheckParameter.checkDecimal(pd.getString("otherCost"), "其他费用",20,2);
-        CheckParameter.checkDecimal(pd.getString("exchangeCost"), "国际合作交流费",20,2);
-        CheckParameter.checkDecimal(pd.getString("communicationCost"), "出版/文献/信息传播",20,2);
-        CheckParameter.checkDecimal(pd.getString("propertyCost"), "知识产权事务",20,2);
-        CheckParameter.checkDecimal(pd.getString("expertCost"), "专家费",20,2);
-        CheckParameter.checkDecimal(pd.getString("other"), "其他",20,2);
-        CheckParameter.checkDecimal(pd.getString("designCost"), "新产品设计费",20,2);
-        CheckParameter.checkDecimal(pd.getString("expensesCost"), "委托研发费用",20,2);
-    }
 
 
+    private ResponseEntity submitCheck(PageData pd,int flag){
 
-    private ResponseEntity submitCheck(PageData pd,List<PageData> userList){
+
+        List<PageData> userList = null;
+        if(flag == 1){
+            userList = (List<PageData>) pd.get("researchUser");
+        }else {
+            userList = JSONObject.parseArray(pd.getString("researchUser"), PageData.class);
+        }
+
+        List<PageData> budgetList = null;
+        if(flag == 1){
+            budgetList = (List<PageData>) pd.get("budgetList");
+        }else {
+            budgetList = JSONObject.parseArray(pd.getString("budgetList"), PageData.class);
+        }
+
+
         //1、判断人员项目周期
+
+        //判断人员是否存在不容岗位
+        pd.put("dicTypeId",1021);
+        List<PageData> dicList = (List<PageData>)dao.findForList("DictionaryMapper.queryDictionariesList",pd);
+        List<String> nameList = null;
+        if(!CollectionUtils.isEmpty(dicList)){
+            nameList = dicList.stream().map(e -> e.getString("dicEnumName")).collect(Collectors.toList());
+        }
+
+
+
         String startYear = pd.getString("startYear");
         String endYear = pd.getString("endYear");
 
-//        if(){
-//
-//        }
-//
+        String year = checkOrder(startYear,endYear);
+        if(year.equals("than")){
+            throw new MyException("项目的起始年度不能大于结束年度");
+        }
+
+        if(!CollectionUtils.isEmpty(userList)){
+            for(PageData user : userList){
+
+                String userName = user.getString("userName");
+                String belongPost = user.getString("belongPost");
+                if(!CollectionUtils.isEmpty(nameList) && nameList.contains(belongPost)){
+                    throw new MyException(userName+"存在非研发岗位，请确认调整后重新提交");
+                }
+
+
+                String startDate = user.getString("startDate");
+                String endDate = user.getString("endDate");
+
+                String date = checkOrder(startDate,endDate);
+                if(date.equals("than")){
+                    throw new MyException(userName+"参与研发的开始时间不能大于结束时间");
+                }
+
+                String date1 = checkOrder(startYear,startDate);
+                if(date1.equals("than")){
+                    throw new MyException(userName+"参与研发周期已超出项目周期，请确认调整后重新提交");
+                }
+
+                String date2 = checkOrder(endYear,endDate);
+                if(date2.equals("less")){
+                    throw new MyException(userName+"参与研发周期已超出项目周期，请确认调整后重新提交");
+                }
+
+
+            }
+
+        }
+
+
+        //判断研发费用预算是否超值
+        if(!CollectionUtils.isEmpty(budgetList)){
+            BigDecimal total = new BigDecimal(0);//总费用
+            BigDecimal material = new BigDecimal(0);//材料
+            BigDecimal equipment = new BigDecimal(0);//设备
+            BigDecimal artificial = new BigDecimal(0);//人工
+            BigDecimal other = new BigDecimal(0);//其他
+
+            for(PageData data : budgetList){
+                String expenseAccount = data.getString("expenseAccount");
+                String expenseBudget = data.getString("expenseBudget");
+                if(expenseAccount.equals("支出预算合计")){
+                    total = new BigDecimal(expenseBudget);
+                }else if(expenseAccount.equals("三、材料费")){
+                    material = new BigDecimal(expenseBudget);
+                }else if(expenseAccount.equals("二、设备费")){
+                    equipment = new BigDecimal(expenseBudget);
+                }else if(expenseAccount.equals("一、人员费")){
+                    artificial = new BigDecimal(expenseBudget);
+                }
+            }
+
+
+
+        }
+
+
+
 
         return ResponseEntity.success(null);
 

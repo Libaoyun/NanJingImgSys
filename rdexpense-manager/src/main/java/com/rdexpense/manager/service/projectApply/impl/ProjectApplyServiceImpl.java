@@ -639,18 +639,6 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         }
 
 
-        //8、插入经费来源每月预算
-        dao.insert("ProjectApplyMapper.insertBudgetSource", pd);
-
-        //9、插入经费支出每月预算
-        dao.insert("ProjectApplyMapper.insertBudgetExpenses", pd);
-
-        //10、插入年度预算（按月填报）
-        if (!CollectionUtils.isEmpty(monthList)) {
-            dao.batchInsert("ProjectApplyMapper.batchInsertMonthList", monthList);
-
-        }
-
         //11、插入拨款计划
         if (!CollectionUtils.isEmpty(appropriationPlanList)) {
             dao.batchInsert("ProjectApplyMapper.batchAppropriationPlan", appropriationPlanList);
@@ -883,9 +871,9 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         String unitAddress = ReadExcelUtil.readCellStr(cell, 4, "单位地址", false, 256);
         pd.put("unitAddress",unitAddress);
 
-        cell = row.getCell(3);
-        String zipCode = ReadExcelUtil.readCellStr(cell, 4, "编码", false, 256);
-        pd.put("unitAddress",zipCode);
+        cell = row.getCell(10);
+        String zipCode = ReadExcelUtil.readCellFormat(cell, 4, "编码", false, 256);
+        pd.put("zipCode",zipCode);
 
         //4、申请人
         row = sheet.getRow(4);
@@ -894,24 +882,24 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         pd.put("applyUserName",applyUserName);
 
         //5、性别
-        cell = row.getCell(3);
+        cell = row.getCell(4);
         String gender = ReadExcelUtil.readCellStr(cell, 5, "性别", false, 256);
         pd.put("gender",gender);
         pd.put("genderCode",getCode(gender,map));
 
         //6、年龄
-        cell = row.getCell(5);
-        String age = ReadExcelUtil.readCellStr(cell, 5, "年龄", false, 256);
+        cell = row.getCell(6);
+        String age = ReadExcelUtil.readCellFormat(cell, 5, "年龄", false, 256);
         pd.put("age",age);
 
         //7、职务
-        cell = row.getCell(7);
+        cell = row.getCell(8);
         String postName = ReadExcelUtil.readCellStr(cell, 5, "职务", false, 256);
         pd.put("postName",postName);
 
         //8、电话
-        cell = row.getCell(9);
-        String telephone = ReadExcelUtil.readCellStr(cell, 5, "电话", false, 256);
+        cell = row.getCell(10);
+        String telephone = ReadExcelUtil.readCellFormat(cell, 5, "电话", false, 256);
         pd.put("telephone",telephone);
 
         //9、读取申请经费
@@ -921,13 +909,13 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         pd.put("applyAmount",applyAmount);
 
         //10、起始年度
-        cell = row.getCell(3);
-        String startYear = ReadExcelUtil.readCellStr(cell, 6, "起始年度", false, 256);
+        cell = row.getCell(6);
+        String startYear = ReadExcelUtil.readCellDate(cell, 6, "起始年度", false);
         pd.put("startYear",startYear);
 
         //11、结束年度
-        cell = row.getCell(5);
-        String endYear = ReadExcelUtil.readCellStr(cell, 6, "结束年度", false, 256);
+        cell = row.getCell(9);
+        String endYear = ReadExcelUtil.readCellDate(cell, 6, "结束年度", false);
         pd.put("endYear",endYear);
 
         //12、专业类别
@@ -945,7 +933,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         pd.put("projectTypeCode",getCode(projectType,map));
 
         //14、是否鉴定
-        cell = row.getCell(3);
+        cell = row.getCell(9);
         String identify = ReadExcelUtil.readCellStr(cell, 8, "项目类型", false, 256);
         pd.put("identify",identify.equals("是")?"1":"0");
 
@@ -1036,8 +1024,6 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             throw new MyException("请上传正确的模板，检查进度计划sheet页是否正确");
         }
 
-        String[] head = {"年度", "计划及目标"};
-        checkHead(sheet,head);
 
         //遍历文件
         int end = sheet.getLastRowNum();
@@ -1046,16 +1032,20 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             XSSFRow row = sheet.getRow(i);
             XSSFCell cell0 = row.getCell(0);
-            XSSFCell cell1 = row.getCell(1);
+            XSSFCell cell1 = row.getCell(5);
 
             int rowNumber = i + 1;
             //解析第一个单元格 年度
-            String years = ReadExcelUtil.readCellStr(cell0, rowNumber, "年度", false, 256);
+            String years = ReadExcelUtil.readCellFormat(cell0, rowNumber, "年度", false, 256);
             data.put("years",years);
 
             //解析第二个单元格 计划及目标
             String planTarget = ReadExcelUtil.readCellStr(cell1, rowNumber, "计划及目标", false, 2048);
             data.put("planTarget",planTarget);
+
+            if(StringUtils.isBlank(years) && StringUtils.isBlank(planTarget)){
+                continue;
+            }
 
             list.add(data);
 
@@ -1079,8 +1069,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         }
 
 
-        String[] head = {"参加单位", "研究任务及分工"};
-        checkHead(sheet,head);
+ //       String[] head = {"参加单位", "研究任务及分工"};
+//        checkHead(sheet,head);
 
         //遍历文件
         int end = sheet.getLastRowNum();
@@ -1089,7 +1079,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             XSSFRow row = sheet.getRow(i);
             XSSFCell cell0 = row.getCell(0);
-            XSSFCell cell1 = row.getCell(1);
+            XSSFCell cell1 = row.getCell(5);
 
             int rowNumber = i + 1;
             //解析第一个单元格 参加单位
@@ -1099,6 +1089,10 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             //解析第二个单元格 研究任务及分工
             String taskDivision = ReadExcelUtil.readCellStr(cell1, rowNumber, "研究任务及分工", false, 2048);
             data.put("taskDivision",taskDivision);
+
+            if(StringUtils.isBlank(unitName) && StringUtils.isBlank(taskDivision)){
+                continue;
+            }
 
             list.add(data);
 
@@ -1122,8 +1116,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             throw new MyException("请上传正确的模板，检查研究人员（初始）sheet页是否正确");
         }
 
-        String[] head = {"姓名","身份证号码","年龄","性别","学历","所属部门","职务职称","所学专业","现从事专业","所在单位","研究任务及分工","全时率","联系电话","参与研发开始日期","参与研发结束日期"};
-        checkHead(sheet,head);
+//        String[] head = {"姓名","身份证号码","年龄","性别","学历","所属部门","职务职称","所学专业","现从事专业","所在单位","研究任务及分工","全时率","联系电话","参与研发开始日期","参与研发结束日期"};
+//        checkHead(sheet,head);
 
         //遍历文件
         int end = sheet.getLastRowNum();
@@ -1202,12 +1196,22 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             data.put("telephone",telephone);
 
             //解析第14个单元格 参与研发开始日期
-            String startDate = ReadExcelUtil.readCellStr(cell14, rowNumber, "参与研发开始日期", false, 256);
+            String startDate = ReadExcelUtil.readCellDate(cell14, rowNumber, "参与研发开始日期", false);
             data.put("startDate",startDate);
 
             //解析第15个单元格 参与研发结束日期
-            String endDate = ReadExcelUtil.readCellStr(cell15, rowNumber, "参与研发结束日期", false, 256);
+            String endDate = ReadExcelUtil.readCellDate(cell15, rowNumber, "参与研发结束日期", false);
             data.put("endDate",endDate);
+
+
+            if(StringUtils.isBlank(unitName) && StringUtils.isBlank(idCard)&& StringUtils.isBlank(age)&& StringUtils.isBlank(gender)
+                    && StringUtils.isBlank(education)&& StringUtils.isBlank(belongDepartment)
+                    && StringUtils.isBlank(belongPost)&& StringUtils.isBlank(majorStudied)&& StringUtils.isBlank(majorWorked)
+                    && StringUtils.isBlank(belongUnit)&& StringUtils.isBlank(taskDivision)&& StringUtils.isBlank(workRate)
+                    && StringUtils.isBlank(telephone)&& StringUtils.isBlank(startDate)&& StringUtils.isBlank(endDate)){
+
+                continue;
+            }
 
             list.add(data);
 
@@ -1234,8 +1238,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             throw new MyException("请上传正确的模板，检查拨款计划sheet页是否正确");
         }
 
-        String[] head = {"年度", "计划（万元）"};
-        checkHead(sheet,head);
+ //       String[] head = {"年度", "计划（万元）"};
+ //       checkHead(sheet,head);
 
         //遍历文件
         int end = sheet.getLastRowNum();
@@ -1244,16 +1248,20 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             XSSFRow row = sheet.getRow(i);
             XSSFCell cell0 = row.getCell(0);
-            XSSFCell cell1 = row.getCell(1);
+            XSSFCell cell1 = row.getCell(2);
 
             int rowNumber = i + 1;
             //解析第一个单元格 年度
-            String years = ReadExcelUtil.readCellStr(cell0, rowNumber, "年度", false, 256);
+            String years = ReadExcelUtil.readCellFormat(cell0, rowNumber, "年度", false, 256);
             data.put("years",years);
 
             //解析第二个单元格 计划（万元）
             String planAmount = ReadExcelUtil.readCellDecimal(cell1, rowNumber, "二、国家拨款", false, 20, 2);
             data.put("planAmount",planAmount);
+
+            if(StringUtils.isBlank(years) && StringUtils.isBlank(planAmount)){
+                continue;
+            }
 
             list.add(data);
 
@@ -1277,58 +1285,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             throw new MyException("请上传正确的模板，检查经费预算sheet页是否正确");
         }
 
-
-        //解析第1行 支出预算合计
-        setBudgetValue(sheet,2,"来源预算合计",7,"支出预算合计",24,list,pd);
-
-        //解析第1个单元格 一、人员费
-        setBudgetValue(sheet,2,"一、股份公司计划拨款",1,"一、人员费",8,list,pd);
-
-        //解析第2个单元格 二、设备费
-        setBudgetValue(sheet,2,"二、国家拨款",2,"二、设备费",9,list,pd);
-
-        //解析第3个单元格 三、材料费
-        setBudgetValue(sheet,2,"三、省市拨款",3,"三、材料费",10,list,pd);
-
-        //解析第4个单元格  四、燃料及动力费
-        setBudgetValue(sheet,2,"四、单位自筹款",4,"四、燃料及动力费",11,list,pd);
-
-        //解析第5个单元格 五、测试及化验费
-        setBudgetValue(sheet,2,"五、银行贷款",5,"五、测试及化验费",12,list,pd);
-
-        //解析第6个单元格 六、差旅费
-        setBudgetValue(sheet,2,"六、其他来源款",6,"六、差旅费",13,list,pd);
-
-        //解析第7个单元格 七、会议费
-        setBudgetValue(sheet,2,"",0,"七、会议费",14,list,pd);
-
-        //解析第8个单元格 八、课题管理费
-        setBudgetValue(sheet,2,"",0,"八、课题管理费",15,list,pd);
-
-        //解析第9个单元格 九、其他费用
-        setBudgetValue(sheet,2,"",0,"九、其他费用",16,list,pd);
-
-        //解析第10个单元格 9.1、国际合作交流费
-        setBudgetValue(sheet,2,"",0,"9.1、国际合作交流费",17,list,pd);
-
-        //解析第11个单元格 9.2、出版/文献/信息传播
-        setBudgetValue(sheet,2,"",0,"9.2、出版/文献/信息传播",18,list,pd);
-
-        //解析第12个单元格 9.3、知识产权事务
-        setBudgetValue(sheet,2,"",0,"9.3、知识产权事务",19,list,pd);
-
-        //解析第13个单元格 9.4、专家费
-        setBudgetValue(sheet,2,"",0,"9.4、专家费",20,list,pd);
-
-        //解析第14个单元格 9.5其他
-        setBudgetValue(sheet,2,"",0,"9.5其他",21,list,pd);
-
-        //解析第15个单元格 十、新产品设计费
-        setBudgetValue(sheet,2,"",0,"十、新产品设计费",22,list,pd);
-
-        //解析第16个单元格 十一、委托研发费用
-        setBudgetValue(sheet,2,"",0,"十一、委托研发费用",23,list,pd);
-
+        packageBudget(sheet,list,pd);
         return list;
     }
 
@@ -1347,59 +1304,67 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             throw new MyException("请上传正确的模板，检查每月预算sheet页是否正确");
         }
 
-        //解析第1行 支出预算合计
-        setBudgetValue(sheet,3,"来源预算合计",1,"支出预算合计",3,list,pd);
-
-        //解析第1个单元格 一、人员费
-        setBudgetValue(sheet,4,"一、股份公司计划拨款",1,"一、人员费",3,list,pd);
-
-        //解析第2个单元格 二、设备费
-        setBudgetValue(sheet,5,"二、国家拨款",1,"二、设备费",3,list,pd);
-
-        //解析第3个单元格 三、材料费
-        setBudgetValue(sheet,6,"三、省市拨款",1,"三、材料费",3,list,pd);
-
-        //解析第4个单元格  四、燃料及动力费
-        setBudgetValue(sheet,7,"四、单位自筹款",1,"四、燃料及动力费",3,list,pd);
-
-        //解析第5个单元格 五、测试及化验费
-        setBudgetValue(sheet,8,"五、银行贷款",1,"五、测试及化验费",3,list,pd);
-
-        //解析第6个单元格 六、差旅费
-        setBudgetValue(sheet,9,"六、其他来源款",1,"六、差旅费",3,list,pd);
-
-        //解析第7个单元格 七、会议费
-        setBudgetValue(sheet,10,"",0,"七、会议费",3,list,pd);
-
-        //解析第8个单元格 八、课题管理费
-        setBudgetValue(sheet,11,"",0,"八、课题管理费",3,list,pd);
-
-        //解析第9个单元格 九、其他费用
-        setBudgetValue(sheet,12,"",0,"九、其他费用",3,list,pd);
-
-        //解析第10个单元格 9.1、国际合作交流费
-        setBudgetValue(sheet,13,"",0,"9.1、国际合作交流费",3,list,pd);
-
-        //解析第11个单元格 9.2、出版/文献/信息传播
-        setBudgetValue(sheet,14,"",0,"9.2、出版/文献/信息传播",3,list,pd);
-
-        //解析第12个单元格 9.3、知识产权事务
-        setBudgetValue(sheet,15,"",0,"9.3、知识产权事务",3,list,pd);
-
-        //解析第13个单元格 9.4、专家费
-        setBudgetValue(sheet,16,"",0,"9.4、专家费",3,list,pd);
-
-        //解析第14个单元格 9.5其他
-        setBudgetValue(sheet,17,"",0,"9.5其他",3,list,pd);
-
-        //解析第15个单元格 十、新产品设计费
-        setBudgetValue(sheet,18,"",0,"十、新产品设计费",3,list,pd);
-
-        //解析第16个单元格 十一、委托研发费用
-        setBudgetValue(sheet,19,"",0,"十一、委托研发费用",3,list,pd);
+        packageBudget(sheet,list,pd);
 
         return list;
     }
+
+
+    private List<PageData> packageBudget(XSSFSheet sheet,List<PageData> list,PageData pd){
+        //解析第1行 支出预算合计
+        setBudgetValue(sheet,4,0,1,2,3,list,pd);
+
+        //解析第1个单元格 一、人员费
+        setBudgetValue(sheet,5,0,1,2,3,list,pd);
+
+        //解析第2个单元格 二、设备费
+        setBudgetValue(sheet,6,0,1,2,3,list,pd);
+
+        //解析第3个单元格 三、材料费
+        setBudgetValue(sheet,7,0,1,2,3,list,pd);
+
+        //解析第4个单元格  四、燃料及动力费
+        setBudgetValue(sheet,8,0,1,2,3,list,pd);
+
+        //解析第5个单元格 五、测试及化验费
+        setBudgetValue(sheet,9,0,1,2,3,list,pd);
+
+        //解析第6个单元格 六、差旅费
+        setBudgetValue(sheet,10,0,1,2,3,list,pd);
+
+        //解析第7个单元格 七、会议费
+        setBudgetValue(sheet,11,-1,-1,2,3,list,pd);
+
+        //解析第8个单元格 八、课题管理费
+        setBudgetValue(sheet,12,-1,-1,2,3,list,pd);
+
+        //解析第9个单元格 九、其他费用
+        setBudgetValue(sheet,13,-1,-1,2,3,list,pd);
+
+        //解析第10个单元格 9.1、国际合作交流费
+        setBudgetValue(sheet,14,-1,-1,2,3,list,pd);
+
+        //解析第11个单元格 9.2、出版/文献/信息传播
+        setBudgetValue(sheet,15,-1,-1,2,3,list,pd);
+
+        //解析第12个单元格 9.3、知识产权事务
+        setBudgetValue(sheet,16,-1,-1,2,3,list,pd);
+
+        //解析第13个单元格 9.4、专家费
+        setBudgetValue(sheet,17,-1,-1,2,3,list,pd);
+
+        //解析第14个单元格 9.5其他
+        setBudgetValue(sheet,18,-1,-1,2,3,list,pd);
+
+        //解析第15个单元格 十、新产品设计费
+        setBudgetValue(sheet,19,-1,-1,2,3,list,pd);
+
+        //解析第16个单元格 十一、委托研发费用
+        setBudgetValue(sheet,20,-1,-1,2,3,list,pd);
+
+        return list;
+    }
+
 
 
     /**
@@ -1429,7 +1394,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
                 //读取年份
                 XSSFRow yearRow = sheet.getRow(2);
-                XSSFCell yearCell = yearRow.getCell(4 + i);
+                XSSFCell yearCell = yearRow.getCell(num);
                 String yearValue = ReadExcelUtil.readCellStr(yearCell, 4, "年度", false, 256);
                 if(yearValue.length() >4){
                     yearValue = yearValue.substring(0,4);
@@ -1440,7 +1405,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                     PageData data = new PageData();
                     data.put("businessId", pd.getString("businessId"));
                     data.put("years", yearValue);
-                    data.put("expenseAccount",monthList.get(y-4));
+                    data.put("expenseAccount",monthList.get(y-4).getString("expenseAccount"));
 
                     XSSFRow row = sheet.getRow(y);
                     XSSFCell cell1 = row.getCell(cellNum);
@@ -1526,30 +1491,39 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
 
 
-    private List<PageData> setBudgetValue(XSSFSheet sheet,int rowNum,String param1,int row1,String param2,int row2,List<PageData> list,PageData pd){
+    private List<PageData> setBudgetValue(XSSFSheet sheet,int rowNum,int row1,int row2,int row3,int row4,List<PageData> list,PageData pd){
         PageData data = new PageData();
-        data.put("sourceAccount",param1);
-        data.put("expenseAccount",param2);
         data.put("businessId", pd.getString("businessId"));
 
         XSSFRow row = sheet.getRow(rowNum);
         XSSFCell cell = null;
-        if(row1 > 0){
+        String sourceAccount = "";
+        if(row1 >= 0){
             cell = row.getCell(row1);
-            String sourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, param1, false, 20, 2);
-            data.put("sourceBudget", sourceBudget);
-        }else {
-            data.put("sourceBudget", "");
+            sourceAccount = ReadExcelUtil.readCellStr(cell, 3, "来源科目", false, 256);
         }
 
-        if(row2 > 0){
+        if(row2 >= 0){
             cell = row.getCell(row2);
-            String expenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, param2, false, 20, 2);
+            String sourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, sourceAccount, false, 20, 2);
+            data.put("sourceBudget", sourceBudget);
+        }
+
+        String expenseAccount = "";
+        if(row3 >= 0){
+            cell = row.getCell(row3);
+            expenseAccount = ReadExcelUtil.readCellStr(cell, 3, "支出科目", false, 256);
+        }
+
+        if(row4 >= 0){
+            cell = row.getCell(row4);
+            String expenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, expenseAccount, false, 20, 2);
             data.put("expenseBudget", expenseBudget);
 
-        }else {
-            data.put("expenseBudget", "");
         }
+
+        data.put("sourceAccount",sourceAccount);
+        data.put("expenseAccount",expenseAccount);
 
         list.add(data);
 
@@ -1566,8 +1540,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
     private PageData packageData(PageData pd) {
         PageData data = new PageData();
 
-        data.put("createUserId", pd.getString("createUserId"));
-        data.put("createUser", pd.getString("createUser"));
+        data.put("creatorUserId", pd.getString("createUserId"));
+        data.put("creatorUser", pd.getString("createUser"));
         data.put("createTime", timeFormat.format(new Date()));
         data.put("businessId", pd.getString("businessId"));
 

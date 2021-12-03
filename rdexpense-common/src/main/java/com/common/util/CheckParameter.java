@@ -418,12 +418,14 @@ public class CheckParameter {
 
         String intName = roeNumber + ";" +paraName + ";" + intLength;
         if (!StringUtils.isEmpty(paraValue) && int_length > intLength) {
-            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_CELL_INT.desc(), intName));
+            String error = ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_CELL_DECIMAL.desc(), intName);
+            throw new MyException(error);
         }
 
-        String decimalName = paraName + ";" + small_length;
+        String decimalName = roeNumber + ";" +paraName + ";" + smallLength;
         if (!StringUtils.isEmpty(paraValue) && small_length > smallLength) {
-            throw new MyException(ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_CELL_DECIMAL.desc(), decimalName));
+            String error = ConstantMsgUtil.getProperty(ConstantMsgUtil.WAN_CELL_DECIMAL.desc(), decimalName);
+            throw new MyException(error);
         }
 
     }
