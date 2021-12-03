@@ -12,8 +12,9 @@
                status
         from sys_department_tree
         <where>
+            status = 1
             <if test="companyId!=null and companyId!=''">
-                org_id not in (select org_id
+                and org_id not in (select org_id
                 from sys_department_tree
                 where org_id != #{companyId} and org_type = 0)
             </if>

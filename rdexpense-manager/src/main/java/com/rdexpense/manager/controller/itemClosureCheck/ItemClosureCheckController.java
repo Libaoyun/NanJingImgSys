@@ -374,9 +374,9 @@ public class ItemClosureCheckController extends BaseController {
     private void submitCheckParam(PageData pd) {
         CheckParameter.checkDefaultParams(pd);
         CheckParameter.stringLengthAndEmpty(pd.getString("jobTitle"), "成果名称", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("taskSource"), "任务来源", 1024);
+        CheckParameter.stringLength(pd.getString("taskSource"), "任务来源", 1024);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectAbstract"), "成果内容简介", 1024);
-        CheckParameter.stringLength(pd.getString("directoryAndUnit"), "经济技术文件目录及提供单位", 1024);
+        CheckParameter.stringLengthAndEmpty(pd.getString("directoryAndUnit"), "经济技术文件目录及提供单位", 1024);
         CheckParameter.stringLength(pd.getString("checkRemark"), "申请评审单位意见", 1024);
     }
 

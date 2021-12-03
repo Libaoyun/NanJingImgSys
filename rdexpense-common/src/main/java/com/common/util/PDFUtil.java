@@ -45,21 +45,22 @@ public class PDFUtil {
 
     }*/
 	public static void mergeTable(PdfPTable table, PdfPTable... tables) {
-		for (int i = 0; i < tables.length; i++) {
-			PdfPCell tempCell = new PdfPCell(tables[i]);
-			tempCell.setBorderWidthRight(0);
-			tempCell.setBorderWidthLeft(0);
-			tempCell.setBorderWidthTop(0);
-			tables[i].setSpacingBefore(0);//设置表格直接间距
-			tempCell.setPadding(0);
-			tempCell.setColspan(table.getNumberOfColumns());
-			tables[i].setSplitLate(false);
-			tables[i].setSplitRows(true);
-			table.setSplitLate(false);
-			table.setSplitRows(true);
-			table.addCell(tempCell);
+		if (tables != null){
+			for (int i = 0; i < tables.length; i++) {
+				PdfPCell tempCell = new PdfPCell(tables[i]);
+				tempCell.setBorderWidthRight(0);
+				tempCell.setBorderWidthLeft(0);
+				tempCell.setBorderWidthTop(0);
+				tables[i].setSpacingBefore(0);//设置表格直接间距
+				tempCell.setPadding(0);
+				tempCell.setColspan(table.getNumberOfColumns());
+				tables[i].setSplitLate(false);
+				tables[i].setSplitRows(true);
+				table.setSplitLate(false);
+				table.setSplitRows(true);
+				table.addCell(tempCell);
+			}
 		}
-
 	}
 
 	public static void mergeTable2(PdfPTable table, PdfPTable... tables) {
@@ -200,12 +201,12 @@ public class PDFUtil {
 		//String path = property + "\\equipmentBusiness-manager\\src\\main\\resources\\static\\logo.png";
 		//      Image image = Image.getInstance(path);
 
-		InputStream inStream = PDFUtil.class.getResourceAsStream("/static/logo.png");
-		Image image = Image.getInstance(toByteArray(inStream));
+//		InputStream inStream = PDFUtil.class.getResourceAsStream("/static/logo.png");
+//		Image image = Image.getInstance(toByteArray(inStream));
 
-		image.setIndentationLeft(10f);
-		image.scaleAbsolute(168, 29);
-		document.add(image);
+//		image.setIndentationLeft(10f);
+//		image.scaleAbsolute(168, 29);
+//		document.add(image);
 		Paragraph blankRow1 = new Paragraph(titleName, PDFUtil.getFont().get("keyBigFont"));
 		blankRow1.setAlignment(Element.ALIGN_CENTER);
 		document.add(blankRow1);

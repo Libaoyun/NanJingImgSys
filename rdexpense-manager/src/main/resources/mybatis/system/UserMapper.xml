@@ -39,17 +39,17 @@
             <if test="userName!=null and userName!=''">
                 and user_name LIKE concat('%',#{userName},'%')
             </if>
-            <if test="departmentCode!=null and departmentCode!=''">
-                and department_code LIKE concat('%',#{departmentCode},'%')
+            <if test="departmentName!=null and departmentName!=''">
+                and department_name LIKE concat('%',#{departmentName},'%')
             </if>
-            <if test="postCode!=null and postCode!=''">
-                and post_code LIKE concat('%',#{postCode},'%')
+            <if test="postName!=null and postName!=''">
+                and post_name LIKE concat('%',#{postName},'%')
             </if>
             <if test="mobilePhone!=null and mobilePhone!=''">
                 and mobile_phone LIKE concat('%',#{mobilePhone},'%')
             </if>
-            <if test="createUser!=null and createUser!=''">
-                and create_user LIKE concat('%',#{createUser},'%')
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and create_user LIKE concat('%',#{selectCreateUser},'%')
             </if>
             <if test="updateUser!=null and updateUser!=''">
                 and update_user LIKE concat('%',#{updateUser},'%')
@@ -69,7 +69,7 @@
             </if>
 
             <if test="employeeStatusCodeList != null and employeeStatusCodeList.size()>0">
-                and employeeStatusCode in
+                and employee_status_code in
                 <foreach item="item" index="index" collection="employeeStatusCodeList" open="(" separator="," close=")">
                     #{item}
                 </foreach>

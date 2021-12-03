@@ -1,5 +1,6 @@
 package com.rdexpense.manager.service.system.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.common.base.dao.mysql.BaseDao;
@@ -604,13 +605,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void exportPDF(PageData pageData, Document document) throws Exception {
         // 中文字体,解决中文不能显示问题
-        BaseFont bfChinese = BaseFont.createFont("STSongStd-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
-        com.itextpdf.text.Font keyfont = new com.itextpdf.text.Font(bfChinese, 12, com.itextpdf.text.Font.BOLD);
-        com.itextpdf.text.Font textfont = new com.itextpdf.text.Font(bfChinese, 10, com.itextpdf.text.Font.NORMAL);
-        // 设置标题
-        Paragraph blankRow1 = new Paragraph("员工信息", keyfont);
-        blankRow1.setAlignment(Element.ALIGN_CENTER);
-        document.add(blankRow1);
+//        BaseFont bfChinese = BaseFont.createFont("STSongStd-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+//        com.itextpdf.text.Font keyfont = new com.itextpdf.text.Font(bfChinese, 12, com.itextpdf.text.Font.BOLD);
+//        com.itextpdf.text.Font textfont = new com.itextpdf.text.Font(bfChinese, 10, com.itextpdf.text.Font.NORMAL);
+//        // 设置标题
+//        Paragraph blankRow1 = new Paragraph("员工信息", keyfont);
+//        blankRow1.setAlignment(Element.ALIGN_CENTER);
+//        document.add(blankRow1);
 
 
         //根据idList查询主表
@@ -632,92 +633,125 @@ public class UserServiceImpl implements UserService {
 
         //创建一个表格,10为一行有几栏
 
-        PdfPTable table1 = new PdfPTable(10);
-        table1.setSpacingBefore(10f);
-        table1.setWidthPercentage(100);
-        int[] width1 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
-        table1.setWidths(width1); //设置宽度
+//        PdfPTable table1 = new PdfPTable(10);
+//        table1.setSpacingBefore(10f);
+//        table1.setWidthPercentage(100);
+//        int[] width1 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+//        table1.setWidths(width1); //设置宽度
+//
+//        String[] argArr1 = {"编号", pd.getString("userCode"), "姓名", pd.getString("userName"), "部门", pd.getString("departmentName"), "职务", pd.getString("postName")};
+//        for (String arg : argArr1) {
+//            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+//            cell.setMinimumHeight(20);
+//            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+//            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//            table1.addCell(cell);
+//        }
+//
+//
+//        PdfPTable table2 = new PdfPTable(10);
+//        table2.setSpacingBefore(10f);
+//        table2.setWidthPercentage(100);
+//        int[] width2 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+//        table2.setWidths(width2); //设置宽度
+//
+//        String[] argArr2 = {"性别", pd.getString("gender"), "出生日期", pd.getString("birthDate"), "身高", pd.getString("height"),
+//                "学历", pd.getString("education"), "婚姻状况", pd.getString("maritalStatus").equals("0")?"否":"是"};
+//        for (String arg : argArr2) {
+//            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+//            cell.setMinimumHeight(20);
+//            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+//            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//            table2.addCell(cell);
+//        }
+//
+//
+//        PdfPTable table3 = new PdfPTable(10);
+//        table3.setSpacingBefore(10f);
+//        table3.setWidthPercentage(100);
+//        int[] width3 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+//        table3.setWidths(width3); //设置宽度
+//
+//        String[] argArr3 = {"血型", pd.getString("bloodType"), "移动电话", pd.getString("mobilePhone"), "电子邮箱",
+//                pd.getString("email"), "传真", pd.getString("fax")};
+//        for (String arg : argArr3) {
+//            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+//            cell.setMinimumHeight(20);
+//            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+//            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//            table3.addCell(cell);
+//        }
+//
+//
+//        PdfPTable table4 = new PdfPTable(10);
+//        table4.setSpacingBefore(10f);
+//        table4.setWidthPercentage(100);
+//        int[] width4 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+//        table4.setWidths(width4); //设置宽度
+//
+//        String[] argArr4 = {"员工状态", pd.getString("employeeStatus"), "员工类型", pd.getString("employeeType"),
+//                "参工日期", pd.getString("participationDate"), "入职日期", pd.getString("entryDate"), "转正日期",
+//                pd.getString("confirmationDate")};
+//        for (String arg : argArr4) {
+//            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+//            cell.setMinimumHeight(20);
+//            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+//            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//            table4.addCell(cell);
+//        }
+//
+//
+//        PdfPTable table5 = new PdfPTable(10);
+//        table5.setSpacingBefore(10f);
+//        table5.setWidthPercentage(100);
+//        int[] width5 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+//        table5.setWidths(width1); //设置宽度
+//
+//        String[] argArr5 = {"离职日期", pd.getString("leaveDate"), "国籍", pd.getString("nationality"), "籍贯", pd.getString("nativePlace"), "民族", pd.getString("nation"), "宗教", pd.getString("religion")};
+//        for (String arg : argArr5) {
+//            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+//            cell.setMinimumHeight(20);
+//            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+//            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//            table5.addCell(cell);
+//        }
+//
+//
+//
+//        //将表格二，表格三合入表格一中
+//        PDFUtil.mergeTable(table1,table2,table3,table4,table5);
+//
+//        // 添加表格
+//        document.add(table1);
 
-        String[] argArr1 = {"编号", pd.getString("userCode"), "姓名", pd.getString("userName"), "英文名", pd.getString("englishUserName"), "部门", pd.getString("departmentName"), "职务", pd.getString("postName")};
-        for (String arg : argArr1) {
-            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
-            cell.setMinimumHeight(20);
-            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table1.addCell(cell);
+        String maritalStatus = pd.getString("maritalStatus").toString();
+        if (maritalStatus.equals("0")){
+            maritalStatus = "否";
+        } else if (maritalStatus.equals("1")){
+            maritalStatus = "是";
+        } else {
+            maritalStatus = "";
         }
 
+        //设置logo和标题
+        PDFUtil.addTitle(document,"员工信息");
 
-        PdfPTable table2 = new PdfPTable(10);
-        table2.setSpacingBefore(10f);
-        table2.setWidthPercentage(100);
-        int[] width2 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
-        table2.setWidths(width2); //设置宽度
+        //设置基本信息
+        int width1[] = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+        String[] argArr1 = {"编号", pd.getString("userCode"), "姓名", pd.getString("userName"), "部门", pd.getString("departmentName"), "职务", pd.getString("postName"),
+                "性别", pd.getString("gender"), "出生日期", pd.getString("birthDate"), "身高", pd.getString("height"),
+                "学历", pd.getString("education"), "婚姻状况", maritalStatus,
+                "血型", pd.getString("bloodType"), "移动电话", pd.getString("mobilePhone"), "电子邮箱",
+                pd.getString("email"), "传真", pd.getString("fax"),"员工状态", pd.getString("employeeStatus"), "员工类型", pd.getString("employeeType"),
+                "参工日期", pd.getString("participationDate"), "入职日期", pd.getString("entryDate"), "转正日期",
+                pd.getString("confirmationDate"),"离职日期", pd.getString("leaveDate"), "国籍", pd.getString("nationality"), "籍贯",
+                pd.getString("nativePlace"), "民族", pd.getString("nation"), "宗教", pd.getString("religion"),"","","",""};
 
-        String[] argArr2 = {"性别", pd.getString("gender"), "出生日期", pd.getString("birthDate"), "身高", pd.getString("height"), "学历", pd.getString("education"), "婚姻状况", pd.getString("maritalStatus").equals("0")?"否":"是"};
-        for (String arg : argArr2) {
-            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
-            cell.setMinimumHeight(20);
-            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table2.addCell(cell);
-        }
-
-
-        PdfPTable table3 = new PdfPTable(10);
-        table3.setSpacingBefore(10f);
-        table3.setWidthPercentage(100);
-        int[] width3 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
-        table3.setWidths(width3); //设置宽度
-
-        String[] argArr3 = {"血型", pd.getString("bloodType"), "移动电话", pd.getString("mobilePhone"), "办公电话", pd.getString("officeTelephone"), "电子邮箱", pd.getString("email"), "传真", pd.getString("fax")};
-        for (String arg : argArr3) {
-            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
-            cell.setMinimumHeight(20);
-            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table3.addCell(cell);
-        }
+        PdfPTable baseTableHaveMerge = PDFUtil.createBaseTableOnlyOne(width1, argArr1, null);
 
 
-        PdfPTable table4 = new PdfPTable(10);
-        table4.setSpacingBefore(10f);
-        table4.setWidthPercentage(100);
-        int[] width4 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
-        table4.setWidths(width4); //设置宽度
-
-        String[] argArr4 = {"员工状态", pd.getString("employeeStatus"), "员工类型", pd.getString("employeeType"), "参工日期", pd.getString("participationDate"), "入职日期", pd.getString("entryDate"), "转正日期", pd.getString("confirmationDate")};
-        for (String arg : argArr4) {
-            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
-            cell.setMinimumHeight(20);
-            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table4.addCell(cell);
-        }
-
-
-        PdfPTable table5 = new PdfPTable(10);
-        table5.setSpacingBefore(10f);
-        table5.setWidthPercentage(100);
-        int[] width5 = {150, 300, 150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
-        table5.setWidths(width1); //设置宽度
-
-        String[] argArr5 = {"离职日期", pd.getString("leaveDate"), "国籍", pd.getString("nationality"), "籍贯", pd.getString("nativePlace"), "民族", pd.getString("nation"), "宗教", pd.getString("religion")};
-        for (String arg : argArr5) {
-            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
-            cell.setMinimumHeight(20);
-            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table5.addCell(cell);
-        }
-
-
-
-        //将表格二，表格三合入表格一中
-        PDFUtil.mergeTable(table1,table2,table3,table4,table5);
-
-        // 添加表格
-        document.add(table1);
+        //添加表格
+        document.add(baseTableHaveMerge);
     }
 
 
