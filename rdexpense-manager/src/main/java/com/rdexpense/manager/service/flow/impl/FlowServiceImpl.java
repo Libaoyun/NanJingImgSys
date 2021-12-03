@@ -924,6 +924,7 @@ public class FlowServiceImpl implements FlowService {
         nextApprove.put("nextApproveNodeId",nextApproveNode.getString("id"));
         nextApprove.put("nextApproveNodeName",nextApproveNode.getString("name"));
         nextApprove.put("fileId",pd.getString("fileId"));
+        nextApprove.put("fileName",pd.getString("fileName"));
         nextApprove.put("approveStartTime",approveStartTime);
 
         baseDao.insert("FlowMapper.insertApprovalSchedule", nextApprove);

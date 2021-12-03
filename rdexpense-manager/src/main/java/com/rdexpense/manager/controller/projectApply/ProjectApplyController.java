@@ -48,11 +48,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 
 import static com.common.util.ConstantMsgUtil.*;
 import static com.common.util.ConstantMsgUtil.ERR_EXPORT_FAIL;
 import static com.common.util.DateCheckUtil.checkOrder;
-import static java.math.BigDecimal.ROUND_HALF_UP;
 
 /**
  * @author rdexpense
@@ -74,6 +74,8 @@ public class ProjectApplyController extends BaseController {
 
     @Autowired
     private LogUtil logUtil;
+
+    private static final String FILE_PREFIX = "项目立项申请_";
 
 
     @PostMapping("/queryList")
@@ -101,6 +103,11 @@ public class ProjectApplyController extends BaseController {
         String operationType = pd.getString("operationType");
         if(operationType.equals("2")){
             checkParam(pd,2);
+            String check = submitCheck(pd,2);
+            if(StringUtils.isNotBlank(check)){
+                return ResponseEntity.success(check, check);
+            }
+
         }
 
         ResponseEntity result = null;
@@ -129,6 +136,11 @@ public class ProjectApplyController extends BaseController {
         String operationType = pd.getString("operationType");
         if(operationType.equals("2")){
             checkParam(pd,2);
+            String check = submitCheck(pd,2);
+            if(StringUtils.isNotBlank(check)){
+                return ResponseEntity.success(check, check);
+            }
+
         }
 
         ResponseEntity result = null;
@@ -152,13 +164,7 @@ public class ProjectApplyController extends BaseController {
     @PostMapping("/delete")
     public ResponseEntity deleteApply(BusinessIdListDto businessIdListDto) {
         PageData pd = this.getParams();
-
-        //校验取出参数
-        String idList = pd.getString("businessIdList");
-        if (StringUtils.isBlank(idList)) {
-            throw new MyException("业务主键ID不能为空");
-        }
-        CheckParameter.checkDefaultParams(pd);
+        CheckParameter.checkBusinessIdList(pd);
 
         ResponseEntity result = null;
         try {
@@ -211,6 +217,12 @@ public class ProjectApplyController extends BaseController {
         }
 
         checkParam(recordData,1);
+
+        String check =  submitCheck(recordData,1);
+        if(StringUtils.isNotBlank(check)){
+            return ResponseEntity.success(check, check);
+        }
+
 
         try {
             pd.put("serialNumber",recordData.getString("serialNumber"));
@@ -387,12 +399,12 @@ public class ProjectApplyController extends BaseController {
 
     @ApiOperation(value = "导入经费预算（每月预算）")
     @PostMapping("/uploadMonth")
-    public ResponseEntity<PageData> uploadMonth(UploadTemplateFileDto dto) throws Exception {
+    public ResponseEntity uploadMonth(UploadTemplateFileDto dto) throws Exception {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
             List<PageData> list = projectApplyService.uploadMonth(dto.getFile(), pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(list, PageData.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            result = ResponseEntity.success(list, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入经费预算（每月预算）失败,request=[{}]", pd);
@@ -424,24 +436,48 @@ public class ProjectApplyController extends BaseController {
     public ResponseEntity exportExcel(BusinessIdListDto businessIdListDto) {
         PageData pd = this.getParams();
         ResponseEntity result = null;
-        //取出菜单id
-        CheckParameter.checkDefaultParams(pd);
-        //校验取出参数
-        String idList = pd.getString("idList");
-        if (StringUtils.isBlank(idList)) {
-            throw new MyException(ConstantMsgUtil.ERR_NO_EMPTY.desc());
-        }
+        CheckParameter.checkBusinessIdList(pd);
+
+        HttpServletResponse response = this.getResponse();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
+        String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+        String number = SerialNumberUtil.generateSerialNo("projectApplyExcel");
+
         try {
-            HSSFWorkbook wb = projectApplyService.exportExcel(pd);
-            HttpServletResponse res = this.getResponse();
-            String serialNumber = SerialNumberUtil.generateSerialNo("userExcel");
-            String fileName = "用户管理_" + df.format(new Date()) + "_"+serialNumber +".xls";
-            res.setHeader("Content-Disposition",
-                    "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
-            OutputStream out = res.getOutputStream();
-            wb.write(out);
-            out.close();
+
+
+            String businessIdStr = pd.getString("businessIdList");
+            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
+
+            if(businessIdList.size() == 1){
+                HSSFWorkbook wb = projectApplyService.exportExcel(businessIdList.get(0));
+                String fileName = FILE_PREFIX+date+"_"+number+".xls";
+                response.setHeader("Content-Disposition",
+                        "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
+                OutputStream out = response.getOutputStream();
+                wb.write(out);
+                out.close();
+
+            }else {
+                //文件名
+                String fileName = FILE_PREFIX+date+"_"+number+".zip";
+                //输出流
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                // 压缩流
+                ZipOutputStream zos = new ZipOutputStream(bos);
+                //生成excel
+                projectApplyService.exportExcelZip(businessIdList, zos, bos,number);
+                zos.flush();
+                zos.close();
+                //写入返回response
+                response.reset();
+                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
+                OutputStream out = new BufferedOutputStream(response.getOutputStream());
+                out.write(bos.toByteArray());
+                out.flush();
+                out.close();
+            }
+
             result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
             return result;
         } catch (Exception e) {
@@ -454,17 +490,18 @@ public class ProjectApplyController extends BaseController {
 
 
 
-    @ApiOperation(value = "导出PDF", notes = "导出PDF")
+    @ApiOperation(value = "导出PDF")
     @PostMapping(value = "/exportPdf")
     public ResponseEntity exportPdf(BusinessIdListDto businessIdListDto) {
-        PageData pageData = this.getParams();
+        PageData pd = this.getParams();
+        CheckParameter.checkBusinessIdList(pd);
         ResponseEntity result = null;
         try {
             //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pageData);
+            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pd);
             logger.info("业务主数据 === " + request);
             //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pageData);
+            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pd);
             logger.info("明细表数据 === " + detailList);
             //明细子表数据
             if(detailList.size()==0){
@@ -473,7 +510,7 @@ public class ProjectApplyController extends BaseController {
             List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
             logger.info("明细子表数据 === " + detailChildList);
             //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pageData);
+            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pd);
             logger.info("合同数据 ====" + shieldData);
      //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
             return result;
@@ -481,15 +518,48 @@ public class ProjectApplyController extends BaseController {
             result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
             throw new MyException(ERR_EXPORT_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 6, "项目立项申请PDF", pageData);
+            logUtil.saveLogData(result.getCode(), 6, "项目立项申请PDF", pd);
         }
     }
 
 
 
-    @ApiOperation(value = "导出WORD", notes = "导出WORD")
+    @ApiOperation(value = "导出WORD")
     @PostMapping(value = "/exportWord")
     public ResponseEntity exportWord(BusinessIdListDto businessIdListDto) {
+        PageData pd = this.getParams();
+        ResponseEntity result = null;
+        CheckParameter.checkBusinessIdList(pd);
+        try {
+            //业务主数据
+            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pd);
+            logger.info("业务主数据 === " + request);
+            //设备维保明细
+            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pd);
+            logger.info("明细表数据 === " + detailList);
+            //明细子表数据
+            if(detailList.size()==0){
+                detailList.add(new PageData());
+            }
+            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
+            logger.info("明细子表数据 === " + detailChildList);
+            //查询合同数据
+            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pd);
+            logger.info("合同数据 ====" + shieldData);
+            //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+            return result;
+        } catch (Exception e) {
+            result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
+            throw new MyException(ERR_EXPORT_FAIL.desc(), e);
+        } finally {
+            logUtil.saveLogData(result.getCode(), 6, "项目立项申请PDF", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "预览合同")
+    @PostMapping(value = "/preview")
+    public ResponseEntity preview(ProjectApplyAddDto projectApplyAddDto) {
         PageData pageData = this.getParams();
         ResponseEntity result = null;
         try {
@@ -513,8 +583,6 @@ public class ProjectApplyController extends BaseController {
         } catch (Exception e) {
             result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
             throw new MyException(ERR_EXPORT_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 6, "项目立项申请PDF", pageData);
         }
     }
 
@@ -654,10 +722,18 @@ public class ProjectApplyController extends BaseController {
         }
 
 
+        //校验经费预算
+        List<PageData> budgetList = null;
+        if(flag == 1){
+            budgetList = (List<PageData>) pd.get("budgetList");
+        }else {
+            budgetList = JSONObject.parseArray(pd.getString("budgetList"), PageData.class);
+        }
 
-        //校验经费预算-每月预算
+        checkBudget(budgetList);
 
-        //校验年度预算（按月填报）
+
+        //校验经费预算（每月填报）
         List<PageData> monthList = null;
         if(flag == 1){
             monthList = (List<PageData>) pd.get("monthList");
@@ -665,28 +741,7 @@ public class ProjectApplyController extends BaseController {
             monthList = JSONObject.parseArray(pd.getString("monthList"), PageData.class);
         }
 
-        if(!CollectionUtils.isEmpty(monthList)){
-            for(PageData month : monthList){
-                CheckParameter.checkDecimal(month.getString("january"), "1月",20,2);
-                CheckParameter.checkDecimal(month.getString("february"), "2月",20,2);
-                CheckParameter.checkDecimal(month.getString("march"), "3月",20,2);
-                CheckParameter.checkDecimal(month.getString("april"), "4月",20,2);
-                CheckParameter.checkDecimal(month.getString("may"), "5月",20,2);
-                CheckParameter.checkDecimal(month.getString("june"), "6月",20,2);
-                CheckParameter.checkDecimal(month.getString("july"), "7月",20,2);
-                CheckParameter.checkDecimal(month.getString("august"), "8月",20,2);
-                CheckParameter.checkDecimal(month.getString("september"), "9月",20,2);
-                CheckParameter.checkDecimal(month.getString("october"), "10月",20,2);
-                CheckParameter.checkDecimal(month.getString("november"), "11月",20,2);
-                CheckParameter.checkDecimal(month.getString("december"), "12月",20,2);
-                CheckParameter.stringLengthAndEmpty(month.getString("years"), "年份", 256);
-
-            }
-        }else{
-            throw new MyException("年度预算（按月填报）不能为空");
-
-        }
-
+        checkBudget(monthList);
 
 
         //校验拨款计划
@@ -714,8 +769,25 @@ public class ProjectApplyController extends BaseController {
     }
 
 
+    private void checkBudget(List<PageData> list){
+        if(!CollectionUtils.isEmpty(list)){
+            for(PageData budget : list){
+                if(StringUtils.isNotBlank(budget.getString("sourceAccount"))){
+                    CheckParameter.checkDecimal(budget.getString("sourceBudget"), "来源预算数",20,2);
+                }
 
-    private ResponseEntity submitCheck(PageData pd,int flag){
+                CheckParameter.stringLengthAndEmpty(budget.getString("expenseAccount"), "支出科目", 256);
+                CheckParameter.checkDecimal(budget.getString("expenseBudget"), "支出预算数",20,2);
+
+            }
+        }else{
+            throw new MyException("经费预算不能为空");
+
+        }
+    }
+
+
+    private String submitCheck(PageData pd,int flag){
 
 
         List<PageData> userList = null;
@@ -787,13 +859,14 @@ public class ProjectApplyController extends BaseController {
         }
 
 
+        StringBuffer buffer = new StringBuffer();
+
         //判断研发费用预算是否超值
         if(!CollectionUtils.isEmpty(budgetList)){
             BigDecimal total = new BigDecimal(0);//总费用
             BigDecimal material = new BigDecimal(0);//材料
             BigDecimal equipment = new BigDecimal(0);//设备
             BigDecimal artificial = new BigDecimal(0);//人工
-            BigDecimal other = new BigDecimal(0);//其他
 
             for(PageData data : budgetList){
                 String expenseAccount = data.getString("expenseAccount");
@@ -809,14 +882,64 @@ public class ProjectApplyController extends BaseController {
                 }
             }
 
+            BigDecimal other = total.subtract(material).subtract(equipment).subtract(artificial);//其他
 
+
+            //查询规则配置的阈值
+            //2:材料费,3:机械设备使用费,4:人工费,5:其他费用
+            List<PageData> ruleList = (List<PageData>) dao.findForList("",pd);
+            BigDecimal materialRate = new BigDecimal(75);//材料
+            BigDecimal equipmentRate = new BigDecimal(15);//设备
+            BigDecimal artificialRate= new BigDecimal(10);//人工
+            BigDecimal otherRate = new BigDecimal(10);//其他费用
+
+            if(!CollectionUtils.isEmpty(ruleList)){
+                for(PageData data : ruleList){
+                    String ruleType = data.getString("ruleType");
+                    String ruleValue = data.getString("ruleValue");
+                    if(ruleType.equals("5")){
+                        otherRate = new BigDecimal(ruleValue);
+                    }else if(ruleType.equals("2")){
+                        materialRate = new BigDecimal(ruleValue);
+                    }else if(ruleType.equals("3")){
+                        equipmentRate = new BigDecimal(ruleValue);
+                    }else if(ruleType.equals("4")){
+                        artificialRate = new BigDecimal(ruleValue);
+                    }
+                }
+            }
+
+
+            //1、材料费不得超过总预算的75%
+
+            if(material.divide(total).multiply(new BigDecimal(100)).compareTo(materialRate) == 1){
+                buffer.append("材料费");
+            }
+
+            //2、机械使用费不得低于总预算的15%
+            if(equipment.divide(total).multiply(new BigDecimal(100)).compareTo(equipmentRate) == -1){
+                buffer.append("、机械设备费");
+            }
+
+            //3、人工费不得低于总预算的10%
+            if(artificial.divide(total).multiply(new BigDecimal(100)).compareTo(artificialRate) == -1){
+                buffer.append("、人工费");
+            }
+
+            //4、其他费用不得低于总预算的10%
+            if(other.divide(total).multiply(new BigDecimal(100)).compareTo(otherRate) == 1){
+                buffer.append("、其他费用");
+            }
 
         }
 
 
 
+        if(StringUtils.isNotBlank(buffer.toString())){
+            buffer.append("不符合公司规定的预算比例，请确认调整后重新提交");
+        }
 
-        return ResponseEntity.success(null);
+        return buffer.toString();
 
     }
 

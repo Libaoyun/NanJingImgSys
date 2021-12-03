@@ -12,7 +12,7 @@
 
     <sql id="recordAndDic">
         r.id,r.business_id as businessId,r.serial_number as serialNumber,r.creator_org_id as creatorOrgId,r.creator_org_name as creatorOrgName ,
-         r.creator_user_id as creatorUserId,r.creator_user as creatorUser,r.created_date as createdDate,r.project_name as projectName,
+         r.creator_user_id as createUserId,r.creator_user as createUser,r.created_date as createdDate,r.project_name as projectName,
         r.unit_name as unitName,r.unit_address as unitAddress,r.apply_user_name as applyUserName,r.apply_user_id as applyUserId,r.gender,r.gender_code as genderCode,
         r.age,r.post_code as postCode,r.post_name as postName,r.create_time as createTime,r.update_time as updateTime ,r.update_user as updateUser,
          r.update_user_id as updateUserId,r.telephone,r.apply_amount as applyAmount,r.start_year as startYear,r.end_year as endYear,r.zip_code as zipCode,
@@ -112,7 +112,7 @@
         values (#{businessId},#{serialNumber},#{creatorOrgId},#{creatorOrgName} ,
                 #{creatorUserId},#{creatorUserName},#{createdDate,jdbcType=DATE},#{projectName},
                 #{unitName},#{unitAddress},#{applyUserName},#{applyUserId},#{gender},#{genderCode},
-                #{age},#{postCode},#{postName},getDate(),getDate() ,#{creatorUser},
+                #{age},#{postCode},#{postName},getDate(),getDate() ,#{creatorUserName},
                 #{creatorUserId},#{telephone},#{applyAmount, jdbcType=DECIMAL},#{startYear,jdbcType=DATE},#{endYear,jdbcType=DATE},#{zipCode},
                 #{professionalCategoryCode},#{professionalCategory},#{projectTypeCode},
                 #{projectType},#{identify},#{researchContents},#{reviewComments},
@@ -381,8 +381,8 @@
             r.serial_number AS serialNumber,
             r.creator_org_id AS creatorOrgId,
             r.creator_org_name AS creatorOrgName,
-            r.creator_user_id AS creatorUserId,
-            r.creator_user AS creatorUser,
+            r.creator_user_id AS createUserId,
+            r.creator_user AS createUser,
             r.created_date AS createdDate,
             r.project_name AS projectName,
             r.unit_name AS unitName,
@@ -547,7 +547,7 @@
             id,
             business_id as businessId,
             january,february,march,april,may,june,
-            july,august,september,october,november,december,years
+            july,august,september,october,november,december,years,expense_account as expenseAccount
         FROM  project_apply_budget_month_detail
         where business_id = #{businessId}
         order by id

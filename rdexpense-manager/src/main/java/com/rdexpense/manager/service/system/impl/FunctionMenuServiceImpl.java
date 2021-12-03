@@ -200,6 +200,13 @@ public class FunctionMenuServiceImpl implements FunctionMenuService {
                     continue;
                 }
 
+                //根据菜单的menuCode判断是否欢迎页
+                Integer waitCode = 22;
+                if (waitCode.equals(menu.getMenuCode())) {
+                    childerList.add(menu);
+                    continue;
+                }
+
                 //授权的菜单、组合按钮、组合按钮详细
                 if (!CollectionUtils.isEmpty(menuList)) {
                     for (PageData str : menuList) {

@@ -26,9 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -279,7 +281,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             //处理按月填写的预算，进行列转行的封装
             List<PageData> detailList = getMonthDetailList(monthList,businessId);
-            dao.batchInsert("ProjectApplyMapper.deleteBudgetMonthDetail", monthList);
+            dao.batchDelete("ProjectApplyMapper.deleteBudgetMonthDetail", removeList);
             if(!CollectionUtils.isEmpty(detailList)){
                 dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonthDetail", detailList);
             }
@@ -288,7 +290,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchInsert("ProjectApplyMapper.deleteBudgetMonth", monthList);
+            dao.batchDelete("ProjectApplyMapper.deleteBudgetMonth", removeList);
             dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
 
 
@@ -334,7 +336,11 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             for (PageData detailData : monthList) {
                 for (Object key : detailData.keySet()) {
                     String keyStr = (String)key;
-                    yearSet.add(keyStr.substring(5,9));
+
+                    if(keyStr.length() > 8 && StringUtils.isNumeric(keyStr.substring(5,9))){
+                        yearSet.add(keyStr.substring(5,9));
+                    }
+
                 }
             }
         }
@@ -479,8 +485,12 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             // 8、经费预算（每月预算) 年度预算（按月填报)
             List<PageData> monthList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryMonthList", request);
-            List<PageData> monthDetailList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryMonthDetailList", request);
-            packageMonthList(monthList,monthDetailList);
+            if(!CollectionUtils.isEmpty(monthList)){
+                List<PageData> monthDetailList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryMonthDetailList", request);
+                packageMonthList(monthList,monthDetailList);
+                request.put("monthList", monthList);
+
+            }
 
             // 9、拨款计划
             List<PageData> appropriationPlan = (List<PageData>) dao.findForList("ProjectApplyMapper.queryAppropriationPlan", request);
@@ -509,8 +519,9 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
 
         //插入附件表，并返回主键id的拼接字符串
-        String fileIdStr = fileService.insertApproveFile(pd);
-        pd.put("fileId", fileIdStr);
+        PageData fileData = fileService.insertApproveFile(pd);
+        pd.put("fileId", fileData.getString("fileId"));
+        pd.put("fileName", fileData.getString("fileName"));
 
         //审批类型 1:同意 2:回退上一个节点 3：回退到发起人
         String approveType = pd.getString("approveType");
@@ -566,6 +577,11 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         pd.put("serialNumber", serialNumber);
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
         pd.put("createdDate", dateFormat.format(new Date()));
+        pd.put("creatorUserId",pd.getString("createUserId"));
+        pd.put("creatorUserName",pd.getString("createUser"));
+
+
+
 
         XSSFWorkbook wb = getWorkbook(file);
 
@@ -1032,7 +1048,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             XSSFRow row = sheet.getRow(i);
             XSSFCell cell0 = row.getCell(0);
-            XSSFCell cell1 = row.getCell(5);
+            XSSFCell cell1 = row.getCell(1);
 
             int rowNumber = i + 1;
             //解析第一个单元格 年度
@@ -1079,7 +1095,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             XSSFRow row = sheet.getRow(i);
             XSSFCell cell0 = row.getCell(0);
-            XSSFCell cell1 = row.getCell(5);
+            XSSFCell cell1 = row.getCell(1);
 
             int rowNumber = i + 1;
             //解析第一个单元格 参加单位
@@ -1248,7 +1264,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             XSSFRow row = sheet.getRow(i);
             XSSFCell cell0 = row.getCell(0);
-            XSSFCell cell1 = row.getCell(2);
+            XSSFCell cell1 = row.getCell(1);
 
             int rowNumber = i + 1;
             //解析第一个单元格 年度
@@ -1506,7 +1522,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         if(row2 >= 0){
             cell = row.getCell(row2);
             String sourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, sourceAccount, false, 20, 2);
-            data.put("sourceBudget", sourceBudget);
+            data.put("sourcebudget", sourceBudget);
         }
 
         String expenseAccount = "";
@@ -1518,12 +1534,12 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         if(row4 >= 0){
             cell = row.getCell(row4);
             String expenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, expenseAccount, false, 20, 2);
-            data.put("expenseBudget", expenseBudget);
+            data.put("expensebudget", expenseBudget);
 
         }
 
-        data.put("sourceAccount",sourceAccount);
-        data.put("expenseAccount",expenseAccount);
+        data.put("sourceaccount",sourceAccount);
+        data.put("expenseaccount",expenseAccount);
 
         list.add(data);
 
@@ -1581,84 +1597,169 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         return code;
 
     }
+
+
+    @Override
+    public void exportExcelZip(List<String> businessId, ZipOutputStream zos, ByteArrayOutputStream bos, String serialNumber) throws Exception {
+
+    }
+
     /**
      * 导出Excel
      *
-     * @param pageData
+     * @param businessId
      * @return
      */
     @Override
-    public HSSFWorkbook exportExcel(PageData pageData) {
+    public HSSFWorkbook exportExcel(String businessId) {
         String title = "员工信息";
         String[] head = {"序号", "用户编号", "用户姓名", "手机号码", "所属部门", "所属职务", "学历", "员工状态", "员工类型", "创建人", "创建日期", "更新人", "更新日期"};
-        String idStr = pageData.getString("idList");
-        List<String> listId = JSONObject.parseArray(idStr, String.class);
-        //根据idList查询主表
-        List<PageData> userInfoList = (List<PageData>) dao.findForList("UserMapper.queryUserById", listId);
+
+        //查询单据的所有数据
+        PageData pd = new PageData();
+        pd.put("businessId",businessId);
+        PageData data = getApplyDetail(pd);
 
         HSSFWorkbook wb = new HSSFWorkbook();
-        HSSFSheet sheet = wb.createSheet(title + 1);
-        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 表头
-        HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
-        // 创建表头
-        HSSFRow rows = sheet.createRow(0);
-        rows.setHeightInPoints(20);// 行高
-        HSSFCell cells = rows.createCell(0);
-        cells.setCellValue(title);
-        cells.setCellStyle(styleHeader);
-        ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
-        // 第一行  表头
-        HSSFRow rowTitle = sheet.createRow(1);
-        HSSFCell hc;
-        for (int j = 0; j < head.length; j++) {
-            hc = rowTitle.createCell(j);
-            hc.setCellValue(head[j]);
-            hc.setCellStyle(styleCell);
-        }
 
-        if (!CollectionUtils.isEmpty(userInfoList)) {
-            for (int i = 0; i < userInfoList.size(); i++) {
-                PageData pd = userInfoList.get(i);
+        //1、写入主表信息
+        HSSFSheet mainSheet = wb.createSheet();
+        setMainData(wb, mainSheet, data);
+        wb.setSheetName(0, "主信息");
 
-                HSSFRow row = sheet.createRow(i + 2);
-                int j = 0;
+        //2、写入立项调研信息
+        HSSFSheet surveySheet = wb.createSheet();
+        setSurveyData(wb, surveySheet, data);
+        wb.setSheetName(1, "立项调研信息");
 
-                HSSFCell cell = row.createCell(j++);
-                cell.setCellValue(i + 1);
-                cell.setCellStyle(styleCell);
+        //2、写入进度计划
+        HSSFSheet progressSheet = wb.createSheet();
+        setProgressData(wb, progressSheet, data);
+        wb.setSheetName(2, "进度计划");
 
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("userCode"));
-                cell.setCellStyle(styleCell);
+        //3、写入参加单位
+        HSSFSheet unitSheet = wb.createSheet();
+        setUnitData(wb, unitSheet, data);
+        wb.setSheetName(3, "参加单位");
 
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("userName"));
-                cell.setCellStyle(styleCell);
+        //4、写入研究人员（初始）
+        HSSFSheet userSheet = wb.createSheet();
+        setUserData(wb, userSheet, data);
+        wb.setSheetName(4, "研究人员（初始）");
+
+        //5、写入研究人员（初始）
+        HSSFSheet userChangeSheet = wb.createSheet();
+        setUserChangeData(wb, userChangeSheet, data);
+        wb.setSheetName(5, "研究人员（变更）");
+
+        //6、写入经费预算
+        HSSFSheet budgetSheet = wb.createSheet();
+        setBudgetData(wb, budgetSheet, data);
+        wb.setSheetName(6, "经费预算");
+
+        //7、写入每月预算
+        HSSFSheet monthSheet = wb.createSheet();
+        setMonthData(wb, monthSheet, data);
+        wb.setSheetName(7, "每月预算");
+
+        //8、写入拨款计划
+        HSSFSheet appSheet = wb.createSheet();
+        setAppData(wb, appSheet, data);
+        wb.setSheetName(8, "拨款计划");
 
 
-                cell = row.createCell(j++);
-                String time1 = pd.getString("updateTime");
-                cell.setCellValue(time1.substring(0, time1.lastIndexOf(".")));
-                cell.setCellStyle(styleCell);
-
-
-            }
-        }
-
-        //设置自适应宽度
-        for (int j = 0; j < head.length; j++) {
-            sheet.autoSizeColumn(j);
-            int colWidth = sheet.getColumnWidth(j) * 17 / 10;
-            if (colWidth < 255 * 256) {
-                sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
-            } else {
-                sheet.setColumnWidth(j, 6000);
-            }
-        }
-        sheet.setAutobreaks(true);
         return wb;
     }
 
 
+    /**
+     * 写入主表信息
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setMainData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入立项调研信息
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setSurveyData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入进度计划
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setProgressData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入参加单位
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setUnitData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入研究人员（初始）
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setUserData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入主表信息（变更）
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setUserChangeData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入经费预算
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setBudgetData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入经费预算=每月预算
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setMonthData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
+
+    /**
+     * 写入拨款计划
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setAppData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+
+    }
 
 }

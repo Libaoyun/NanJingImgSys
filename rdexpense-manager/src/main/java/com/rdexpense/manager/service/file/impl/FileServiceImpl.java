@@ -115,8 +115,9 @@ public class FileServiceImpl implements FileService {
      * @return
      */
     @Override
-    public String insertApproveFile(PageData pd) {
-        StringBuffer buffer = new StringBuffer();
+    public PageData insertApproveFile(PageData pd) {
+        StringBuffer idBuffer = new StringBuffer();
+        StringBuffer nameBuffer = new StringBuffer();
 
         String file = pd.getString("attachmentList");
         if (StringUtils.isNotBlank(file)) {
@@ -126,16 +127,24 @@ public class FileServiceImpl implements FileService {
                     data.put("businessId", pd.getString("businessId"));
                     dao.insert("FileMapper.saveFile", data);
 
-                    buffer.append(data.getString("id")).append("、");
+                    nameBuffer.append(data.getString("fileName")).append("、");
+
+                    idBuffer.append(data.getString("id")).append("、");
                 }
 
             }
         }
 
-        String bufferStr = buffer.toString();
+        String idBufferStr = idBuffer.toString();
+        String nameBufferStr = nameBuffer.toString();
 
-        return bufferStr.substring(0,bufferStr.length() - 1);
+
+        PageData result = new PageData();
+        result.put("fileId",idBufferStr.substring(0,idBufferStr.length() - 1));
+        result.put("fileName",nameBufferStr.substring(0,nameBufferStr.length() - 1));
 
 
+
+        return result;
     }
 }
