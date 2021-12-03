@@ -165,7 +165,7 @@
                         // 默认加载流程A的数据、在这里可以根据具体的业务返回符合流程数据格式的数据即可
                         this.$API.apiGetFlow({menuCode:this.selected.menuCode}).then(res=>{
                             this.interfaceData = res.data
-                            let getData = inData || (res.data.id ? res.data.flowContent : JSON.parse(JSON.stringify(this.originData)))
+                            let getData = inData || (res.data.id ? JSON.parse(res.data.flowContent) : JSON.parse(JSON.stringify(this.originData)))
                             getData.name = getData.name || this.selected.title
                             getData.nodeList = getData.nodeList || []
                             getData.lineList = getData.lineList || []

@@ -60,3 +60,21 @@ export function apiGetDictionariesList (data) {
       data
   })
 }
+
+// 获取代办列表
+export function apiGetTodoList (data) {
+  return fetch({
+      url: '/rdexpense/flow/queryWaitDone',
+      method: 'post',
+      data
+  })
+}
+
+// 获取已办列表
+export function apiGetDoneList (data) {
+  return fetch({
+      url: '/rdexpense/flow/queryIsDone',
+      method: 'post',
+      data
+  })
+}
