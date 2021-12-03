@@ -13,8 +13,8 @@ public class ConstantValUtil {
     //附件上传目录
     public static final String BUCKET_PRIVATE = "private1";
 
-    // 审批状态：10070001-未提交, 10070002-审批中, 10070003-已废除, 10070004-被打回 10070005-已通过
-    public static final String[] APPROVAL_STATUS = {"DICT10070001", "DICT10070002", "DICT10070003", "DICT10070004", "DICT10070005"};
+    // 审批状态：10171001-未提交, 10171002-审批中, 10171003-已废除, 10171004-被打回 10171005-已通过
+    public static final String[] APPROVAL_STATUS = {"DICT10171001", "DICT10171002", "DICT10171003", "DICT10071004", "DICT10171005"};
 
 
     // 审批处理结果：DICT10181001-发起, DICT10181002-同意, DICT10181003-回退上一个节点, DICT10181004-回退到发起人

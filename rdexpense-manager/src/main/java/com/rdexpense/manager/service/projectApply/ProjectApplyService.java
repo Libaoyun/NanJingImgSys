@@ -6,7 +6,9 @@ import com.itextpdf.text.Document;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author rdexpense
@@ -76,7 +78,17 @@ public interface ProjectApplyService {
     /**
      * 导出excel
      */
-    HSSFWorkbook exportExcel(PageData pd) throws Exception;
+    HSSFWorkbook exportExcel(String businessId) throws Exception;
+
+    /**
+     * 导出excel压缩包
+     * @param businessIdList
+     * @param zos
+     * @param bos
+     * @param serialNumber
+     * @throws Exception
+     */
+    void exportExcelZip(List<String> businessIdList, ZipOutputStream zos, ByteArrayOutputStream bos, String serialNumber) throws Exception;
 
     /**
      * 导入主信息

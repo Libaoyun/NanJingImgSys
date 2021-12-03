@@ -138,6 +138,7 @@ public class ExcelUtil {
         fontStyle.setFontHeightInPoints((short) 10);
         fontStyle.setFontName("微软雅黑");
         cellStyle.setFont(fontStyle);
+        cellStyle.setWrapText(true);// 设置自动换行
         // 设置边框样式
         cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN); // 下边框
         cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框

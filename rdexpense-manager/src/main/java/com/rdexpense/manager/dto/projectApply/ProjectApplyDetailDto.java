@@ -23,8 +23,12 @@ public class ProjectApplyDetailDto extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @ApiModelProperty(value = "单据号")
+    private String serialNumber;
+
     @ApiModelProperty(value = "编制日期")
-    private String  createdDate;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date createdDate;
 
     @ApiModelProperty(value = "项目名称")
     private String projectName;

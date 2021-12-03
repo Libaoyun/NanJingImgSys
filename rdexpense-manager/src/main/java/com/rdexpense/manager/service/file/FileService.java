@@ -48,6 +48,6 @@ public interface FileService {
      * @param pd
      * @return
      */
-    String insertApproveFile(PageData pd);
+    PageData insertApproveFile(PageData pd);
 
 }

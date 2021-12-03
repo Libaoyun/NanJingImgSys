@@ -488,7 +488,18 @@ public class CheckParameter {
     public static void checkDefaultParams(PageData pd){
         checkPositiveInt(pd.getString("menuCode"), "功能菜单编码");
         CheckParameter.stringLengthAndEmpty(pd.getString("creatorOrgId"), "右上角项目ID",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorOrgName"), "右上角项目名称",128);
+        CheckParameter.stringLengthAndEmpty(pd.getString("creatorOrgName"), "右上角项目名称",256);
+    }
+
+
+    public static void checkBusinessIdList(PageData pd){
+        checkDefaultParams(pd);
+        //校验取出参数
+        String idList = pd.getString("businessIdList");
+        if (StringUtils.isBlank(idList)) {
+            throw new MyException("业务主键ID不能为空");
+        }
+
     }
 
 

@@ -154,6 +154,7 @@
                next_approve_user_name,
                next_approve_node_id,
                file_id,
+               file_name,
                approve_node_name,
                next_approve_node_name)
         VALUES (  #{processInstId},
@@ -171,6 +172,7 @@
                   #{nextApproveUserName},
                   #{nextApproveNodeId},
                   #{fileId},
+                  #{fileName},
                   #{approveNodeName},
                   #{nextApproveNodeName})
     </insert>
