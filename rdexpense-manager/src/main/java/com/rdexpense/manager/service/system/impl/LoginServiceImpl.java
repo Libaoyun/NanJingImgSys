@@ -5,9 +5,19 @@ import com.common.base.dao.mysql.BaseDao;
 import com.common.base.dao.redis.RedisDao;
 import com.common.base.exception.MyException;
 import com.common.entity.PageData;
+import com.common.util.ConstantValUtil;
 import com.common.util.ErrorCodeEnum;
+import com.common.util.PDFUtil;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.rdexpense.manager.service.flow.FlowService;
 import com.rdexpense.manager.service.system.LoginService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,7 +44,9 @@ public class LoginServiceImpl implements LoginService {
     @Resource(name = "baseDao")
     private BaseDao baseDao;
 
-
+    @Autowired
+    @Resource(name = "FlowService")
+    FlowService flowService;
 
     /**
      * 外部用户登录

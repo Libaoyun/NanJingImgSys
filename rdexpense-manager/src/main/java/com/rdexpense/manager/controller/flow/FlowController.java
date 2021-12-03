@@ -10,6 +10,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.rdexpense.manager.controller.base.BaseController;
 import com.rdexpense.manager.dto.flow.*;
+import com.rdexpense.manager.dto.projectApply.ProgressPlanDto;
+import com.rdexpense.manager.dto.projectApply.ResearchUserDto;
 import com.rdexpense.manager.dto.system.permission.UserAuthMenuListDto;
 import com.rdexpense.manager.dto.system.user.IdListDto;
 import com.rdexpense.manager.dto.system.user.UserListDTO;
@@ -265,6 +267,23 @@ public class FlowController extends BaseController {
             return ResponseEntity.success("成功");
         } catch (Exception e) {
             throw new MyException("退回发起人失败:"+e.getMessage());
+        }
+    }
+
+    @PostMapping("/queryFlowApproveInfo")
+    @ApiOperation(value = "查询审批记录")
+    @ApiImplicitParam(name = "processInstId", value = "审批实例ID", required = true, dataType = "String")
+    public ResponseEntity<FlowSerialDataDTO> queryFlowApproveInfo() {
+        PageData pd = this.getParams();
+        CheckParameter.stringLengthAndEmpty(pd.getString("processInstId"), "审批实例ID",128);
+        ResponseEntity result = null;
+        try {
+            List<PageData> pageDataList = flowService.queryApprovalScheduleByProcessInstId(pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(pageDataList, FlowSerialDataDTO.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            return result;
+        } catch (MyException e) {
+            logger.error("查询审批记录失败,request=[{}]", pd);
+            return ResponseEntity.failure(ERR_QUERY_FAIL.val(), ERR_QUERY_FAIL.desc());
         }
     }
 }

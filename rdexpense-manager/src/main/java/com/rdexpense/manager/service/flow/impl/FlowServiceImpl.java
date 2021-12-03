@@ -9,6 +9,13 @@ import com.common.base.exception.MyException;
 import com.common.entity.PageData;
 import com.common.util.CheckParameter;
 import com.common.util.ConstantValUtil;
+import com.common.util.PDFUtil;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.rdexpense.manager.service.flow.FlowService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -818,6 +825,16 @@ public class FlowServiceImpl implements FlowService {
 
     }
 
+    /**
+     * 根据实例ID，查询审批记录
+     * @param pd
+     * @return
+     */
+    @Override
+    public List<PageData> queryApprovalScheduleByProcessInstId(PageData pd) {
+        List<PageData> pageData = (List<PageData>) baseDao.findForList("FlowMapper.queryApprovalScheduleByProcessInstId", pd);
+        return pageData;
+    }
 
 
     /**
@@ -1101,6 +1118,81 @@ public class FlowServiceImpl implements FlowService {
 
         return list;
 
+    }
+
+    /**
+     * 获取审批记录
+     * @param pd
+     * @param table
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public PdfPTable getApproveTable2(PageData pd, PdfPTable table) throws Exception {
+        if (table == null) {
+            table = new PdfPTable(5);
+            int width3[] = {200, 200, 300, 200, 200};// 每栏的宽度
+            table.setWidths(width3);
+        }
+        BaseFont bfChinese = BaseFont.createFont("STSongStd-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+        com.itextpdf.text.Font textfont = new com.itextpdf.text.Font(bfChinese, 10, com.itextpdf.text.Font.NORMAL);
+        PdfPTable table3 = new PdfPTable(5);
+        table3.setSpacingBefore(10f);
+        table3.setWidthPercentage(100);
+        table3.resetColumnCount(5);
+        int width3[] = {200, 200, 300, 200, 200};// 每栏的宽度
+        table3.setWidths(width3); // 设置宽度
+        // 设置标题，并合并单元格
+        PdfPCell keyCell2 = new PdfPCell(new Paragraph("审批记录", textfont));
+        keyCell2.setMinimumHeight(20);
+        keyCell2.setRowspan(1);
+        keyCell2.setColspan(5);
+        keyCell2.setHorizontalAlignment(Element.ALIGN_CENTER);// 水平居中
+        keyCell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        keyCell2.setBorderWidthBottom(0);
+        //keyCell2.setBorderWidthTop(0);
+        keyCell2.setBackgroundColor(new BaseColor(224, 239, 255));
+        table3.addCell(keyCell2);
+        String[] argArr4 = {"审批人", "审批环节", "审批意见", "审批人岗位", "审批时间"};;
+        for (int i = 0; i < argArr4.length; i++) {
+            PdfPCell cell = new PdfPCell(new Paragraph(argArr4[i], textfont));
+            cell.setMinimumHeight(20);
+            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBorderWidthBottom(0);
+            cell.setBackgroundColor(new BaseColor(224, 239, 255));
+            if (i != argArr4.length - 1) {
+                cell.setBorderWidthRight(0);
+            }
+            table3.addCell(cell);
+        }
+        // 明细数据写入
+        List<PageData> list3 = null;
+        if(StringUtils.isNotBlank(pd.getString("processInstId"))){
+            list3 = queryApprovalScheduleByProcessInstId(pd);
+        }
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(list3)) {
+            for (PageData data : list3) {
+                String approval_time = data.getString("approve_end_time");
+                approval_time = approval_time.substring(0, approval_time.lastIndexOf("."));
+                String[] argArr5 = {data.getString("approve_user_name"), data.getString("approve_node_name"), data.getString("approve_comment"), data.getString("department_name"),
+                        approval_time};
+                for (int i = 0; i < argArr5.length; i++) {
+                    PdfPCell cell = new PdfPCell(new Paragraph(argArr5[i], textfont));
+                    cell.setMinimumHeight(20);
+                    cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    cell.setBorderWidthBottom(0);
+                    if (i != argArr4.length - 1) {
+                        cell.setBorderWidthRight(0);
+                    }
+                    cell.setUseAscender(true);
+                    table3.addCell(cell);
+                }
+            }
+        }
+        PDFUtil.mergeTable2(table,table3);
+        return table;
     }
 
 

@@ -2,6 +2,7 @@ package com.rdexpense.manager.service.flow;
 
 import com.common.entity.PageData;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfPTable;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.util.List;
@@ -102,5 +103,15 @@ public interface FlowService {
      * @return
      */
     PageData backOriginalNode(PageData pd);
+
+    /**
+     * 根据实例ID，查询审批记录
+     * @param pd
+     * @return
+     */
+    List<PageData> queryApprovalScheduleByProcessInstId(PageData pd);
+
+
+    PdfPTable getApproveTable2(PageData pd, PdfPTable table) throws Exception;
 
 }

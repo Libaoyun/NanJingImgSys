@@ -341,6 +341,29 @@
         where id = #{processInstId,jdbcType=BIGINT}
     </delete>
 
+    <select id="queryApprovalScheduleByProcessInstId" resultType="pd" parameterType="pd" >
+        select  activity_id,
+           approve_user_id,
+           approve_user_name,
+           approve_comment,
+           approve_result_id,
+           approve_result_name,
+           approve_start_time,
+           approve_end_time,
+           department_code,
+           department_name,
+           approve_node_id,
+           next_approve_user_id,
+           next_approve_user_name,
+           next_approve_node_id,
+           file_id,
+           approve_node_name,
+           next_approve_node_name
+        from
+            bpm_approval_schedule
+        where
+            activity_id = #{processInstId}
+    </select>
 
 
 </mapper>

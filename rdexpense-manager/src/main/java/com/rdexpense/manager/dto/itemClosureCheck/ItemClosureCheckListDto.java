@@ -2,12 +2,14 @@ package com.rdexpense.manager.dto.itemClosureCheck;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rdexpense.manager.dto.base.BaseEntity;
+import com.rdexpense.manager.dto.file.CreateFileDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @ApiModel(value = "查询研发项目结题验收列表")
@@ -69,4 +71,25 @@ public class ItemClosureCheckListDto extends BaseEntity implements Serializable 
     @ApiModelProperty(value = "结束年度")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date endYear;
+
+    @ApiModelProperty(value = "任务来源(长度：1024)")
+    private String taskSource;
+
+    @ApiModelProperty(value = "成果内容简介(长度：1024)")
+    private String projectAbstract;
+
+    @ApiModelProperty(value = "经济技术文件目录及提供单位(长度：1024)")
+    private String directoryAndUnit;
+
+    @ApiModelProperty(value = "申请评审单位意见(长度：1024)")
+    private String checkRemark;
+
+    @ApiModelProperty(value = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date updateTime;
+
 }
