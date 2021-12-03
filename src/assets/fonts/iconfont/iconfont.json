@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "4948965",
+      "name": "提交成功",
+      "font_class": "tijiaochenggong",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "3530584",
+      "name": "项目立项",
+      "font_class": "xiangmulixiang",
+      "unicode": "e788",
+      "unicode_decimal": 59272
+    },
+    {
+      "icon_id": "10269097",
+      "name": "废除",
+      "font_class": "feichux",
+      "unicode": "e65e",
+      "unicode_decimal": 58974
+    },
+    {
+      "icon_id": "1727517",
+      "name": "303正确、完成",
+      "font_class": "zhengquewancheng",
+      "unicode": "e8e5",
+      "unicode_decimal": 59621
+    },
+    {
       "icon_id": "18170999",
       "name": "地图连线,连线,连接",
       "font_class": "map-connect",

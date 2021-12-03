@@ -41,9 +41,9 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-      let reloginErrorList = [1000014, 1000025, 1000000, 20012, 2000001, 20073]
+      let reloginErrorList = [20012, 1000025, 1000000, 20012, 2000001, 20073]
       if(reloginErrorList.includes(res.code)){
-        allowTips && store.dispatch('Logout')
+        allowTips && store.dispatch('Logout',{reLogin:true})
         allowTips = false
       }
       return Promise.reject(new Error(res.msg || 'Error'))

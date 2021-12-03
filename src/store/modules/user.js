@@ -45,7 +45,7 @@ const user = {
                 })
             })
         },
-        Logout ({ commit }) {
+        Logout ({ commit },data) {
             return new Promise((resolve, reject) => {
                 apiLogout().then(res => {
                     Vue.ls.remove(ACCESS_TOKEN)
@@ -54,6 +54,12 @@ const user = {
                     resetRouter()
                     resolve()
               }).catch(error => {
+                  if(data.reLogin) {
+                    Vue.ls.remove(ACCESS_TOKEN)
+                    Vue.ls.clear()
+                    commit('CLEAR_TAB_LIST')
+                    resetRouter()
+                  }
                 reject(error)
               })
             })

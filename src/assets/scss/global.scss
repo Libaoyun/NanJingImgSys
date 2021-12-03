@@ -361,6 +361,10 @@
             color: $--color-primary;
         }
     }
+    .table-add-btn {
+        width: 100%;
+        border-style: dashed;
+    }
     // 明细删除按钮
     .delete-detail-btn{
         color: $--color-danger;
@@ -415,6 +419,35 @@
                 color: #fff;
                 border-color: #85ce61;
                 background-color: #85ce61;
+            }
+        }
+        &:nth-of-type(4) {
+            letter-spacing:0px;
+            background-color: #ff9933;
+            border-color: #ff9933;
+            &:hover,&:focus,&:active{
+                color: #fff;
+                border-color: #fbaa59;
+                background-color: #fbaa59;
+            }
+        }
+        &.primary {
+            background-color: #1890ff;
+            border-color: #1890ff;
+            &:hover,&:focus,&:active{
+                color: #fff;
+                border-color: #46a6ff;
+                background-color: #46a6ff;
+            }
+        }
+        &.rejectOrigin {
+            letter-spacing:0px;
+            background-color: #ca3d3d;
+            border-color: #ca3d3d;
+            &:hover,&:focus,&:active{
+                color: #fff;
+                border-color: #d15f5f;
+                background-color: #d15f5f;
             }
         }
     }

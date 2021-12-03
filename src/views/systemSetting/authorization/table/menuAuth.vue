@@ -3,7 +3,7 @@
         title="功能菜单授权"
         :visible="menuAuthDialog"
         :close-on-click-modal="false"
-        custom-class="global-dialog-default global-dialog-large"
+        custom-class="global-dialog-default"
         @close="closeDialog"
         append-to-body
         width="1000px">
@@ -261,7 +261,11 @@ export default class extends tableMixin {
 </script>
 
 <style lang="scss" scoped>
-/deep/ .el-dialog__body {
-    height: 85%;
+/deep/.el-dialog{
+    height: auto;
+    .el-dialog__body {
+        height: 70vh;
+        overflow: auto;
+    }
 }
 </style>

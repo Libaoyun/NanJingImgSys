@@ -333,7 +333,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                             message: '提交成功!'
                         });
                         this.$store.commit('DELETE_TAB', this.$route.path);
-                        this.$router.push({ name: 'userList'})
+                        this.$router.push({ name: 'userList',params:{refresh:true}})
                     }).catch(() => {
                         this.loadingBtn = 0;
                     })

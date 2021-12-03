@@ -171,9 +171,15 @@
                             getData.lineList = getData.lineList || []
                             this.dataReload(getData)
                             this.dataHasChange = false
-                            console.log(this.data)
                             resolve()
                         }).catch(()=>{
+                            this.interfaceData = {}
+                            let getData = inData || JSON.parse(JSON.stringify(this.originData))
+                            getData.name = getData.name || this.selected.title
+                            getData.nodeList = getData.nodeList || []
+                            getData.lineList = getData.lineList || []
+                            this.dataReload(getData)
+                            this.dataHasChange = false
                             reject()
                         })
                     })
@@ -182,7 +188,7 @@
             },
             // 重置画布
             resetCanvas() {
-                this.initData(JSON.parse(JSON.stringify(this.originData))).then(res=>{
+                this.initData(JSON.parse(JSON.stringify(this.originData))).finally(res=>{
                     this.dataHasChange = true
                     this.$message({
                         type:'success',

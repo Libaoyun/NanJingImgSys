@@ -9,6 +9,10 @@ export default class dictionaryMixin extends Vue {
     bloodTypeList = []
     employeeStatusList = []
     employeeTypeList = []
+    approvalStatusList = []
+    approvalResultList = []
+    projectTypeList = []
+    professionalCategroyList = []
 
 
     // 获取操作类型
@@ -45,6 +49,30 @@ export default class dictionaryMixin extends Vue {
     getEmployeeTypeList(){
         this.GET_DICTIONARY_LIST(1016).then(res=>{
             this.employeeTypeList = res;
+        })
+    }
+    // 获取审批状态
+    getApprovalStatusList(){
+        this.GET_DICTIONARY_LIST(1017).then(res=>{
+            this.approvalStatusList = res;
+        })
+    }
+    // 获取审批处理结果
+    getApprovalResultList(){
+        this.GET_DICTIONARY_LIST(1018).then(res=>{
+            this.approvalResultList = res;
+        })
+    }
+    // 获取项目类型
+    getProjectTypeList(){
+        this.GET_DICTIONARY_LIST(1019).then(res=>{
+            this.projectTypeList = res;
+        })
+    }
+    // 获取专业类别
+    getProfessionalCategroyList(){
+        this.GET_DICTIONARY_LIST(1020).then(res=>{
+            this.professionalCategroyList = res;
         })
     }
 }

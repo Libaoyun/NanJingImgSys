@@ -11,6 +11,7 @@ import * as operationLogApi from './modules/systemSetting/operationLog'
 import * as ruleConfigurationApi from './modules/systemSetting/ruleConfiguration'
 import * as authorizationApi from './modules/systemSetting/authorization'
 import * as flowManageApi from './modules/systemSetting/flowManage'
+import * as setProjectApplyApi from './modules/setProject/setProjectApply'
 
 let api = Object.assign(
     appApi,
@@ -24,7 +25,8 @@ let api = Object.assign(
     operationLogApi,
     ruleConfigurationApi,
     authorizationApi,
-    flowManageApi
+    flowManageApi,
+    setProjectApplyApi,
 )
 
 Vue.prototype.$API = api

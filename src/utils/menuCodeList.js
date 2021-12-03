@@ -10,4 +10,5 @@ export const menuCodeList = {
     ruleConfigurationList:10008,
     operationLogList:10007,
     flowManageList:10009,
+    setProjectApplyList:30000,
 }
