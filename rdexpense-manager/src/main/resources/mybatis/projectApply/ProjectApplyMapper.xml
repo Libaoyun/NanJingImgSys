@@ -584,4 +584,20 @@
     </update>
 
 
+    <select id="queryApproveById" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            approve_user_name as approveUserName,
+            approve_node_name as approveNodeName,
+            approve_result_name as approveResultName,
+            approve_comment as approveComment,
+            approve_end_time as approveEndTime,
+            next_approve_user_name as nextApproveUserName,
+            next_approve_node_name as nextApproveNodeName
+
+        FROM  bpm_approval_schedule
+        where activity_id = #{processInstId}
+    </select>
+
+
 </mapper>

@@ -466,7 +466,7 @@ public class ProjectApplyController extends BaseController {
                 // 压缩流
                 ZipOutputStream zos = new ZipOutputStream(bos);
                 //生成excel
-                projectApplyService.exportExcelZip(businessIdList, zos, bos,number);
+                projectApplyService.exportZip(1,businessIdList, zos, bos,number);
                 zos.flush();
                 zos.close();
                 //写入返回response
@@ -496,23 +496,41 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.checkBusinessIdList(pd);
         ResponseEntity result = null;
+
+        HttpServletResponse response = this.getResponse();
         try {
-            //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pd);
-            logger.info("业务主数据 === " + request);
-            //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pd);
-            logger.info("明细表数据 === " + detailList);
-            //明细子表数据
-            if(detailList.size()==0){
-                detailList.add(new PageData());
+
+            String businessIdStr = pd.getString("businessIdList");
+            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
+            String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+            String number = SerialNumberUtil.generateSerialNo("projectApplyPdf");
+
+
+            if(businessIdList.size() == 1){
+                projectApplyService.exportWordPdf(2,businessIdList.get(0),response,FILE_PREFIX);
+            }else {
+                //文件名
+                String fileName = FILE_PREFIX+date+"_"+number+".zip";
+                //输出流
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                // 压缩流
+                ZipOutputStream zos = new ZipOutputStream(bos);
+
+                projectApplyService.exportZip(2,businessIdList, zos, bos,FILE_PREFIX);
+                zos.flush();
+                zos.close();
+                //写入返回response
+                response.reset();
+                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
+                OutputStream out = new BufferedOutputStream(response.getOutputStream());
+                out.write(bos.toByteArray());
+                out.flush();
+                out.close();
             }
-            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
-            logger.info("明细子表数据 === " + detailChildList);
-            //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pd);
-            logger.info("合同数据 ====" + shieldData);
-     //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+
+
+            result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
@@ -530,23 +548,39 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         ResponseEntity result = null;
         CheckParameter.checkBusinessIdList(pd);
+
+        HttpServletResponse response = this.getResponse();
         try {
-            //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pd);
-            logger.info("业务主数据 === " + request);
-            //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pd);
-            logger.info("明细表数据 === " + detailList);
-            //明细子表数据
-            if(detailList.size()==0){
-                detailList.add(new PageData());
+            String businessIdStr = pd.getString("businessIdList");
+            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
+            String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+            String number = SerialNumberUtil.generateSerialNo("projectApplyWord");
+
+
+            if(businessIdList.size() == 1){
+                projectApplyService.exportWordPdf(1,businessIdList.get(0),response,FILE_PREFIX);
+
+            }else {
+                //文件名
+                String fileName = FILE_PREFIX+date+"_"+number+".zip";
+                //输出流
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                // 压缩流
+                ZipOutputStream zos = new ZipOutputStream(bos);
+
+                projectApplyService.exportZip(3,businessIdList, zos, bos,FILE_PREFIX);
+                zos.flush();
+                zos.close();
+                //写入返回response
+                response.reset();
+                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
+                OutputStream out = new BufferedOutputStream(response.getOutputStream());
+                out.write(bos.toByteArray());
+                out.flush();
+                out.close();
             }
-            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
-            logger.info("明细子表数据 === " + detailChildList);
-            //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pd);
-            logger.info("合同数据 ====" + shieldData);
-            //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+            result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
@@ -560,29 +594,18 @@ public class ProjectApplyController extends BaseController {
     @ApiOperation(value = "预览合同")
     @PostMapping(value = "/preview")
     public ResponseEntity preview(ProjectApplyAddDto projectApplyAddDto) {
-        PageData pageData = this.getParams();
-        ResponseEntity result = null;
+        PageData pd = this.getParams();
+
         try {
             //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pageData);
-            logger.info("业务主数据 === " + request);
-            //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pageData);
-            logger.info("明细表数据 === " + detailList);
-            //明细子表数据
-            if(detailList.size()==0){
-                detailList.add(new PageData());
-            }
-            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
-            logger.info("明细子表数据 === " + detailChildList);
-            //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pageData);
-            logger.info("合同数据 ====" + shieldData);
-            //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+            HttpServletResponse response = this.getResponse();
+
+            projectApplyService.preview(pd, response);
+
+            ResponseEntity result = ResponseEntity.success(null, INFO_PREVIEW_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
-            throw new MyException(ERR_EXPORT_FAIL.desc(), e);
+            throw new MyException(ERR_PREVIEW_FAIL.desc(), e);
         }
     }
 

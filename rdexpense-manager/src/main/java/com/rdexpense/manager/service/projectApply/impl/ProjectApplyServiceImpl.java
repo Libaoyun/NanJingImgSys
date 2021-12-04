@@ -6,6 +6,7 @@ import com.common.base.dao.mysql.BaseDao;
 
 import com.common.base.exception.MyException;
 import com.common.entity.PageData;
+import com.common.entity.ResponseEntity;
 import com.common.util.*;
 import com.rdexpense.manager.service.file.FileService;
 import com.rdexpense.manager.service.flow.FlowService;
@@ -18,19 +19,25 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static com.common.util.ConstantMsgUtil.ERR_EXPORT_FAIL;
+import static com.common.util.ConstantMsgUtil.INFO_EXPORT_SUCCESS;
 
 
 /**
@@ -1596,13 +1603,419 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         return code;
 
+
     }
 
+    /**
+     * 预览合同
+     * @param pd
+     * @param response
+     * @throws Exception
+     */
+    @Override
+    public void preview(PageData pd, HttpServletResponse response) throws Exception {
+
+    }
+
+
+    /**
+     * 导出压缩包
+     * @param flag 文件类型标识 1:excel 2:pdf 3:word
+     * @param businessIdList
+     * @param zos
+     * @param bos
+     * @param filePrefix
+     * @throws Exception
+     */
+    @Override
+    public void exportZip(int flag,List<String> businessIdList, ZipOutputStream zos, ByteArrayOutputStream bos, String filePrefix) {
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
+        String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+        XwpfTUtil xwpfTUtil = new XwpfTUtil();
+
+        if(flag == 1){//导出excel
+
+            for(String businessId : businessIdList){
+                HSSFWorkbook wb = exportExcel(businessId);
+            }
+
+
+        }else if(flag == 2){//导出pdf
+
+            for(String businessId : businessIdList){
+
+                String number = SerialNumberUtil.generateSerialNo("projectApplyPdf");
+
+                String wordFileName = filePrefix +date+"_"+number+ ".docx";
+                String pdfFileName = filePrefix +date+"_"+number+".pdf";
+
+                File file = FileUtil.createFile();
+                XWPFDocument doc = null;
+                InputStream is = null;
+
+                try {
+                    is = this.getClass().getResourceAsStream("/template/研发项目立项申请信息.docx");
+                    doc = new XWPFDocument(is);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    File newWordTempFile = packageWord( businessId, doc, is,wordFileName,file);
+
+                    String newWordTempFilePath = newWordTempFile.getCanonicalPath();
+                    File pdfTempFile = new File(file, pdfFileName);
+                    String pdfTempFilePath = pdfTempFile.getCanonicalPath();
+
+                    //下载到临时word文件中 
+                    FileOutputStream os = new FileOutputStream(newWordTempFilePath);
+                    doc.write(os);
+                    xwpfTUtil.close(is);
+                    xwpfTUtil.close(os);
+                    //将word转为pdf
+                    Doc2Pdf.doc2pdf(newWordTempFilePath, pdfTempFilePath);
+
+                    //将数据写入到zip流中
+                    //已读出图片
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(getBytes(pdfTempFilePath));
+                    DownloadUtil.zipFile(pdfFileName, inputStream, zos);
+                    inputStream.close();
+                    //删除临时文件
+                    newWordTempFile.delete();
+                    pdfTempFile.delete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+
+
+        }else if(flag == 3){//导出word
+            for(String businessId : businessIdList){
+
+                String number = SerialNumberUtil.generateSerialNo("projectApplyWord");
+                String wordFileName = filePrefix +date+"_"+number+ ".docx";
+
+                File file = FileUtil.createFile();
+                XWPFDocument doc = null;
+                InputStream is = null;
+
+                try {
+                    is = this.getClass().getResourceAsStream("/template/研发项目立项申请信息.docx");
+                    doc = new XWPFDocument(is);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    File newWordTempFile = packageWord( businessId, doc, is,wordFileName,file);
+
+                    String newWordTempFilePath = newWordTempFile.getCanonicalPath();
+                    //下载到临时word文件中 
+                    FileOutputStream os = new FileOutputStream(newWordTempFilePath);
+                    doc.write(os);
+                    xwpfTUtil.close(is);
+                    xwpfTUtil.close(os);
+
+                    //将数据写入到zip流中
+                    //已读出图片
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(getBytes(newWordTempFilePath));
+                    DownloadUtil.zipFile(wordFileName, inputStream, zos);
+                    inputStream.close();
+                    //删除临时文件
+                    newWordTempFile.delete();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+
+    }
+
+
+    private static byte[] getBytes(String filePath){
+        ByteArrayOutputStream out = null;
+        File file = new File(filePath);
+        try {
+            FileInputStream in = new FileInputStream(file);
+            out = new ByteArrayOutputStream();
+            byte[] b = new byte[1024];
+            int i=0;
+            while ((i = in.read(b)) != -1){
+                out.write(b,0,b.length);
+
+            }
+            out.close();
+            in.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+        byte[] result = out.toByteArray();
+
+        return result;
+
+    }
+
+
+    /**
+     * 导出word或者pdf
+     * @param  flag 文件标识 1：word 2:pdf
+     * @param businessId
+     */
 
     @Override
-    public void exportExcelZip(List<String> businessId, ZipOutputStream zos, ByteArrayOutputStream bos, String serialNumber) throws Exception {
+    public void exportWordPdf(int flag, String businessId,HttpServletResponse response,String filePrefix) {
+        XwpfTUtil xwpfTUtil = new XwpfTUtil();
+//        XWPFDocument doc = null;
+//        InputStream is = null;
+        File file = FileUtil.createFile();
+        XWPFDocument doc = null;
+        InputStream is = null;
+        try {
+            is = this.getClass().getResourceAsStream("/template/研发项目立项申请信息.docx");
+            doc = new XWPFDocument(is);
+
+            File newWordTempFile = packageWord( businessId, doc, is,filePrefix + ".docx",file);
+
+            //  在默认文件夹下创建临时文件
+            if(flag == 1){
+                String newWordTempFilePath = newWordTempFile.getCanonicalPath();
+                //下载到临时word文件中 
+                FileOutputStream os = new FileOutputStream(newWordTempFilePath);
+                doc.write(os);
+                xwpfTUtil.close(is);
+                xwpfTUtil.close(os);
+                //输出pdf文件
+                Word2pdfUtil.fileResponse(newWordTempFilePath, response);
+                //删除临时文件
+                newWordTempFile.delete();
+
+            }else {
+                String newWordTempFilePath = newWordTempFile.getCanonicalPath();
+                File pdfTempFile = new File(file, filePrefix + ".pdf");
+                String pdfTempFilePath = pdfTempFile.getCanonicalPath();
+
+                //下载到临时word文件中 
+                FileOutputStream os = new FileOutputStream(newWordTempFilePath);
+                doc.write(os);
+                xwpfTUtil.close(is);
+                xwpfTUtil.close(os);
+                //将word转为pdf
+                Doc2Pdf.doc2pdf(newWordTempFilePath, pdfTempFilePath);
+                //输出pdf文件
+                Word2pdfUtil.fileResponse(pdfTempFilePath, response);
+                //删除临时文件
+                newWordTempFile.delete();
+                pdfTempFile.delete();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
+
+
+    private File packageWord(String businessId,XWPFDocument doc,InputStream is,String fileName,File file){
+
+        PageData businessData = new PageData();
+        businessData.put("businessId", businessId);
+        PageData data = getApplyDetail(businessData);
+        List<PageData> progressPlan = (List<PageData>)data.get("progressPlan");
+        List<PageData> attendUnit = (List<PageData>)data.get("attendUnit");
+        List<PageData> researchUser = (List<PageData>)data.get("researchUser");
+        List<PageData> budgetList = (List<PageData>)data.get("budgetList");
+        List<PageData> appropriationPlan = (List<PageData>)data.get("appropriationPlan");
+
+        XwpfTUtil xwpfTUtil = new XwpfTUtil();
+
+        try {
+
+            //获取文件路径
+
+            //文本
+            Map<String, Object> params = new HashMap<>();
+            //1、主信息
+            String year = data.getString("createdDate").substring(0,4);
+            params.put("(year)", year);
+
+            params.put("(projectName)", data.getString("projectName"));
+            params.put("(unitName)", data.getString("unitName"));
+            params.put("(unitAddress)", data.getString("unitAddress"));
+            params.put("(zipCode)", data.getString("zipCode"));
+            params.put("(applyUserName)", data.getString("applyUserName"));
+            params.put("(gender)", data.getString("gender"));
+            params.put("(age)", data.getString("age"));
+            params.put("(postName)", data.getString("postName"));
+            params.put("(telephone)", data.getString("telephone"));
+            params.put("(applyAmount)", data.getString("applyAmount"));
+            params.put("(startYear)", data.getString("startYear"));
+            params.put("(endYear)", data.getString("endYear"));
+            params.put("(professionalCategory)", data.getString("professionalCategory"));
+            params.put("(researchContents)", data.getString("researchContents"));
+            params.put("(reviewComments)", data.getString("reviewComments"));
+
+            //2、调研信息
+            params.put("(currentSituation)", data.getString("currentSituation"));
+            params.put("(purposeSignificance)", data.getString("purposeSignificance"));
+            params.put("(contentMethod)", data.getString("contentMethod"));
+            params.put("(targetResults)", data.getString("targetResults"));
+            params.put("(basicConditions)", data.getString("basicConditions"));
+
+            //3、项目负责人
+            if(!CollectionUtils.isEmpty(researchUser)){
+                PageData leader = researchUser.get(0);
+                params.put("(projectLeader)", leader.getString("userName"));
+                params.put("(leaderAge)", leader.getString("age"));
+                params.put("(leaderPost)", leader.getString("belongPost"));
+                params.put("(leaderAction)", leader.getString("taskDivision"));
+            }else {
+                params.put("(projectLeader)", "");
+                params.put("(leaderAge)", "");
+                params.put("(leaderPost)", "");
+                params.put("(leaderAction)", "");
+            }
+
+            //替换掉文档中对应的字段
+            xwpfTUtil.replaceInPara(doc, params);
+
+            ExportWordHelper exportWordHelper = new ExportWordHelper();
+            //4、进度计划
+            List<List<String>> progressList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(progressPlan)){
+                for(PageData progress : progressPlan){
+                    List<String> progressDetailList = new ArrayList<>();
+                    progressDetailList.add(progress.getString("years"));
+                    progressDetailList.add(progress.getString("planTarget"));
+
+                    progressList.add(progressDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(progressList, doc, 2);
+
+
+            //5、参加单位
+            List<List<String>> unitList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(attendUnit)){
+                for(PageData unit : attendUnit){
+                    List<String> unitDetailList = new ArrayList<>();
+                    unitDetailList.add(unit.getString("unitName"));
+                    unitDetailList.add(unit.getString("taskDivision"));
+
+                    unitList.add(unitDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(unitList, doc, 3);
+
+
+            //6、研究人员
+            List<List<String>> userList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(researchUser)){
+                for(int i=0;i<researchUser.size();i++){
+                    PageData user = researchUser.get(i);
+                    List<String> userDetailList = new ArrayList<>();
+                    int number = i+1;
+                    userDetailList.add(String.valueOf(number));
+                    userDetailList.add(user.getString("userName"));
+                    userDetailList.add(user.getString("age"));
+                    userDetailList.add(user.getString("belongPost"));
+                    userDetailList.add(user.getString("taskDivision"));
+
+                    userList.add(userDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(userList, doc, 4);
+
+            //7、经费预算
+            List<List<String>> budgetList1 = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(budgetList)){
+                for(PageData budget : budgetList){
+                    List<String> budgetDetailList = new ArrayList<>();
+                    budgetDetailList.add(budget.getString("sourceAccount"));
+                    budgetDetailList.add(budget.getString("sourceBudget"));
+                    budgetDetailList.add(budget.getString("expenseAccount"));
+                    budgetDetailList.add(budget.getString("expenseBudget"));
+
+                    budgetList1.add(budgetDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(budgetList1, doc, 5);
+
+
+
+            //8、拨款计划
+            List<List<String>> appList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(appropriationPlan)){
+                for(PageData budget : appropriationPlan){
+                    List<String> appDetailList = new ArrayList<>();
+                    appDetailList.add(budget.getString("years"));
+                    appDetailList.add(budget.getString("planAmount"));
+
+                    appList.add(appDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(appList, doc, 6);
+
+
+            //9、审批记录
+            List<List<String>> approveList = new ArrayList<>();
+            List<PageData> approveLists = (List<PageData>) dao.findForList("ProjectApplyMapper.queryApproveById",data);
+            if(!CollectionUtils.isEmpty(approveLists)){
+                for(PageData approve : approveLists){
+                    List<String> approveDetailList = new ArrayList<>();
+                    approveDetailList.add(approve.getString("approveNodeName"));
+                    approveDetailList.add(approve.getString("approveUserName"));
+                    approveDetailList.add(approve.getString("approveResultName"));
+                    approveDetailList.add(approve.getString("approveComment"));
+                    approveDetailList.add(approve.getString("approveEndTime"));
+                    approveDetailList.add(approve.getString("nextApproveNodeName"));
+                    approveDetailList.add(approve.getString("nextApproveUserName"));
+
+                    approveList.add(approveDetailList);
+
+                }
+
+            }
+
+
+            exportWordHelper.exportWordDisorder(approveList, doc, 7);
+
+            File newWordTempFile = new File(file, fileName);
+
+            return newWordTempFile;
+
+        } catch (Exception e) {
+            xwpfTUtil.close(is);
+            throw new MyException("立项申请导出异常");
+
+        }
+    }
+
 
     /**
      * 导出Excel
@@ -1612,9 +2025,6 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      */
     @Override
     public HSSFWorkbook exportExcel(String businessId) {
-        String title = "员工信息";
-        String[] head = {"序号", "用户编号", "用户姓名", "手机号码", "所属部门", "所属职务", "学历", "员工状态", "员工类型", "创建人", "创建日期", "更新人", "更新日期"};
-
         //查询单据的所有数据
         PageData pd = new PageData();
         pd.put("businessId",businessId);

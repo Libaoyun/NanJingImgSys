@@ -52,6 +52,7 @@ public enum ConstantMsgUtil {
     INFO_ADD_SUCCESS(10026, "百度云人脸注册成功"),
     INFO_SEND_SUCCESS(10027, "数据发送成功"),
     INFO_LOGIN_SUCCESS(10028, "登陆成功"),
+    INFO_PREVIEW_SUCCESS(10029, "预览成功"),
 
 
     /**
@@ -133,7 +134,7 @@ public enum ConstantMsgUtil {
     ERR_LOGIN_FAIL1(20074, "登陆失败"),
     ERR_CELL_DATE(20075, "第{0}行,{1}日期格式不正确"),
     ERR_CELL_TIME(20076, "第{0}行,{1}时间格式不正确"),
-
+    ERR_PREVIEW_FAIL(20077, "预览成功"),
 
 
 

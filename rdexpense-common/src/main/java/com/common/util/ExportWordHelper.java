@@ -22,17 +22,19 @@ public class ExportWordHelper {
      * @return
      * @throws Exception
      */
-     public XWPFDocument ExportWord(List<List<String>> tableList, XWPFDocument document, int tableNum) throws Exception {
+     public XWPFDocument exportWord(List<List<String>> tableList, XWPFDocument document, int tableNum) throws Exception {
 
         //获取所有表格
         List<XWPFTable> tables = document.getTables();
         //这里简单取第一个表格
         XWPFTable table = tables.get(tableNum);
-         CTTblPr tblPr = table.getCTTbl().getTblPr();
-         tblPr.getTblW().setType(STTblWidth.AUTO);
+        CTTblPr tblPr = table.getCTTbl().getTblPr();
+        tblPr.getTblW().setType(STTblWidth.AUTO);
+
+        int newRowNum = table.getNumberOfRows();
         for (int i = 0; i < tableList.size(); i++) {
             //为表格添加行
-            XWPFTableRow newRow = table.insertNewTableRow(i+1);
+            XWPFTableRow newRow = table.insertNewTableRow(i+newRowNum);
             newRow.createCell();
             //获取list中的字符串数组
             List<String> strings =  tableList.get(i);
@@ -62,7 +64,7 @@ public class ExportWordHelper {
      * @return
      * @throws Exception
      */
-    public XWPFDocument exportSerialNumber(List<List<String>> tableList, XWPFDocument document, int tableNum) throws Exception {
+    public XWPFDocument exportWordDisorder(List<List<String>> tableList, XWPFDocument document, int tableNum) throws Exception {
 
         //获取所有表格
         List<XWPFTable> tables = document.getTables();
@@ -70,9 +72,48 @@ public class ExportWordHelper {
         XWPFTable table = tables.get(tableNum);
         CTTblPr tblPr = table.getCTTbl().getTblPr();
         tblPr.getTblW().setType(STTblWidth.AUTO);
+
+        int newRowNum = table.getNumberOfRows();
         for (int i = 0; i < tableList.size(); i++) {
             //为表格添加行
-            XWPFTableRow newRow = table.insertNewTableRow(i+1);
+            XWPFTableRow newRow = table.insertNewTableRow(i+newRowNum);
+            //获取list中的字符串数组
+            List<String> strings =  tableList.get(i);
+            for (int j = 0; j < strings.size(); j++) {
+                String strings1 =  strings.get(j);
+                newRow.createCell();
+                setCellText(newRow.getCell(j),strings1);
+            }
+        }
+        //换行  
+        XWPFParagraph paragraph2 = document.createParagraph();
+        XWPFRun paragraphRun2 = paragraph2.createRun();
+        paragraphRun2.setText("\r");
+        return document;
+
+    }
+
+
+    /**
+     * 导出表格无序号字段 从指定位置行写
+     * @param tableList 填充表格数据
+     * @param document  word文档对象
+     * @param tableNum 填充的第几个表格
+     * @return
+     * @throws Exception
+     */
+    public XWPFDocument exportWordAppoint(List<List<String>> tableList, XWPFDocument document, int tableNum,int newRowNum) throws Exception {
+
+        //获取所有表格
+        List<XWPFTable> tables = document.getTables();
+        //这里简单取第一个表格
+        XWPFTable table = tables.get(tableNum);
+        CTTblPr tblPr = table.getCTTbl().getTblPr();
+        tblPr.getTblW().setType(STTblWidth.AUTO);
+
+        for (int i = 0; i < tableList.size(); i++) {
+            //为表格添加行
+            XWPFTableRow newRow = table.insertNewTableRow(i+newRowNum);
             //获取list中的字符串数组
             List<String> strings =  tableList.get(i);
             for (int j = 0; j < strings.size(); j++) {

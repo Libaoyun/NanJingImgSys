@@ -6,6 +6,7 @@ import com.itextpdf.text.Document;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
@@ -85,10 +86,27 @@ public interface ProjectApplyService {
      * @param businessIdList
      * @param zos
      * @param bos
-     * @param serialNumber
+     * @param filePrefix
      * @throws Exception
      */
-    void exportExcelZip(List<String> businessIdList, ZipOutputStream zos, ByteArrayOutputStream bos, String serialNumber) throws Exception;
+    void exportZip(int flag,List<String> businessIdList, ZipOutputStream zos, ByteArrayOutputStream bos, String filePrefix) throws Exception;
+
+    /**
+     * 导出word或者pdf
+     * @param  flag 文件标识 1：word 2:pdf
+     * @param businessId
+     */
+    void exportWordPdf(int flag, String businessId, HttpServletResponse response,String filePrefix) throws Exception;
+
+
+    /**
+     * 预览
+     * @param pd
+     * @param response
+     * @throws Exception
+     */
+    void preview(PageData pd, HttpServletResponse response) throws Exception;
+
 
     /**
      * 导入主信息

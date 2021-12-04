@@ -183,8 +183,9 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
     @Override
     public void approveRecord(PageData pd) {
         //插入附件表，并返回主键id的拼接字符串
-        String fileIdStr = fileService.insertApproveFile(pd);
-        pd.put("fileId", fileIdStr);
+        PageData data = fileService.insertApproveFile(pd);
+        pd.put("fileId", data.getString("fileId"));
+        pd.put("fileName", data.getString("fileName"));
 
         //审批类型 1:同意 2:回退上一个节点 3：回退到发起人
         String approveType = pd.getString("approveType");
