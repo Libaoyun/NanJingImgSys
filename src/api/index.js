@@ -10,19 +10,25 @@ import * as onlineManualsApi from './modules/systemSetting/onlineManuals'
 import * as operationLogApi from './modules/systemSetting/operationLog'
 import * as ruleConfigurationApi from './modules/systemSetting/ruleConfiguration'
 import * as authorizationApi from './modules/systemSetting/authorization'
+import * as contractApi from './modules/implementationManagement/contract'
+import * as disclosureApi from './modules/implementationManagement/disclosure'
+import * as reportApi from './modules/implementationManagement/report'
 
 let api = Object.assign(
-    appApi,
-    attachmentApi,
-    routerMenuApi,
-    userApi,
-    organizationApi,
-    projectApi,
-    dictionaryApi,
-    onlineManualsApi,
-    operationLogApi,
-    ruleConfigurationApi,
-    authorizationApi
+  appApi,
+  attachmentApi,
+  routerMenuApi,
+  userApi,
+  organizationApi,
+  projectApi,
+  dictionaryApi,
+  onlineManualsApi,
+  operationLogApi,
+  ruleConfigurationApi,
+  authorizationApi,
+  contractApi,
+  disclosureApi,
+  reportApi
 )
 
 Vue.prototype.$API = api
