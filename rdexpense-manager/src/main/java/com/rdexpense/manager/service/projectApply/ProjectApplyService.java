@@ -102,10 +102,9 @@ public interface ProjectApplyService {
     /**
      * 预览
      * @param pd
-     * @param response
      * @throws Exception
      */
-    void preview(PageData pd, HttpServletResponse response) throws Exception;
+    void preview(PageData pd,HttpServletResponse response ) throws Exception;
 
 
     /**

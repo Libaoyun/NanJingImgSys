@@ -34,6 +34,12 @@ public class ExcelUtil {
         fontStyle.setFontName("微软雅黑");
         fontStyle.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);// 加粗
         cellStyle.setFont(fontStyle);
+
+        // 设置边框样式
+        cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN); // 下边框
+        cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框
+        cellStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);// 上边框
+        cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
         return cellStyle;
     }
 
@@ -50,8 +56,9 @@ public class ExcelUtil {
         cellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);// 水平居中
         cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);// 垂直居中
         HSSFFont fontStyle = wb.createFont();
-        fontStyle.setFontHeightInPoints((short) 10);
+        fontStyle.setFontHeightInPoints((short) 13);
         fontStyle.setFontName("微软雅黑");
+        fontStyle.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);// 加粗
         cellStyle.setFont(fontStyle);
         cellStyle.setWrapText(true);
         // 设置边框样式
@@ -138,6 +145,30 @@ public class ExcelUtil {
         fontStyle.setFontHeightInPoints((short) 10);
         fontStyle.setFontName("微软雅黑");
         cellStyle.setFont(fontStyle);
+        // 设置边框样式
+        cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN); // 下边框
+        cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框
+        cellStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);// 上边框
+        cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
+        return cellStyle;
+    }
+
+    /**
+     * 设置内容样式
+     *
+     * @param wb
+     * @param sheet
+     * @return
+     */
+    public static HSSFCellStyle setWrapCell(HSSFWorkbook wb, HSSFSheet sheet) {
+        // 字段样式
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平居中
+        cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);// 垂直居中
+        HSSFFont fontStyle = wb.createFont();
+        fontStyle.setFontHeightInPoints((short) 10);
+        fontStyle.setFontName("微软雅黑");
+        cellStyle.setFont(fontStyle);
         cellStyle.setWrapText(true);// 设置自动换行
         // 设置边框样式
         cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN); // 下边框
@@ -146,6 +177,9 @@ public class ExcelUtil {
         cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
         return cellStyle;
     }
+
+
+
 
     /**
      * 合并单元格 参数：起始行号，终止行号， 起始列号，终止列号

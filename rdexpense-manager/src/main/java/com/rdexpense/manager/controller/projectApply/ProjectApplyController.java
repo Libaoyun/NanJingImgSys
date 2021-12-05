@@ -466,7 +466,7 @@ public class ProjectApplyController extends BaseController {
                 // 压缩流
                 ZipOutputStream zos = new ZipOutputStream(bos);
                 //生成excel
-                projectApplyService.exportZip(1,businessIdList, zos, bos,number);
+                projectApplyService.exportZip(1,businessIdList, zos, bos,FILE_PREFIX);
                 zos.flush();
                 zos.close();
                 //写入返回response
@@ -595,12 +595,10 @@ public class ProjectApplyController extends BaseController {
     @PostMapping(value = "/preview")
     public ResponseEntity preview(ProjectApplyAddDto projectApplyAddDto) {
         PageData pd = this.getParams();
-
+        HttpServletResponse response = this.getResponse();
         try {
             //业务主数据
-            HttpServletResponse response = this.getResponse();
-
-            projectApplyService.preview(pd, response);
+            projectApplyService.preview(pd,response);
 
             ResponseEntity result = ResponseEntity.success(null, INFO_PREVIEW_SUCCESS.desc());
             return result;

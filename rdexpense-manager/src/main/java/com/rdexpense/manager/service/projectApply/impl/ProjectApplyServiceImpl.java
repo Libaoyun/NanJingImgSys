@@ -1609,12 +1609,214 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
     /**
      * 预览合同
      * @param pd
-     * @param response
      * @throws Exception
      */
     @Override
-    public void preview(PageData pd, HttpServletResponse response) throws Exception {
+    public void preview(PageData pd,HttpServletResponse response) throws Exception {
 
+
+        File file = FileUtil.createFile();
+        XWPFDocument doc = null;
+        InputStream is = null;
+
+        try {
+            is = this.getClass().getResourceAsStream("/template/研究与开发项目合同.docx");
+            doc = new XWPFDocument(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        //3、插入进度计划
+        String progressPlan = pd.getString("progressPlan");
+        List<PageData> progressPlanList = JSONObject.parseArray(progressPlan, PageData.class);
+
+
+        //4、插入参与单位
+        String attendUnit = pd.getString("attendUnit");
+        List<PageData> attendUnitList = JSONObject.parseArray(attendUnit, PageData.class);
+
+
+        //5、插入研究人员
+        String researchUser = pd.getString("researchUser");
+        List<PageData> researchUserList = JSONObject.parseArray(researchUser, PageData.class);
+
+
+        //6、插入经费预算
+        String budgetListStr = pd.getString("budgetList");
+        List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
+
+
+        //8、插入拨款计划
+        String appropriationPlan = pd.getString("appropriationPlan");
+        List<PageData> appropriationPlanList = JSONObject.parseArray(appropriationPlan, PageData.class);
+
+        XwpfTUtil xwpfTUtil = new XwpfTUtil();
+
+
+        try {
+
+            //获取文件路径
+
+            //文本
+            Map<String, Object> params = new HashMap<>();
+            //1、主信息
+            String year = pd.getString("createdDate").substring(0,4);
+            params.put("(year)", year);
+
+            params.put("(projectName)", pd.getString("projectName"));
+            params.put("(unitName)", pd.getString("unitName"));
+            params.put("(projectLeader)", pd.getString("applyUserName"));
+            params.put("(dateRange)", pd.getString("startYear")+"至"+pd.getString("endYear"));
+
+
+            //2、调研信息
+            params.put("(currentSituation)", pd.getString("currentSituation"));
+            params.put("(contentMethod)", pd.getString("contentMethod"));
+            params.put("(targetResults)", pd.getString("targetResults"));
+
+            //3、项目负责人
+            if(!CollectionUtils.isEmpty(researchUserList)){
+                PageData leader = researchUserList.get(0);
+                params.put("(name)", leader.getString("userName"));
+                params.put("(sax)", leader.getString("gender"));
+                params.put("(age)", leader.getString("age"));
+                params.put("(post)", leader.getString("belongPost"));
+                params.put("(task)", leader.getString("taskDivision"));
+                params.put("(rate)", leader.getString("workRate"));
+                params.put("(unit)", leader.getString("belongUnit"));
+            }else {
+                params.put("(name)", "");
+                params.put("(sax)", "");
+                params.put("(age)", "");
+                params.put("(post)", "");
+                params.put("(task)", "");
+                params.put("(rate)", "");
+                params.put("(unit)", "");
+            }
+
+            //替换掉文档中对应的字段
+            xwpfTUtil.replaceInPara(doc, params);
+
+            ExportWordHelper exportWordHelper = new ExportWordHelper();
+            //4、进度计划
+            List<List<String>> progressList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(progressPlanList)){
+                for(PageData progress : progressPlanList){
+                    List<String> progressDetailList = new ArrayList<>();
+                    progressDetailList.add(progress.getString("years"));
+                    progressDetailList.add(progress.getString("planTarget"));
+
+                    progressList.add(progressDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(progressList, doc, 0);
+
+
+            //5、参加单位
+            List<List<String>> unitList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(attendUnitList)){
+                for(PageData unit : attendUnitList){
+                    List<String> unitDetailList = new ArrayList<>();
+                    unitDetailList.add(unit.getString("unitName"));
+                    unitDetailList.add(unit.getString("taskDivision"));
+
+                    unitList.add(unitDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(unitList, doc, 1);
+
+
+            //6、研究人员
+            List<List<String>> userList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(researchUserList)){
+                for(PageData user : researchUserList){
+                    List<String> userDetailList = new ArrayList<>();
+                    userDetailList.add(user.getString("userName"));
+                    userDetailList.add(user.getString("gender"));
+                    userDetailList.add(user.getString("age"));
+                    userDetailList.add(user.getString("belongPost"));
+                    userDetailList.add(user.getString("taskDivision"));
+                    userDetailList.add(user.getString("workRate"));
+                    userDetailList.add(user.getString("belongUnit"));
+
+                    userList.add(userDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(userList, doc, 2);
+
+            //7、经费预算
+            List<List<String>> budgetList1 = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(budgetList)){
+                for(PageData budget : budgetList){
+                    List<String> budgetDetailList = new ArrayList<>();
+                    budgetDetailList.add(budget.getString("sourceAccount"));
+                    budgetDetailList.add(budget.getString("sourceBudget"));
+                    budgetDetailList.add(budget.getString("expenseAccount"));
+                    budgetDetailList.add(budget.getString("expenseBudget"));
+
+                    budgetList1.add(budgetDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(budgetList1, doc, 3);
+
+
+
+            //8、拨款计划
+            List<List<String>> appList = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(appropriationPlanList)){
+                for(PageData budget : appropriationPlanList){
+                    List<String> appDetailList = new ArrayList<>();
+                    appDetailList.add(budget.getString("years"));
+                    appDetailList.add(budget.getString("planAmount"));
+
+                    appList.add(appDetailList);
+
+                }
+
+            }
+
+            exportWordHelper.exportWordDisorder(appList, doc, 4);
+
+
+            String number = SerialNumberUtil.generateSerialNo("projectApplyPreview");
+
+            String fileName = "研究与开发项目合同" + "_" + new SimpleDateFormat("yyyyMMdd").format(new Date())+"_"+number;
+            File newWordTempFile = new File(file, fileName + ".docx");
+            String newWordTempFilePath = newWordTempFile.getCanonicalPath();
+            File pdfTempFile = new File(file, fileName + ".pdf");
+            String pdfTempFilePath = pdfTempFile.getCanonicalPath();
+
+            //下载到临时word文件中 
+            FileOutputStream os = new FileOutputStream(newWordTempFilePath);
+            doc.write(os);
+            xwpfTUtil.close(is);
+            xwpfTUtil.close(os);
+            //将word转为pdf
+            Doc2Pdf.doc2pdf(newWordTempFilePath, pdfTempFilePath);
+            //输出pdf文件
+            Word2pdfUtil.fileResponse(pdfTempFilePath, response);
+            //删除临时文件
+            newWordTempFile.delete();
+            pdfTempFile.delete();
+
+        } catch (Exception e) {
+            xwpfTUtil.close(is);
+            throw new MyException("研究与开发项目合同导出异常");
+
+        }
     }
 
 
@@ -1628,7 +1830,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @throws Exception
      */
     @Override
-    public void exportZip(int flag,List<String> businessIdList, ZipOutputStream zos, ByteArrayOutputStream bos, String filePrefix) {
+    public void exportZip(int flag,List<String> businessIdList, ZipOutputStream zos, ByteArrayOutputStream bos, String filePrefix) throws Exception {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
         String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
@@ -1638,6 +1840,14 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             for(String businessId : businessIdList){
                 HSSFWorkbook wb = exportExcel(businessId);
+                String number = SerialNumberUtil.generateSerialNo("projectApplyExcel");
+                //文件名
+                String fileName = filePrefix + date + "_" + number + ".xls";
+                //重点开始,创建压缩文件
+                //后端生成文件,可直接put
+                ZipEntry z = new ZipEntry(fileName);
+                zos.putNextEntry(z);
+                wb.write(zos);
             }
 
 
@@ -2089,7 +2299,211 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @param pd
      */
     private void setMainData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 表头
+        HSSFCellStyle styleCell = ExcelUtil.setWrapCell(wb, sheet);// 单元格
 
+
+        // 一、标题
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        String year = pd.getString("createdDate").substring(0,4);
+        cells.setCellValue(year + "年度公司科技研究开发计划课题申请表");
+        cells.setCellStyle(styleHeader);
+
+        ExcelUtil.merge(wb, sheet, 0, 0, 0, 10);
+
+        //1、项目名称
+        rows = sheet.createRow(1);
+        cells = rows.createCell(0);
+        cells.setCellValue("项目名称");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("projectName"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 1, 1, 1, 10);
+
+        //2、单位名称
+        rows = sheet.createRow(2);
+        cells = rows.createCell(0);
+        cells.setCellValue("项目名称");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("unitName"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 2, 2, 1, 10);
+
+        //3、单位地址
+        rows = sheet.createRow(3);
+        cells = rows.createCell(0);
+        cells.setCellValue("单位地址");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("unitAddress"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 3, 3, 1, 8);
+
+        //4、邮编
+        cells = rows.createCell(9);
+        cells.setCellValue("邮编");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(10);
+        cells.setCellValue(pd.getString("zipCode"));
+        cells.setCellStyle(styleCell);
+
+        //5、申请人姓名
+        rows = sheet.createRow(4);
+        cells = rows.createCell(0);
+        cells.setCellValue("申请人姓名");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("applyUserName"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 4, 4, 1, 2);
+        //6、性别
+        cells = rows.createCell(3);
+        cells.setCellValue("性别");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(4);
+        cells.setCellValue(pd.getString("gender"));
+        cells.setCellStyle(styleCell);
+
+        //7、年龄
+        cells = rows.createCell(5);
+        cells.setCellValue("年龄");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(6);
+        cells.setCellValue(pd.getString("age"));
+        cells.setCellStyle(styleCell);
+
+        //8、职称
+        cells = rows.createCell(7);
+        cells.setCellValue("职称");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(8);
+        cells.setCellValue(pd.getString("postName"));
+        cells.setCellStyle(styleCell);
+
+        //9、电话
+        cells = rows.createCell(9);
+        cells.setCellValue("电话");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(10);
+        cells.setCellValue(pd.getString("telephone"));
+        cells.setCellStyle(styleCell);
+
+        //10、申请经费（万元）
+        rows = sheet.createRow(5);
+        cells = rows.createCell(0);
+        cells.setCellValue("申请经费（万元）");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("applyAmount"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 5, 5, 1, 2);
+
+        //11、起始年度
+        cells = rows.createCell(3);
+        cells.setCellValue("起始年度");
+        cells.setCellStyle(styleHeader);
+        ExcelUtil.merge(wb, sheet, 5, 5, 3, 5);
+
+        cells = rows.createCell(6);
+        cells.setCellValue(pd.getString("startYear"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 5, 5, 6, 7);
+
+        //12、结束年度
+        cells = rows.createCell(8);
+        cells.setCellValue("结束年度");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(9);
+        cells.setCellValue(pd.getString("endYear"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 5, 5, 9, 10);
+
+        //13、专业类别
+        rows = sheet.createRow(6);
+        cells = rows.createCell(0);
+        cells.setCellValue("专业类别");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("professionalCategory"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 6, 6, 1, 10);
+
+        //14、项目类型
+        rows = sheet.createRow(7);
+        cells = rows.createCell(0);
+        cells.setCellValue("项目类型");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("projectType"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 7, 7, 1, 7);
+
+        //15、是否进行成果鉴定
+        cells = rows.createCell(8);
+        cells.setCellValue("是否进行成果鉴定");
+        cells.setCellStyle(styleHeader);
+        ExcelUtil.merge(wb, sheet, 7, 7, 8, 9);
+
+        cells = rows.createCell(10);
+        cells.setCellValue(pd.getString("identify").equals("0")?"否":"是");
+        cells.setCellStyle(styleCell);
+
+        //16、研究内容提要
+        rows = sheet.createRow(8);
+        cells = rows.createCell(0);
+        cells.setCellValue("研究内容提要");
+        cells.setCellStyle(styleHeader);
+        ExcelUtil.merge(wb, sheet, 8, 8, 0, 10);
+
+        //
+        rows = sheet.createRow(9);
+        rows.setHeightInPoints(50);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("researchContents"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 9, 10, 0, 10);
+
+        //17、申报单位审查意见：
+        rows = sheet.createRow(11);
+        rows.setHeightInPoints(80);
+        cells = rows.createCell(0);
+        cells.setCellValue("研究内容提要");
+        cells.setCellStyle(styleHeader);
+
+        //
+        cells = rows.createCell(1);
+        cells.setCellValue(pd.getString("reviewComments"));
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 11, 11, 1, 6);
+
+        //18、盖章：
+        cells = rows.createCell(7);
+        cells.setCellValue("盖章");
+        cells.setCellStyle(styleHeader);
+
+        cells = rows.createCell(8);
+        cells.setCellValue("");
+        cells.setCellStyle(styleCell);
+        ExcelUtil.merge(wb, sheet, 11, 11, 8, 10);
+
+        sheet.setAutobreaks(true);
     }
 
     /**
@@ -2099,7 +2513,100 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @param pd
      */
     private void setSurveyData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+        HSSFCellStyle styleHeader = ExcelUtil.setHeaderLeft(wb, sheet);// 表头
+        HSSFCellStyle styleCell = ExcelUtil.setWrapCell(wb, sheet);// 单元格
 
+        // 一、国内外现状
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        cells.setCellValue("一、国内外现状");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(1);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("currentSituation"));
+        cells.setCellStyle(styleCell);
+
+        // 二、研发目的和意义
+        rows = sheet.createRow(2);
+        rows.setHeightInPoints(20);// 行高
+        cells = rows.createCell(0);
+        cells.setCellValue("二、研发的目的和意义");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(3);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("purposeSignificance"));
+        cells.setCellStyle(styleCell);
+
+
+        // 三、主要研究内容及研究方法
+        rows = sheet.createRow(4);
+        rows.setHeightInPoints(20);// 行高
+        cells = rows.createCell(0);
+        cells.setCellValue("三、主要研究内容及研究方法");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(5);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("contentMethod"));
+        cells.setCellStyle(styleCell);
+
+
+        // 四、要达到的目标、成果形式及主要技术指标
+        rows = sheet.createRow(6);
+        rows.setHeightInPoints(20);// 行高
+        cells = rows.createCell(0);
+        cells.setCellValue("四、要达到的目标、成果形式及主要技术指标");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(7);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("targetResults"));
+        cells.setCellStyle(styleCell);
+
+
+        // 五、现有研发条件和工作基础
+        rows = sheet.createRow(8);
+        rows.setHeightInPoints(20);// 行高
+        cells = rows.createCell(0);
+        cells.setCellValue("五、现有研发条件和工作基础");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(9);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("basicConditions"));
+        cells.setCellStyle(styleCell);
+
+
+        // 六、研发项目创新点
+        rows = sheet.createRow(10);
+        rows.setHeightInPoints(20);// 行高
+        cells = rows.createCell(0);
+        cells.setCellValue("六、研发项目创新点");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(11);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("innovationPoints"));
+        cells.setCellStyle(styleCell);
+
+
+        // 七、成果转化的可行性分析
+        rows = sheet.createRow(12);
+        rows.setHeightInPoints(20);// 行高
+        cells = rows.createCell(0);
+        cells.setCellValue("七、成果转化的可行性分析");
+        cells.setCellStyle(styleHeader);
+
+        rows = sheet.createRow(13);
+        cells = rows.createCell(0);
+        cells.setCellValue(pd.getString("feasibilityAnalysis"));
+        cells.setCellStyle(styleCell);
+
+        sheet.setColumnWidth(0,20000);
+        sheet.setAutobreaks(true);
     }
 
     /**
@@ -2110,26 +2617,137 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      */
     private void setProgressData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
 
+        String title = "八、研发项目立项申请-进度计划";
+
+        String[] head = {"年度","计划及目标"};
+        HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+        HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+        // 创建表头
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        cells.setCellValue(title);
+        cells.setCellStyle(styleTitle);
+        ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
+        // 第一行  表头
+        HSSFRow rowTitle = sheet.createRow(1);
+        HSSFCell hc;
+        for (int j = 0; j < head.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head[j]);
+            hc.setCellStyle(styleHeader);
+        }
+
+        List<PageData> planList = (List<PageData>) pd.get("progressPlan");
+        if (!CollectionUtils.isEmpty(planList)) {
+            for (int i = 0; i < planList.size(); i++) {
+                PageData data = planList.get(i);
+
+                HSSFRow row = sheet.createRow(i + 2);
+                int j = 0;
+
+                HSSFCell cell = row.createCell(j++);
+                cell.setCellValue(data.getString("years"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("planTarget"));
+                cell.setCellStyle(styleCell);
+
+
+            }
+        }
+
+        //设置自适应宽度
+        for (int j = 0; j < head.length; j++) {
+            sheet.autoSizeColumn(j);
+            int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+            if (colWidth < 255 * 256) {
+                sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+            } else {
+                sheet.setColumnWidth(j, 6000);
+            }
+        }
+
+        sheet.setAutobreaks(true);
     }
 
     /**
-     * 写入参加单位
+     * 写入初始人员
+     * @param wb
+     * @param sheet
+     * @param pd
+     */
+    private void setUserData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+        String title = "九、9.2研发项目立项申请-研究人员 （初始）";
+        List<PageData> list = (List<PageData>) pd.get("researchUser");
+        setUser(wb,sheet,list,title);
+
+    }
+
+    /**
+     * 写入参与单位
      * @param wb
      * @param sheet
      * @param pd
      */
     private void setUnitData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
 
-    }
+        String title = "九、9.1研发项目立项申请-参加单位";
 
-    /**
-     * 写入研究人员（初始）
-     * @param wb
-     * @param sheet
-     * @param pd
-     */
-    private void setUserData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+        String[] head = {"参加单位","研究任务及分工"};
+        HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+        HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+        // 创建表头
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        cells.setCellValue(title);
+        cells.setCellStyle(styleTitle);
+        ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
+        // 第一行  表头
+        HSSFRow rowTitle = sheet.createRow(1);
+        HSSFCell hc;
+        for (int j = 0; j < head.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head[j]);
+            hc.setCellStyle(styleHeader);
+        }
 
+        List<PageData> attendUnit = (List<PageData>) pd.get("attendUnit");
+        if (!CollectionUtils.isEmpty(attendUnit)) {
+            for (int i = 0; i < attendUnit.size(); i++) {
+                PageData data = attendUnit.get(i);
+
+                HSSFRow row = sheet.createRow(i + 2);
+                int j = 0;
+
+                HSSFCell cell = row.createCell(j++);
+                cell.setCellValue(data.getString("unitName"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("taskDivision"));
+                cell.setCellStyle(styleCell);
+
+
+            }
+        }
+
+        //设置自适应宽度
+        for (int j = 0; j < head.length; j++) {
+            sheet.autoSizeColumn(j);
+            int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+            if (colWidth < 255 * 256) {
+                sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+            } else {
+                sheet.setColumnWidth(j, 6000);
+            }
+        }
+
+        sheet.setAutobreaks(true);
     }
 
     /**
@@ -2139,7 +2757,129 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @param pd
      */
     private void setUserChangeData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+        String title = "九、9.2研发项目立项申请-研究人员 （变更）";
+        List<PageData> list = (List<PageData>) pd.get("researchUserChange");
+        setUser(wb,sheet,list,title);
+    }
 
+
+
+    private void setUser(HSSFWorkbook wb,HSSFSheet sheet,List<PageData> list,String title){
+
+        String[] head = {"序号","姓名","身份证号码","年龄","性别","学历","所属部门","职务职称","所学专业","现从事专业","所在单位","研究任务及分工","全时率","联系电话","参与研发开始日期","参与研发结束日期"};
+        HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+        HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+        // 创建表头
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        cells.setCellValue(title);
+        cells.setCellStyle(styleTitle);
+        ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
+        // 第一行  表头
+        HSSFRow rowTitle = sheet.createRow(1);
+        HSSFCell hc;
+        for (int j = 0; j < head.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head[j]);
+            hc.setCellStyle(styleHeader);
+        }
+
+
+        if (!CollectionUtils.isEmpty(list)) {
+            for (int i = 0; i < list.size(); i++) {
+                PageData data = list.get(i);
+
+                HSSFRow row = sheet.createRow(i + 2);
+                int j = 0;
+
+                HSSFCell cell = row.createCell(j++);
+                cell.setCellValue(i + 1);
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("userName"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("idCard"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("age"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("gender"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("education"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("belongDepartment"));
+                cell.setCellStyle(styleCell);
+
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("belongPost"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("majorStudied"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("majorWorked"));
+                cell.setCellStyle(styleCell);
+
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("belongUnit"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("taskDivision"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("workRate"));
+                cell.setCellStyle(styleCell);
+
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("telephone"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("startDate"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("endDate"));
+                cell.setCellStyle(styleCell);
+
+
+
+            }
+        }
+
+
+
+        //设置自适应宽度
+        for (int j = 0; j < head.length; j++) {
+            sheet.autoSizeColumn(j);
+            int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+            if (colWidth < 255 * 256) {
+                sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+            } else {
+                sheet.setColumnWidth(j, 6000);
+            }
+        }
+
+        sheet.setAutobreaks(true);
     }
 
     /**
@@ -2150,6 +2890,179 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      */
     private void setBudgetData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
 
+        String title = "十、10.1研发项目立项申请-经费预算（单位：万元）";
+        List<PageData> budgetList = (List<PageData>) pd.get("budgetList");
+        //判断是不是有预算变更
+        //bool=true有变更 bool=false没有变更
+        Boolean bool = false;
+        if(!CollectionUtils.isEmpty(budgetList)){
+            for(PageData data : budgetList){
+                String sourceBudgetChange = data.getString("sourceBudgetChange");
+                String expenseBudgetChange = data.getString("expenseBudgetChange");
+                if(StringUtils.isNotBlank(sourceBudgetChange) || StringUtils.isNotBlank(expenseBudgetChange)){
+                    bool = true;
+
+                    break;
+                }
+            }
+        }
+
+        if(bool == false){
+            String[] head = {"经费来源预算","经费来源预算","经费支出预算","经费支出预算"};
+            HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+            HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+            HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+            // 创建表头
+            HSSFRow rows = sheet.createRow(0);
+            rows.setHeightInPoints(20);// 行高
+            HSSFCell cells = rows.createCell(0);
+            cells.setCellValue(title);
+            cells.setCellStyle(styleTitle);
+            ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
+            // 第一行  表头
+            HSSFRow rowTitle = sheet.createRow(1);
+            HSSFCell hc;
+            for (int j = 0; j < head.length; j++) {
+                hc = rowTitle.createCell(j);
+                hc.setCellValue(head[j]);
+                hc.setCellStyle(styleHeader);
+            }
+            ExcelUtil.merge(wb, sheet, 1, 1, 0, 1);
+            ExcelUtil.merge(wb, sheet, 1, 1, 2, 3);
+
+            String[] head2 = {"科目","预算数","科目","预算数"};
+
+            // 第二行  表头
+            rowTitle = sheet.createRow(2);
+            for (int j = 0; j < head2.length; j++) {
+                hc = rowTitle.createCell(j);
+                hc.setCellValue(head2[j]);
+                hc.setCellStyle(styleHeader);
+            }
+
+            if (!CollectionUtils.isEmpty(budgetList)) {
+                for (int i = 0; i < budgetList.size(); i++) {
+                    PageData data = budgetList.get(i);
+
+                    HSSFRow row = sheet.createRow(i + 3);
+                    int j = 0;
+
+                    HSSFCell cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("sourceAccount"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("sourceBudget"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("expenseAccount"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("expenseBudget"));
+                    cell.setCellStyle(styleCell);
+
+
+
+                }
+            }
+
+            //设置自适应宽度
+            for (int j = 0; j < head.length; j++) {
+                sheet.autoSizeColumn(j);
+                int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+                if (colWidth < 255 * 256) {
+                    sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+                } else {
+                    sheet.setColumnWidth(j, 6000);
+                }
+            }
+
+        }else {
+            String[] head = {"经费来源预算","经费来源预算","经费来源预算","经费支出预算","经费支出预算","经费支出预算"};
+            HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+            HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+            HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+            // 创建表头
+            HSSFRow rows = sheet.createRow(0);
+            rows.setHeightInPoints(20);// 行高
+            HSSFCell cells = rows.createCell(0);
+            cells.setCellValue(title);
+            cells.setCellStyle(styleTitle);
+            ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
+            // 第一行  表头
+            HSSFRow rowTitle = sheet.createRow(1);
+            HSSFCell hc;
+            for (int j = 0; j < head.length; j++) {
+                hc = rowTitle.createCell(j);
+                hc.setCellValue(head[j]);
+                hc.setCellStyle(styleHeader);
+            }
+            ExcelUtil.merge(wb, sheet, 1, 1, 0, 2);
+            ExcelUtil.merge(wb, sheet, 1, 1, 3, 5);
+
+            String[] head2 = {"科目","预算数","变更数","科目","预算数","变更数"};
+
+            // 第二行  表头
+            rowTitle = sheet.createRow(2);
+            for (int j = 0; j < head2.length; j++) {
+                hc = rowTitle.createCell(j);
+                hc.setCellValue(head2[j]);
+                hc.setCellStyle(styleHeader);
+            }
+
+
+            if (!CollectionUtils.isEmpty(budgetList)) {
+                for (int i = 0; i < budgetList.size(); i++) {
+                    PageData data = budgetList.get(i);
+
+                    HSSFRow row = sheet.createRow(i + 3);
+                    int j = 0;
+
+                    HSSFCell cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("sourceAccount"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("sourceBudget"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("sourceBudgetChange"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("expenseAccount"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("expenseBudget"));
+                    cell.setCellStyle(styleCell);
+
+                    cell = row.createCell(j++);
+                    cell.setCellValue(data.getString("expenseBudgetChange"));
+                    cell.setCellStyle(styleCell);
+
+
+                }
+            }
+
+            //设置自适应宽度
+            for (int j = 0; j < head.length; j++) {
+                sheet.autoSizeColumn(j);
+                int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+                if (colWidth < 255 * 256) {
+                    sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+                } else {
+                    sheet.setColumnWidth(j, 6000);
+                }
+            }
+
+        }
+
+
+        sheet.setAutobreaks(true);
     }
 
     /**
@@ -2159,6 +3072,193 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      * @param pd
      */
     private void setMonthData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
+        List<PageData> monthList = (List<PageData>) pd.get("monthList");
+        //遍历出年份
+        Set<String> yearSet = new TreeSet<>(new Comparator<String>(){
+            @Override
+            public int compare(String s1,String s2){
+                return s1.compareTo(s2);
+            }
+        });
+
+        if (!CollectionUtils.isEmpty(monthList)) {
+            for (PageData detailData : monthList) {
+                for (Object key : detailData.keySet()) {
+                    String keyStr = (String)key;
+
+                    if(keyStr.length() > 8 && StringUtils.isNumeric(keyStr.substring(5,9))){
+                        yearSet.add(keyStr.substring(5,9));
+                    }
+
+                }
+            }
+        }
+
+        int len = yearSet.size();
+        String title = "十、10.2研发项目立项申请-经费预算（每月预算）（单位：万元）";
+
+        HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+        // 创建标题
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        cells.setCellValue(title);
+        cells.setCellStyle(styleTitle);
+        ExcelUtil.merge(wb, sheet, 0, 0, 0, 3+(12*len));
+
+        //创建第一行表头
+
+        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+
+        String[] head = new String[ len * 12 +4];
+        head[0] = "经费来源预算";
+        head[1] = "经费来源预算";
+        head[2] = "经费支出预算";
+        head[3] = "经费支出预算";
+
+        HSSFRow rowTitle = sheet.createRow(1);
+        HSSFCell hc;
+        if(!CollectionUtils.isEmpty(yearSet)){
+            int count = 0;
+            for (int i = 1; i <= 12; i++) {
+                head[i + count + 3] = "年度预算（按月填报）";
+                count++;
+            }
+
+        }
+
+        for (int j = 0; j < head.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head[j]);
+            hc.setCellStyle(styleHeader);
+        }
+
+        ExcelUtil.merge(wb, sheet, 1, 1, 0, 1);
+        ExcelUtil.merge(wb, sheet, 1, 1, 2, 3);
+        ExcelUtil.merge(wb, sheet, 1, 1, 4, 3+(12*len));
+
+
+
+        //创建第二行表头
+
+        String[] head2 = new String[ len * 12 +4];
+        head2[0] = "科目";
+        head2[1] = "预算数";
+        head2[2] = "科目";
+        head2[3] = "预算数";
+
+
+        if(!CollectionUtils.isEmpty(yearSet)){
+            int count = 0;
+            for(String year : yearSet){
+
+                for(int i=0;i<12;i++) {
+                    head2[count+4] = year+"年";
+                    count ++;
+                }
+            }
+        }
+
+        rowTitle = sheet.createRow(2);
+        for (int j = 0; j < head2.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head2[j]);
+            hc.setCellStyle(styleHeader);
+        }
+
+        if(!CollectionUtils.isEmpty(yearSet)){
+            for(int i=0;i<yearSet.size();i++){
+                ExcelUtil.merge(wb, sheet, 2, 2, 4+(i*12), 15+(i*12));
+            }
+
+        }
+
+        // 第三行  表头
+        String[] head3 = new String[ len * 12 +4];
+        head3[0] = "科目";
+        head3[1] = "预算数";
+        head3[2] = "科目";
+        head3[3] = "预算数";
+
+        String[] months = {"1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"};
+        if(!CollectionUtils.isEmpty(yearSet)){
+            for(int j=0;j<yearSet.size();j++){
+                for(int i=0;i<12;i++) {
+                    head3[4+(j*12)+i] = months[i];
+
+                }
+            }
+        }
+
+        rowTitle = sheet.createRow(3);
+
+        for (int j = 0; j < head3.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head3[j]);
+            hc.setCellStyle(styleHeader);
+        }
+        ExcelUtil.merge(wb, sheet, 2, 3, 0, 0);
+        ExcelUtil.merge(wb, sheet, 2, 3, 1, 1);
+        ExcelUtil.merge(wb, sheet, 2, 3, 2, 2);
+        ExcelUtil.merge(wb, sheet, 2, 3, 3, 3);
+
+        HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+
+        if (!CollectionUtils.isEmpty(monthList)) {
+            for (int i = 0; i < monthList.size(); i++) {
+                PageData data = monthList.get(i);
+
+                HSSFRow row = sheet.createRow(i + 4);
+                int j = 0;
+
+                HSSFCell cell = row.createCell(j++);
+                cell.setCellValue(data.getString("sourceAccount"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("sourceBudget"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("expenseAccount"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("expenseBudget"));
+                cell.setCellStyle(styleCell);
+
+
+                if(!CollectionUtils.isEmpty(yearSet)){
+
+                    for(String year : yearSet){
+                        for(int n=0;n<12;n++){
+                            String key = "month"+year+""+(n+1);
+                            String value = data.getString(key);
+                            cell = row.createCell(j++);
+                            cell.setCellValue(value);
+                            cell.setCellStyle(styleCell);
+
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+
+        //设置自适应宽度
+        for (int j = 0; j < head3.length; j++) {
+            sheet.autoSizeColumn(j);
+            int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+            if (colWidth < 255 * 256) {
+                sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+            } else {
+                sheet.setColumnWidth(j, 6000);
+            }
+        }
+
+        sheet.setAutobreaks(true);
 
     }
 
@@ -2170,6 +3270,60 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
      */
     private void setAppData(HSSFWorkbook wb,HSSFSheet sheet,PageData pd){
 
+        String title = "十一、研发项目立项申请-拨款计划";
+
+        String[] head = {"年度","计划（万元）"};
+        HSSFCellStyle styleTitle = ExcelUtil.setHeaderLeft(wb, sheet);// 标题
+        HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 单元格
+        HSSFCellStyle styleCell = ExcelUtil.setCell(wb, sheet);// 单元格
+        // 创建表头
+        HSSFRow rows = sheet.createRow(0);
+        rows.setHeightInPoints(20);// 行高
+        HSSFCell cells = rows.createCell(0);
+        cells.setCellValue(title);
+        cells.setCellStyle(styleTitle);
+        ExcelUtil.merge(wb, sheet, 0, 0, 0, (head.length - 1));
+        // 第一行  表头
+        HSSFRow rowTitle = sheet.createRow(1);
+        HSSFCell hc;
+        for (int j = 0; j < head.length; j++) {
+            hc = rowTitle.createCell(j);
+            hc.setCellValue(head[j]);
+            hc.setCellStyle(styleHeader);
+        }
+
+        List<PageData> appropriationPlan = (List<PageData>) pd.get("appropriationPlan");
+        if (!CollectionUtils.isEmpty(appropriationPlan)) {
+            for (int i = 0; i < appropriationPlan.size(); i++) {
+                PageData data = appropriationPlan.get(i);
+
+                HSSFRow row = sheet.createRow(i + 2);
+                int j = 0;
+
+                HSSFCell cell = row.createCell(j++);
+                cell.setCellValue(data.getString("years"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(data.getString("planAmount"));
+                cell.setCellStyle(styleCell);
+
+
+            }
+        }
+
+        //设置自适应宽度
+        for (int j = 0; j < head.length; j++) {
+            sheet.autoSizeColumn(j);
+            int colWidth = sheet.getColumnWidth(j) * 17 / 10;
+            if (colWidth < 255 * 256) {
+                sheet.setColumnWidth(j, colWidth < 3000 ? 3000 : colWidth);
+            } else {
+                sheet.setColumnWidth(j, 6000);
+            }
+        }
+
+        sheet.setAutobreaks(true);
     }
 
 }
