@@ -648,8 +648,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         //6、插入经费预算
         if (!CollectionUtils.isEmpty(budgetList)) {
-            dao.batchInsert("ProjectApplyMapper.batchInsertBudget", budgetList);
-
+ //           dao.batchInsert("ProjectApplyMapper.batchInsertBudget", budgetList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudget1", budgetList);
         }
 
         //7、插入经费预算-每月预算
@@ -658,7 +658,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         }
 
         if(!CollectionUtils.isEmpty(monthList)){
-            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth1", monthList);
         }
 
 
@@ -960,13 +960,13 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         String identify = ReadExcelUtil.readCellStr(cell, 8, "项目类型", false, 256);
         pd.put("identify",identify.equals("是")?"1":"0");
 
-        //13、项目类型
+        //15、研究内容提要
         row = sheet.getRow(9);
-        cell = row.getCell(1);
+        cell = row.getCell(0);
         String researchContents = ReadExcelUtil.readCellMinStr(cell, 10, "研究内容提要", 200);
         pd.put("researchContents",researchContents);
 
-        //13、项目类型
+        //16、申报单位审查意见
         row = sheet.getRow(11);
         cell = row.getCell(1);
         String reviewComments = ReadExcelUtil.readCellMinStr(cell, 12, "申报单位审查意见", 200);
@@ -1167,8 +1167,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
             int rowNumber = i + 1;
             //解析第1个单元格 姓名
-            String unitName = ReadExcelUtil.readCellStr(cell1, rowNumber, "姓名", false, 256);
-            data.put("unitName",unitName);
+            String userName = ReadExcelUtil.readCellStr(cell1, rowNumber, "姓名", false, 256);
+            data.put("userName",userName);
 
             //解析第2个单元格 身份证号码
             String idCard = ReadExcelUtil.readCellStr(cell2, rowNumber, "身份证号码", false, 256);
@@ -1227,7 +1227,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             data.put("endDate",endDate);
 
 
-            if(StringUtils.isBlank(unitName) && StringUtils.isBlank(idCard)&& StringUtils.isBlank(age)&& StringUtils.isBlank(gender)
+            if(StringUtils.isBlank(userName) && StringUtils.isBlank(idCard)&& StringUtils.isBlank(age)&& StringUtils.isBlank(gender)
                     && StringUtils.isBlank(education)&& StringUtils.isBlank(belongDepartment)
                     && StringUtils.isBlank(belongPost)&& StringUtils.isBlank(majorStudied)&& StringUtils.isBlank(majorWorked)
                     && StringUtils.isBlank(belongUnit)&& StringUtils.isBlank(taskDivision)&& StringUtils.isBlank(workRate)
@@ -1424,11 +1424,11 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                 }
 
                 int cellNum = 4 + i;
-                for (int y = 4; y <= 19; y++) {
+                for (int y = 4; y <= 20; y++) {
                     PageData data = new PageData();
                     data.put("businessId", pd.getString("businessId"));
                     data.put("years", yearValue);
-                    data.put("expenseAccount",monthList.get(y-4).getString("expenseAccount"));
+                    data.put("expenseAccount",monthList.get(y-4).getString("expenseaccount"));
 
                     XSSFRow row = sheet.getRow(y);
                     XSSFCell cell1 = row.getCell(cellNum);

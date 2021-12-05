@@ -207,6 +207,28 @@
         </foreach>
     </insert>
 
+    <insert id="batchInsertBudget1" parameterType="java.util.List">
+        INSERT INTO project_apply_funds_budget
+        (  business_id,source_account,source_budget,expense_account,expense_budget
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceaccount},#{item.sourcebudget, jdbcType=DECIMAL},#{item.expenseaccount},#{item.expensebudget, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertBudgetMonth1" parameterType="java.util.List">
+        INSERT INTO project_apply_budget_month
+        (  business_id,source_account,source_budget,expense_account,expense_budget
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceaccount},#{item.sourcebudget, jdbcType=DECIMAL},#{item.expenseaccount},#{item.expensebudget, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
 
     <insert id="batchInsertBudgetMonthDetail" parameterType="java.util.List">
         INSERT INTO project_apply_budget_month_detail
