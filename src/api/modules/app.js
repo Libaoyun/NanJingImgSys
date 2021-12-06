@@ -59,9 +59,6 @@ export function apiGetDictionariesList(data) {
     data,
   })
 }
-<<<<<<< HEAD
-=======
-
 // 获取代办列表
 export function apiGetTodoList (data) {
   return fetch({
@@ -79,4 +76,3 @@ export function apiGetDoneList (data) {
       data
   })
 }
->>>>>>> d942d378c84dec860bf8c2030c2b5581dc226d25

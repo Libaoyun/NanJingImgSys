@@ -47,18 +47,19 @@ module.exports = {
                 return assetFilename.endsWith('.js');
             }
         }
-    },
-    productionSourceMap: false,
-    transpileDependencies: ['ant-design-vue'],
-    devServer: {
-        proxy: {
-            '/rdexpense': {
-                // target: 'http://192.168.41.180:1001',
-                // target: 'http://192.168.41.202:1002',
-                target: 'http://192.168.40.236:1001',//鲁
-                ws: true,
-                changeOrigin: true,
-            }
-        }
-    }
-}
+	},
+	productionSourceMap: false,
+	transpileDependencies: ['ant-design-vue'],
+	devServer: {
+		proxy: {
+			'/rdexpense': {
+				// target: 'http://192.168.41.180:1001',
+				// target: 'http://192.168.41.202:1001',
+				// target: 'http://192.168.40.236:1001',//鲁
+				target: 'http://192.168.40.165:1001',//孟
+				ws: true,
+				changeOrigin: true,
+			}
+		}
+	}
+  }
