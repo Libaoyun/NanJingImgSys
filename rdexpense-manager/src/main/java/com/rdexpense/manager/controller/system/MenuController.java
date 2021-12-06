@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.common.util.CheckParameter.checkPositiveInt;
 import static com.common.util.ConstantMsgUtil.*;
 
 /**
@@ -49,7 +50,7 @@ public class MenuController extends BaseController {
     @ApiImplicitParam(name = "menuCode", value = "菜单编码", required = true, dataType = "string")
     ResponseEntity<List<MenuTreeDto>> queryTree(){
         PageData pd = this.getParams();
-        CheckParameter.checkPositiveInt(pd.getString("menuCode"), "菜单编码");
+        checkPositiveInt(pd.getString("menuCode"), "菜单编码");
         try{
 
             List<PageData> dataList = menuService.queryTree(pd);
@@ -85,7 +86,7 @@ public class MenuController extends BaseController {
     @ApiImplicitParam(name = "menuCode", value = "菜单编码", required = true, dataType = "string")
     ResponseEntity<MenuTreeDto> queryNode() {
         PageData pd = this.getParams();
-        CheckParameter.checkPositiveInt(pd.getString("menuCode"), "菜单编码");
+        checkPositiveInt(pd.getString("menuCode"), "菜单编码");
         try {
             PageData resultData = menuService.queryNode(pd);
             ResponseEntity result = ResponseEntity.success(PropertyUtil.pushData(resultData, MenuTreeDto.class, ConstantMsgUtil.INFO_QUERY_SUCCESS.desc()));
@@ -163,8 +164,8 @@ public class MenuController extends BaseController {
 
     private void checkSave(PageData pd) {
         String menuCode = pd.getString("menuCode");
-        CheckParameter.stringLengthAndEmpty(menuCode, "菜单编码", 8);
-
+//        CheckParameter.stringLengthAndEmpty(menuCode, "菜单编码", 8);
+        checkPositiveInt(pd.getString("menuCode"), "功能菜单编码");
         String title = pd.getString("title");
         CheckParameter.stringLengthAndEmpty(title, "菜单名称", 50);
 

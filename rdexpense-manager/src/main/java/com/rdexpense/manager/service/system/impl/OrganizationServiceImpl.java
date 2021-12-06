@@ -71,7 +71,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void addOrganization(PageData pd) {
 
         //新增项目表
-        String orgNumber = "XMGL-" + UUID.randomUUID().toString();
+        String orgNumber =  UUID.randomUUID().toString();
         pd.put("orgNumber",orgNumber);
 
         baseDao.insert("OrganizationMapper.insertOrganization", pd);

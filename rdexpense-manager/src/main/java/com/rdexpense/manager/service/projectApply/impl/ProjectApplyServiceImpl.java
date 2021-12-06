@@ -528,9 +528,10 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
 
         //插入附件表，并返回主键id的拼接字符串
-        PageData fileData = fileService.insertApproveFile(pd);
-        pd.put("fileId", fileData.getString("fileId"));
-        pd.put("fileName", fileData.getString("fileName"));
+//        PageData fileData = fileService.insertApproveFile(pd);
+//        pd.put("fileId", fileData.getString("fileId"));
+//        pd.put("fileName", fileData.getString("fileName"));
+//        String businessId = (String)dao.findForObject("");
 
         //审批类型 1:同意 2:回退上一个节点 3：回退到发起人
         String approveType = pd.getString("approveType");

@@ -197,7 +197,7 @@
             in_telephone as inTelephone,
             out_telephone as outTelephone,
             department_remark as departmentRemark,
-            department_duty as departmentSuty,
+            department_duty as departmentDuty,
             department_people as departmentPeople,
             department_level_code as departmentLevelCode,
             department_type_code as departmentTypeCode

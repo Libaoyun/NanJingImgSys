@@ -2,6 +2,7 @@ package com.rdexpense.manager.service.system.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.common.base.dao.mysql.BaseDao;
+import com.common.base.exception.MyException;
 import com.common.entity.PageData;
 import com.common.entity.ResponseEntity;
 import com.common.util.ConstantMsgUtil;
@@ -285,8 +286,8 @@ public class MenuServiceImpl implements MenuService {
     @Transactional(rollbackFor = Exception.class)
     public void saveNode(PageData pd) {
         //判断菜单编码和名称是否重复
-        PageData data = (PageData) dao.findForObject("MenuMapper.searchByCodeOrTitle", pd);
-        if(data == null || data.size() == 0){
+        List<PageData> dataList = (List<PageData>) dao.findForList("MenuMapper.searchByCodeOrTitle", pd);
+        if(CollectionUtils.isEmpty(dataList)){
 
             pd = setDefaultValue(pd);
             PageData parentData = (PageData) dao.findForObject("MenuMapper.searchByParentCode", pd);
@@ -327,6 +328,8 @@ public class MenuServiceImpl implements MenuService {
 
             }
 
+        }else {
+            throw new MyException("菜单编码或者名称重复");
         }
 
 

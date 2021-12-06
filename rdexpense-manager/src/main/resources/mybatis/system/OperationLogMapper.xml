@@ -79,6 +79,10 @@
             <if test="userOrgName !=null and userOrgName !=''">
                 and a.user_org_name like concat('%',#{userOrgName},'%')
             </if>
+            <if test="userPositionName !=null and userPositionName !=''">
+                and a.user_position_name like concat('%',#{userPositionName},'%')
+            </if>
+
             <if test="loginIp !=null and loginIp !=''">
                 and a.login_ip like concat('%',#{loginIp},'%')
             </if>

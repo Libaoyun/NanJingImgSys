@@ -98,18 +98,20 @@ public class TemplateServiceImpl implements TemplateService {
                     if (frontId == null || frontId.equals("")) {
                         data.put("businessId", businessId);
                         fileList.add(data);
+
+                        String fileStr = data.getString("fileName");
+                        if(StringUtils.isNotBlank(fileStr)){
+                            String suffix = fileStr.substring(fileStr.lastIndexOf(".") + 1);
+                            String frofix = fileStr.substring(0,fileStr.lastIndexOf("."));
+
+                            pd.put("fileFormat",suffix);
+                            pd.put("fileName",frofix);
+
+                        }
+                        pd.put("fileSize",data.getString("fileSize"));
                     }
 
-                    String fileStr = data.getString("fileName");
-                    if(StringUtils.isNotBlank(fileStr)){
-                        String suffix = fileStr.substring(fileStr.lastIndexOf(".") + 1);
-                        String frofix = fileStr.substring(0,fileStr.lastIndexOf("."));
 
-                        pd.put("fileFormat",suffix);
-                        pd.put("fileName",frofix);
-
-                    }
-                    pd.put("fileSize",data.getString("fileSize"));
 
 
                 }

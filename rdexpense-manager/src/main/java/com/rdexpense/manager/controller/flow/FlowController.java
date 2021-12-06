@@ -273,13 +273,13 @@ public class FlowController extends BaseController {
     @PostMapping("/queryFlowApproveInfo")
     @ApiOperation(value = "查询审批记录")
     @ApiImplicitParam(name = "processInstId", value = "审批实例ID", required = true, dataType = "String")
-    public ResponseEntity<FlowSerialDataDTO> queryFlowApproveInfo() {
+    public ResponseEntity<ApproveRecordListDTO> queryFlowApproveInfo() {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("processInstId"), "审批实例ID",128);
         ResponseEntity result = null;
         try {
             List<PageData> pageDataList = flowService.queryApprovalScheduleByProcessInstId(pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(pageDataList, FlowSerialDataDTO.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            result = ResponseEntity.success(PropertyUtil.covertListModel(pageDataList, ApproveRecordListDTO.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("查询审批记录失败,request=[{}]", pd);

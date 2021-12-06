@@ -897,7 +897,12 @@ public class ProjectApplyController extends BaseController {
         }
 
 
+
         StringBuffer buffer = new StringBuffer();
+        String confirmSubmit = pd.getString("confirmSubmit");
+        if(StringUtils.isNotBlank(confirmSubmit) && confirmSubmit.equals("1")){
+            return buffer.toString();
+        }
 
         //判断研发费用预算是否超值
         if(!CollectionUtils.isEmpty(budgetList)){

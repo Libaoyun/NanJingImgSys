@@ -154,19 +154,19 @@ public class UserServiceImpl implements UserService {
         }
 
         if(StringUtils.isNotBlank(departmentName)){
-            pd.put("departmentName",departmentName.substring(0,departmentName.lastIndexOf(",")-1));
+            pd.put("departmentName",departmentName.substring(0,departmentName.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(departmentCode)){
-            pd.put("departmentCode",departmentCode.substring(0,departmentCode.lastIndexOf(",")-1));
+            pd.put("departmentCode",departmentCode.substring(0,departmentCode.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(postName)){
-            pd.put("postName",postName.substring(0,postName.lastIndexOf(",")-1));
+            pd.put("postName",postName.substring(0,postName.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(postCode)){
-            pd.put("postCode",postCode.substring(0,postCode.lastIndexOf(",")-1));
+            pd.put("postCode",postCode.substring(0,postCode.lastIndexOf(",")));
         }
 
         //插入员工表
@@ -242,19 +242,19 @@ public class UserServiceImpl implements UserService {
 
 
         if(StringUtils.isNotBlank(departmentName)){
-            pd.put("departmentName",departmentName.substring(0,departmentName.lastIndexOf(",")-1));
+            pd.put("departmentName",departmentName.substring(0,departmentName.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(departmentCode)){
-            pd.put("departmentCode",departmentCode.substring(0,departmentCode.lastIndexOf(",")-1));
+            pd.put("departmentCode",departmentCode.substring(0,departmentCode.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(postName)){
-            pd.put("postName",postName.substring(0,postName.lastIndexOf(",")-1));
+            pd.put("postName",postName.substring(0,postName.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(postCode)){
-            pd.put("postCode",postCode.substring(0,postCode.lastIndexOf(",")-1));
+            pd.put("postCode",postCode.substring(0,postCode.lastIndexOf(",")));
         }
 
         //修改员工表
