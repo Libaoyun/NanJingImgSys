@@ -700,6 +700,7 @@ public class FlowServiceImpl implements FlowService {
 //            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
 //            pd.put("nextApproveUserId",currentUser.getString("userCode"));
 //            pd.put("nextApproveUserName",currentUser.getString("userName"));
+            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
             pd.put("nextApproveUserId",null);
             pd.put("nextApproveUserName",null);
             pd.put("processInstId",null);

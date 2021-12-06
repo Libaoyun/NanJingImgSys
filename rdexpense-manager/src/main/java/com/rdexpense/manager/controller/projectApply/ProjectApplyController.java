@@ -220,7 +220,7 @@ public class ProjectApplyController extends BaseController {
         // 编辑时，状态只能为已保存
         PageData recordData = projectApplyService.getApplyDetail(pd);
         String requestStatus = recordData.getString("processStatus");
-        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0])) {
+        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0]) && !requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[3])) {
             throw new MyException(ConstantMsgUtil.ERR_SUBMIT_FAIL.desc());
         }
 
