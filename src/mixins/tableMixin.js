@@ -6,7 +6,7 @@ export default class tableMixin extends Vue {
     // 动态：作为参数传入后端
     listQuery = {
         page: 1,
-        limit: 10
+        limit: 20
     }
     // 静态：表格页面展示配置
     tableConfig = {
@@ -18,14 +18,11 @@ export default class tableMixin extends Vue {
 
     }
     tableHeight = 0
-    previewHeight = 0
     mounted() {
         this.$nextTick(() => {
-            this.tableHeight = document.body.clientHeight - 360;
-            this.previewHeight = document.body.clientHeight - 380;
+            this.tableHeight = window.innerHeight - 260;
         })
     }
-
     resetPageNum(){
         this.listQuery.page = 1;
     }

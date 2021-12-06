@@ -630,7 +630,6 @@
 <script>
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
-import { checkForm } from '@/utils/index'
 import CardGlobal from '../../../../components/cardGlobal.vue';
 
 @Component({
@@ -793,6 +792,11 @@ export default class extends tableMixin {
             if(this.$route.params.businessId){
                this.initData(this.$route.params.businessId)
            }
+           if(this.$route.params.routerName){
+               this.routerName = this.$route.params.routerName
+           }else{
+               this.routerName = 'setProjectApplyList'
+           }
         }
     }
     // 初始化编辑数据
@@ -851,7 +855,7 @@ export default class extends tableMixin {
         // 返回清空当前页面数据
         // this.initData()
         this.$store.commit('DELETE_TAB', this.$route.path);
-        this.$router.push({ name: 'setProjectApplyList',params:{refresh:isRefresh}})
+        this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
     }
     // 返回按钮
     backBtn(){

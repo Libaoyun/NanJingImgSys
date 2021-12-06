@@ -626,7 +626,6 @@
 <script>
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
-import { checkForm } from '@/utils/index'
 import CardGlobal from '../../../../components/cardGlobal.vue';
 
 @Component({

@@ -976,7 +976,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin,rule) {
     }
     // 预览合同
     previewBtn(loadIndex) {
-
+        let params = this.formatSendData(this.baseInfo);
+        this.EXPORT_FILE([],'print',{url:'/rdexpense/projectApply/exportPdf',params},true);
     }
     // 返回按钮
     backBtn(){
