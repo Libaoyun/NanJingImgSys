@@ -419,7 +419,7 @@ public class FlowServiceImpl implements FlowService {
         List<PageData> nextApproveNodeList = new ArrayList<>();
         PageData nextApproveNode = null;
                 getNextApproveNode(lineList, nodeList, currentApproveNodeId,nextApproveNodeList);
-        if(!CollectionUtils.isEmpty(nextApproveNodeList)){
+        if(CollectionUtils.isEmpty(nextApproveNodeList)){
             throw new MyException("下一个审批节点不存在，或者未启用");
         }else {
             nextApproveNode = nextApproveNodeList.get(0);
@@ -472,6 +472,7 @@ public class FlowServiceImpl implements FlowService {
         PageData currentApproveNode = new PageData();
         currentApproveNode.put("id",currentApproveNodeId);
         currentApproveNode.put("name",waitData.getString("nextApproveNodeName"));
+
 
 
         insertApproveSchedule(pd,currentApproveNode,nextApproveNode,nextUser,
@@ -534,6 +535,34 @@ public class FlowServiceImpl implements FlowService {
             }else {//表示该节点还有其他人需要审批，则只需要该自己的状态即可
                 //修改待办人员表中自己的状态
                 baseDao.update("FlowMapper.updateApproveUserStatus",waitData);
+            }
+
+        }
+
+        //查询上个同一个单据流程履历表的最近一次的结束时间
+        String approveStartTime = format.format(new Date());
+        PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",pd);
+        if(scheduleData != null){
+            approveStartTime = scheduleData.getString("approveEndTime");
+            approveStartTime.substring(0,approveStartTime.lastIndexOf("."));
+        }
+
+        PageData approveData = new PageData();
+        approveData.put("approveName",pd.getString("createUser"));
+        approveData.put("approveStartTime",approveStartTime);
+        approveData.put("approveEndTime",format.format(new Date()));
+        for(PageData data : nodeList){
+            String id = data.getString("id");
+            if(id.equals(currentApproveNodeId)){
+                List<PageData> approveList = JSONObject.parseArray(data.getString("approveList"),PageData.class);
+                if(!CollectionUtils.isEmpty(approveList)){
+                    approveList.add(approveData);
+                    data.put("approveList",approveList);
+                }else {
+                    List<PageData> list = new ArrayList<>();
+                    list.add(approveData);
+                    data.put("approveList",list);
+                }
             }
 
         }
@@ -681,8 +710,13 @@ public class FlowServiceImpl implements FlowService {
             PageData currentUser = transforNextUser(approvalUserList);
 
             for (PageData nodeData : nodeList) {
-                //把上一个节点改成待审批
+                //把当前节点改成未审批
                 if (nodeData.getString("id").equals(currentApproveNode.getString("id"))) {
+                    nodeData.put("handleStatus",3);
+                }
+
+                //把上一个节点改成待审批
+                if (nodeData.getString("id").equals(previousApproveNode.getString("id"))) {
                     nodeData.put("handleStatus",2);
                 }
 
@@ -690,6 +724,39 @@ public class FlowServiceImpl implements FlowService {
 
             activityData.put("status", 2);
             activityData.put("endTime", null);
+
+
+
+            //查询上个同一个单据流程履历表的最近一次的结束时间
+            String approveStartTime = format.format(new Date());
+            PageData scheduleData = (PageData) baseDao.findForObject("FlowMapper.queryScheduleData",pd);
+            if(scheduleData != null){
+                approveStartTime = scheduleData.getString("approveEndTime");
+                approveStartTime.substring(0,approveStartTime.lastIndexOf("."));
+            }
+
+            PageData approveData = new PageData();
+            approveData.put("approveName",pd.getString("createUser"));
+            approveData.put("approveStartTime",approveStartTime);
+            approveData.put("approveEndTime",format.format(new Date()));
+            for(PageData data : nodeList){
+                String id = data.getString("id");
+                if(id.equals(currentApproveNodeId)){
+                    List<PageData> approveList = JSONObject.parseArray(data.getString("approveList"),PageData.class);
+                    if(!CollectionUtils.isEmpty(approveList)){
+                        approveList.add(approveData);
+                        data.put("approveList",approveList);
+                    }else {
+                        List<PageData> list = new ArrayList<>();
+                        list.add(approveData);
+                        data.put("approveList",list);
+                    }
+                }
+
+            }
+
+
+
 
             //4、修改活动表中的流程状态
             jSONObject.put("nodeList",JSONArray.parseArray(JSON.toJSONString(nodeList)));

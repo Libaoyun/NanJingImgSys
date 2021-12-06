@@ -19,6 +19,10 @@ import java.util.Date;
 @ApiModel(value = "立项申请查询列表")
 public class ProjectApplyListDto extends BaseEntity implements Serializable {
 
+
+    @ApiModelProperty(value = "审批流程ID")
+    private String processInstId;
+
     @ApiModelProperty(value = "单据号")
     private String serialNumber;
 

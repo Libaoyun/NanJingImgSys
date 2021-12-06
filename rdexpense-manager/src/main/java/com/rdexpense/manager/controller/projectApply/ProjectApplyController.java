@@ -631,8 +631,8 @@ public class ProjectApplyController extends BaseController {
 
     private void checkParam(PageData pd,int flag) {
 
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserId"), "编制人ID", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserName"), "编制人", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserId"), "编制人ID", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserName"), "编制人", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("createdDate"), "编制日期", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectName"), "项目名称", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("unitName"), "单位名称", 256);

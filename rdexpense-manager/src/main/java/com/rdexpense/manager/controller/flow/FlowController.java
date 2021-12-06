@@ -208,12 +208,13 @@ public class FlowController extends BaseController {
     @PostMapping("/getSerialFlow")
     @ApiOperation(value = "查看每个单据的流程")
     @ApiImplicitParam(name = "serialNumber", value = "单据号", required = true, dataType = "String")
-    public ResponseEntity<FlowSerialDataDTO> getSerialFlow() {
+    public ResponseEntity getSerialFlow() {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("serialNumber"), "单据号",128);
         try {
             PageData pageData = flowService.getSerialFlow(pd);
-            return PropertyUtil.pushData(pageData, FlowSerialDataDTO.class, ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
+            return ResponseEntity.success(pageData);
+  //          return PropertyUtil.pushData(pageData, FlowSerialDataDTO.class, ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (MyException e) {
             logger.error("查看流程配置失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_QUERY_FAIL.val(), ERR_QUERY_FAIL.desc());
