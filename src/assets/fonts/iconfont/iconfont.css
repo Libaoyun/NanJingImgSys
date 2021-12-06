@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2933484 */
-  src: url('iconfont.woff2?t=1638175001206') format('woff2'),
-       url('iconfont.woff?t=1638175001206') format('woff'),
-       url('iconfont.ttf?t=1638175001206') format('truetype');
+  src: url('iconfont.woff2?t=1638755354398') format('woff2'),
+       url('iconfont.woff?t=1638755354398') format('woff'),
+       url('iconfont.ttf?t=1638755354398') format('truetype');
 }
 
 .iconfont {
@@ -35,10 +35,6 @@
 
 .icon-feichux:before {
   content: "\e65e";
-}
-
-.icon-zhengquewancheng:before {
-  content: "\e8e5";
 }
 
 .icon-map-connect:before {
