@@ -218,6 +218,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         //判断是否是提交 1:保存 2:提交
         String businessId = pd.getString("businessId");
+        pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
         List<String> removeList = new ArrayList<>();
         removeList.add(businessId);
 
@@ -226,6 +227,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             flowService.startFlow(pd);
         }
 
+
         //1、编辑主表
         dao.update("ProjectApplyMapper.updateMain", pd);
 
@@ -233,6 +235,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         dao.update("ProjectApplyMapper.updateSurvey", pd);
 
         //3、插入进度计划
+        dao.batchDelete("ProjectApplyMapper.deleteProgressPlan", removeList);
         String progressPlan = pd.getString("progressPlan");
         List<PageData> progressPlanList = JSONObject.parseArray(progressPlan, PageData.class);
         if (!CollectionUtils.isEmpty(progressPlanList)) {
@@ -240,55 +243,60 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchDelete("ProjectApplyMapper.deleteProgressPlan", removeList);
+
             dao.batchInsert("ProjectApplyMapper.batchInsertProgressPlan", progressPlanList);
         }
 
         //4、插入参与单位
         String attendUnit = pd.getString("attendUnit");
+        dao.batchDelete("ProjectApplyMapper.deleteAttendUnit", removeList);
         List<PageData> attendUnitList = JSONObject.parseArray(attendUnit, PageData.class);
         if (!CollectionUtils.isEmpty(attendUnitList)) {
             for (PageData detailData : attendUnitList) {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchDelete("ProjectApplyMapper.deleteAttendUnit", removeList);
+
             dao.batchInsert("ProjectApplyMapper.batchInsertAttendUnit", attendUnitList);
         }
 
         //5、插入研究人员
         String researchUser = pd.getString("researchUser");
+        dao.batchDelete("ProjectApplyMapper.deleteResearchUser", removeList);
         List<PageData> researchUserList = JSONObject.parseArray(researchUser, PageData.class);
         if (!CollectionUtils.isEmpty(researchUserList)) {
             for (PageData detailData : researchUserList) {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchDelete("ProjectApplyMapper.deleteResearchUser", removeList);
+
             dao.batchInsert("ProjectApplyMapper.batchInsertResearchUser", researchUserList);
         }
 
         //6、插入经费预算
         String budgetListStr = pd.getString("budgetList");
+        dao.batchDelete("ProjectApplyMapper.deleteBudget", removeList);
         List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
         if (!CollectionUtils.isEmpty(budgetList)) {
             for (PageData detailData : budgetList) {
                 detailData.put("businessId", businessId);
 
             }
-            dao.batchDelete("ProjectApplyMapper.deleteBudget", removeList);
+
             dao.batchInsert("ProjectApplyMapper.batchInsertBudget", budgetList);
 
         }
 
         //7、插入经费预算-每月预算
         String monthListStr = pd.getString("monthList");
+        dao.batchDelete("ProjectApplyMapper.deleteBudgetMonthDetail", removeList);
+        dao.batchDelete("ProjectApplyMapper.deleteBudgetMonth", removeList);
         List<PageData> monthList = JSONObject.parseArray(monthListStr, PageData.class);
         if (!CollectionUtils.isEmpty(monthList)) {
 
             //处理按月填写的预算，进行列转行的封装
             List<PageData> detailList = getMonthDetailList(monthList,businessId);
-            dao.batchDelete("ProjectApplyMapper.deleteBudgetMonthDetail", removeList);
+
             if(!CollectionUtils.isEmpty(detailList)){
                 dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonthDetail", detailList);
             }
@@ -297,8 +305,9 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchDelete("ProjectApplyMapper.deleteBudgetMonth", removeList);
-            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+
+   //         dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth1", monthList);
 
 
         }
@@ -306,13 +315,14 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         //11、插入拨款计划
         String appropriationPlan = pd.getString("appropriationPlan");
+        dao.batchDelete("ProjectApplyMapper.deleteAppropriationPlan", removeList);
         List<PageData> appropriationPlanList = JSONObject.parseArray(appropriationPlan, PageData.class);
         if (!CollectionUtils.isEmpty(appropriationPlanList)) {
             for (PageData detailData : appropriationPlanList) {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchDelete("ProjectApplyMapper.deleteAppropriationPlan", removeList);
+
             dao.batchInsert("ProjectApplyMapper.batchAppropriationPlan", appropriationPlanList);
         }
 
@@ -535,21 +545,22 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         //审批类型 1:同意 2:回退上一个节点 3：回退到发起人
         String approveType = pd.getString("approveType");
+        PageData data = new PageData();
         if (approveType.equals("1")) {
-            flowService.approveFlow(pd);
+            data = flowService.approveFlow(pd);
 
         } else if (approveType.equals("2")) {
-            flowService.backPreviousNode(pd);
+            data = flowService.backPreviousNode(pd);
 
         } else if (approveType.equals("3")) {
-            flowService.backOriginalNode(pd);
+            data = flowService.backOriginalNode(pd);
 
 
         }
 
 
         //编辑主表的审批状态、审批人等信息
-        dao.update("ProjectApplyMapper.updateApproveStatus", pd);
+        dao.update("ProjectApplyMapper.updateApproveStatus", data);
 
     }
 

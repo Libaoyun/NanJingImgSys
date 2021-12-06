@@ -692,14 +692,17 @@ public class FlowServiceImpl implements FlowService {
             }
 
 
-            insertApproveDone(pd,currentApproveNode,startData,currentUser,approvalUserList);
+ //           insertApproveDone(pd,currentApproveNode,startData,currentUser,approvalUserList);
 
             //8、删除审批流程实例表
             baseDao.delete("FlowMapper.deleteActivityData",waitData);
 
-            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
-            pd.put("nextApproveUserId",currentUser.getString("userCode"));
-            pd.put("nextApproveUserName",currentUser.getString("userName"));
+//            pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
+//            pd.put("nextApproveUserId",currentUser.getString("userCode"));
+//            pd.put("nextApproveUserName",currentUser.getString("userName"));
+            pd.put("nextApproveUserId",null);
+            pd.put("nextApproveUserName",null);
+            pd.put("processInstId",null);
 
         }else {
             //找到当前节点
@@ -877,16 +880,23 @@ public class FlowServiceImpl implements FlowService {
         }
 
 
-        insertApproveDone(pd,currentApproveNode,startData,currentUser,approvalUserList);
+ //       insertApproveDone(pd,currentApproveNode,startData,currentUser,approvalUserList);
 
         //8、删除审批流程实例表
         baseDao.delete("FlowMapper.deleteActivityData",waitData);
 
+//        pd.put("approveUserId",pd.getString("createUserId"));
+//        pd.put("approveUserName",pd.getString("createUser"));
+//        pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
+//        pd.put("nextApproveUserId",currentUser.getString("userCode"));
+//        pd.put("nextApproveUserName",currentUser.getString("userName"));
         pd.put("approveUserId",pd.getString("createUserId"));
         pd.put("approveUserName",pd.getString("createUser"));
         pd.put("processStatus",ConstantValUtil.APPROVAL_STATUS[3]);
-        pd.put("nextApproveUserId",currentUser.getString("userCode"));
-        pd.put("nextApproveUserName",currentUser.getString("userName"));
+        pd.put("nextApproveUserId",null);
+        pd.put("nextApproveUserName",null);
+        pd.put("processInstId",null);
+
 
         return pd;
 
@@ -997,8 +1007,8 @@ public class FlowServiceImpl implements FlowService {
 
         nextApprove.put("createUserId",pd.getString("createUserId"));
         nextApprove.put("createUser",pd.getString("createUser"));
-        nextApprove.put("departmentCode",pd.getString("departmentCode"));
-        nextApprove.put("departmentName",pd.getString("departmentName"));
+        nextApprove.put("departmentCode",pd.getString("postId"));
+        nextApprove.put("departmentName",pd.getString("post"));
 
 
         nextApprove.put("nextApproveUserId",nextUser.getString("userCode"));

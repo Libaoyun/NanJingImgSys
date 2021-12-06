@@ -349,7 +349,7 @@
 
 
     <delete id="deleteAppropriationPlan" parameterType="java.util.List">
-        delete from project_apply_progress_plan
+        delete from project_apply_appropriation_plan
         where 1=1 and business_id in
         <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
             #{item}
@@ -554,10 +554,10 @@
         SELECT
             id,
             business_id as businessId,
-            source_account as sourceAccount,
-            source_budget as sourceBudget,
-            expense_account as expenseAccount,
-            expense_budget as expenseBudget
+            source_account as sourceaccount,
+            source_budget as sourcebudget,
+            expense_account as expenseaccount,
+            expense_budget as expensebudget
         FROM  project_apply_budget_month
         where business_id = #{businessId}
         order by id
@@ -569,7 +569,7 @@
             id,
             business_id as businessId,
             january,february,march,april,may,june,
-            july,august,september,october,november,december,years,expense_account as expenseAccount
+            july,august,september,october,november,december,years,expense_account as expenseaccount
         FROM  project_apply_budget_month_detail
         where business_id = #{businessId}
         order by id

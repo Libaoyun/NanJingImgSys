@@ -13,6 +13,7 @@ import com.github.pagehelper.PageHelper;
 import com.rdexpense.manager.dto.base.UserInfoDTO;
 import com.rdexpense.manager.util.UseTokenInfo;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.ognl.Ognl;
@@ -413,9 +414,14 @@ public class BaseController extends BaseUtil {
         pageData.put("createUserId", userInfoVo.getUserCode());
         pageData.put("createUser", userInfoVo.getUserName());
         pageData.put("companyId", userInfoVo.getCompanyId());
+        pageData.put("department", userInfoVo.getDepartment());
+        pageData.put("departmentId", userInfoVo.getDepartmentId());
+        pageData.put("post", userInfoVo.getPost());
+        pageData.put("postId", userInfoVo.getPostId());
         pageData.put("token", userToken);
         return pageData;
     }
+
 
     /**
      * 本方法支持接收的格式
