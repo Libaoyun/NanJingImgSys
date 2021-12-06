@@ -11,4 +11,7 @@ export const menuCodeList = {
     operationLogList:10007,
     flowManageList:10009,
     setProjectApplyList:30000,
+    checkFinalList:4001,
+    expenseList: 2001,
+    changeList: 2006,
 }

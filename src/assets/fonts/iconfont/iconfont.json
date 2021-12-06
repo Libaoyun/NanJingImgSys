@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1131",
+      "name": "资料库",
+      "font_class": "ziliaoku",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "8019296",
+      "name": "左双箭头",
+      "font_class": "feichu",
+      "unicode": "e662",
+      "unicode_decimal": 58978
+    },
+    {
+      "icon_id": "7002345",
+      "name": "组织架构",
+      "font_class": "zuzhijiagou",
+      "unicode": "e6c6",
+      "unicode_decimal": 59078
+    },
+    {
       "icon_id": "4948965",
       "name": "提交成功",
       "font_class": "tijiaochenggong",

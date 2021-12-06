@@ -3,6 +3,9 @@
   src: url('iconfont.woff2?t=1638175001206') format('woff2'),
        url('iconfont.woff?t=1638175001206') format('woff'),
        url('iconfont.ttf?t=1638175001206') format('truetype');
+  src: url('iconfont.woff2?t=1638498779869') format('woff2'),
+       url('iconfont.woff?t=1638498779869') format('woff'),
+       url('iconfont.ttf?t=1638498779869') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +14,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-ziliaoku:before {
+  content: "\e600";
+}
+
+.icon-feichu:before {
+  content: "\e662";
+}
+
+.icon-zuzhijiagou:before {
+  content: "\e6c6";
 }
 
 .icon-tijiaochenggong:before {

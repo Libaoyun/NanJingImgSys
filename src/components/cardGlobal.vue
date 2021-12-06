@@ -89,12 +89,17 @@ export default class extends Vue {
                 height: 30px;
                 line-height: 30px;
             }
+            .el-input--small .el-input__inner,.el-date-editor.el-input,.search-span{
+                width: 100%;
+                height: 30px;
+                line-height: 30px;
+            }
             .el-input__inner, 
             .el-input__icon {
                 height: 30px;
                 line-height: 30px;
             }
-            .el-form-item--mini.el-form-item{
+            .el-form-item--small.el-form-item,.el-form-item--mini.el-form-item{
                 margin-bottom: 15px;
                 // height: 30px;
                 &.secondLine-label{
