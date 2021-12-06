@@ -59,10 +59,10 @@
                     <span>{{baseInfo.identify}}</span>
                 </el-form-item>
                 <el-form-item label="研究内容题要:" prop="researchContents" class="large">
-                    <span>{{baseInfo.researchContents}}</span>
+                    <span style="word-break:break-all">{{baseInfo.researchContents}}</span>
                 </el-form-item>
                 <el-form-item label="申报单位审查意见:" prop="reviewComments" class="large">
-                    <span>{{baseInfo.reviewComments}}</span>
+                    <span style="word-break:break-all">{{baseInfo.reviewComments}}</span>
                 </el-form-item>
                 <el-form-item label="申报单位盖章:" prop="val177" class="large inline">
                     <el-input readonly type="textarea" v-model="baseInfo.val177" minlength="200" rows="5" resize="none" placeholder="盖章处"></el-input>
@@ -73,25 +73,25 @@
         <card-global cardTitle="立项调研信息">
             <el-form ref="infoForm" :inline="true" :model="baseInfo" size="mini" label-position="right" label-width="80px">
                 <el-form-item label="一、国内外现状:" prop="currentSituation" class="large">
-                    <span>{{baseInfo.currentSituation}}</span>
+                    <span style="word-break:break-all">{{baseInfo.currentSituation}}</span>
                 </el-form-item>
                 <el-form-item label="二、研发目的和意义:" prop="purposeSignificance" class="large">
-                    <span>{{baseInfo.purposeSignificance}}</span>
+                    <span style="word-break:break-all">{{baseInfo.purposeSignificance}}</span>
                 </el-form-item>
                 <el-form-item label="三、主要研究内容及研究方法:" prop="contentMethod" class="large">
-                    <span>{{baseInfo.contentMethod}}</span>
+                    <span style="word-break:break-all">{{baseInfo.contentMethod}}</span>
                 </el-form-item>
                 <el-form-item label="四、要达到的目标、成果形式及主要技术指标:" prop="targetResults" class="large">
-                    <span>{{baseInfo.targetResults}}</span>
+                    <span style="word-break:break-all">{{baseInfo.targetResults}}</span>
                 </el-form-item>
                 <el-form-item label="五、现有研发条件和工作基础:" prop="basicConditions" class="large">
-                    <span>{{baseInfo.basicConditions}}</span>
+                    <span style="word-break:break-all">{{baseInfo.basicConditions}}</span>
                 </el-form-item>
                 <el-form-item label="六、研发项目创新点:" prop="innovationPoints" class="large">
-                    <span>{{baseInfo.innovationPoints}}</span>
+                    <span style="word-break:break-all">{{baseInfo.innovationPoints}}</span>
                 </el-form-item>
                 <el-form-item label="七、成果转化的可行性分析:" prop="feasibilityAnalysis" class="large">
-                    <span>{{baseInfo.feasibilityAnalysis}}</span>
+                    <span style="word-break:break-all">{{baseInfo.feasibilityAnalysis}}</span>
                 </el-form-item>
             </el-form>
         </card-global>

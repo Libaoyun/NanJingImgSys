@@ -946,12 +946,34 @@ export default class extends Mixins(tableMixin,dictionaryMixin,rule) {
                     params.operationType = 2; //1-保存,2-提交
                     this.loadingBtn = loadingBtnIndex;
                     this.$API.apiCreateSetProjectApply(params).then(res=>{
-                        this.loadingBtn = 0;
-                        this.$message({
-                            type: 'success',
-                            message: '提交成功!'
-                        });
-                        this.resetData(true)
+                        if(res.data) {
+                            this.$confirm(res.data, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                params.confirmSubmit = 1
+                                this.$API.apiCreateSetProjectApply(params).then(res=>{
+                                    this.loadingBtn = 0;
+                                    this.$message({
+                                        type: 'success',
+                                        message: '提交成功!'
+                                    });
+                                    this.resetData(true)
+                                }).catch(()=>{
+                                    this.loadingBtn = 0;
+                                })
+                            }).catch(()=>{
+                                this.loadingBtn = 0;
+                            })
+                        }else {
+                            this.loadingBtn = 0;
+                            this.$message({
+                                type: 'success',
+                                message: '提交成功!'
+                            });
+                            this.resetData(true)
+                        }
                     }).catch(() => {
                         this.loadingBtn = 0;
                     })

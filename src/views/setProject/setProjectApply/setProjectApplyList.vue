@@ -7,7 +7,7 @@
             <el-button size="small" icon="iconfont icon-bianji1" @click="editBtn" v-checkPermission="'edit'">编辑</el-button>
             <loading-btn size="small" icon="iconfont icon-icon-delete" @click="deleteBtn(1)" :loading="loadingBtn" v-checkPermission="'delete'">删除</loading-btn>
             <loading-btn size="small" icon="iconfont icon-tijiaochenggong" @click="submitBtn(2)" :loading="loadingBtn" v-checkPermission="'submit'">提交</loading-btn>
-            <loading-btn size="small" icon="iconfont icon-feichux" @click="abolishBtn(3)" :loading="loadingBtn" v-checkPermission="'submit'">废除</loading-btn>
+            <!-- <loading-btn size="small" icon="iconfont icon-feichux" @click="abolishBtn(3)" :loading="loadingBtn" v-checkPermission="'submit'">废除</loading-btn> -->
             <el-dropdown style="margin:0 10px">
                 <el-button size="small" icon="iconfont icon-daochu">
                     导出<i class="el-icon-arrow-down el-icon--right"></i>
@@ -249,7 +249,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
             businessIdList:this.idList,
             menuCode:this.MENU_CODE_LIST.setProjectApplyList
         }
-        this.EXPORT_FILE(this.selected,'word',{url:'/rdexpense/projectApply/exportPdf',data});
+        this.EXPORT_FILE(this.selected,'word',{url:'/rdexpense/projectApply/exportWord',data});
     }
     // 打印
     printBtn(){
@@ -279,12 +279,34 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                         menuCode:this.MENU_CODE_LIST.setProjectApplyList,
                     }
                     this.$API.apiSubmitSetProjectApply(params).then(res=>{
-                        this.loadingBtn = 0
-                        this.$message({
-                            type: 'success',
-                            message: '提交成功!'
-                        });
-                        this.getSetProjectApplyList();
+                        if(res.data) {
+                            this.$confirm(res.data, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                params.confirmSubmit = 1
+                                this.$API.apiSubmitSetProjectApply(params).then(res=>{
+                                    this.loadingBtn = 0
+                                    this.$message({
+                                        type: 'success',
+                                        message: '提交成功!'
+                                    });
+                                    this.getSetProjectApplyList();
+                                }).catch(()=>{
+                                    this.loadingBtn = 0
+                                })
+                            }).catch(()=>{
+                                this.loadingBtn = 0
+                            })
+                        }else {
+                            this.loadingBtn = 0
+                            this.$message({
+                                type: 'success',
+                                message: '提交成功!'
+                            });
+                            this.getSetProjectApplyList();
+                        }
                     }).catch(()=>{
                         this.loadingBtn = 0;
                     })
