@@ -184,7 +184,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                 detailData.put("businessId", businessId);
             }
 
-            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth", monthList);
+            dao.batchInsert("ProjectApplyMapper.batchInsertBudgetMonth1", monthList);
 
         }
 
@@ -357,21 +357,23 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             if(!CollectionUtils.isEmpty(yearSet)){
 
                 for(String year : yearSet){
+                    PageData data = new PageData();
                     for(int i=0;i<12;i++){
-                        PageData data = new PageData();
+
                         String key = "month"+year+""+(i+1);
                         String value = detailData.getString(key);
 
-                        data.put("expenseAccount", detailData.getString("expenseAccount"));
-                        data.put("businessId", businessId);
-                        data.put("years", year);
                         if(StringUtils.isBlank(value)){
                             value = "0";
                         }
                         data.put(arr[i], value);
 
-                        detailList.add(data);
                     }
+
+                    data.put("expenseaccount", detailData.getString("expenseaccount"));
+                    data.put("businessId", businessId);
+                    data.put("years", year);
+                    detailList.add(data);
                 }
 
             }
@@ -797,10 +799,10 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
     private List<PageData> packageMonthList(List<PageData> monthList,List<PageData> monthDetailList){
         if(!CollectionUtils.isEmpty(monthDetailList)){
             for(PageData data : monthList){
-                String expenseAccount = data.getString("expenseAccount");
+                String expenseaccount = data.getString("expenseaccount");
                 for (PageData detailData : monthDetailList) {
                     String year = detailData.getString("years");
-                    if (detailData.getString("expenseAccount").equals(expenseAccount)) {
+                    if (detailData.getString("expenseaccount").equals(expenseaccount)) {
                         for(int i=0;i<12;i++){
                             String key = "month"+year+""+(i+1);
                             data.put(key,detailData.getString(arr[0]));
@@ -1428,7 +1430,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
                     PageData data = new PageData();
                     data.put("businessId", pd.getString("businessId"));
                     data.put("years", yearValue);
-                    data.put("expenseAccount",monthList.get(y-4).getString("expenseaccount"));
+                    data.put("expenseaccount",monthList.get(y-4).getString("expenseaccount"));
 
                     XSSFRow row = sheet.getRow(y);
                     XSSFCell cell1 = row.getCell(cellNum);
@@ -1520,33 +1522,33 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         XSSFRow row = sheet.getRow(rowNum);
         XSSFCell cell = null;
-        String sourceAccount = "";
+        String sourceaccount = "";
         if(row1 >= 0){
             cell = row.getCell(row1);
-            sourceAccount = ReadExcelUtil.readCellStr(cell, 3, "来源科目", false, 256);
+            sourceaccount = ReadExcelUtil.readCellStr(cell, 3, "来源科目", false, 256);
         }
 
         if(row2 >= 0){
             cell = row.getCell(row2);
-            String sourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, sourceAccount, false, 20, 2);
+            String sourceBudget = ReadExcelUtil.readCellDecimal(cell, 3, sourceaccount, false, 20, 2);
             data.put("sourcebudget", sourceBudget);
         }
 
-        String expenseAccount = "";
+        String expenseaccount = "";
         if(row3 >= 0){
             cell = row.getCell(row3);
-            expenseAccount = ReadExcelUtil.readCellStr(cell, 3, "支出科目", false, 256);
+            expenseaccount = ReadExcelUtil.readCellStr(cell, 3, "支出科目", false, 256);
         }
 
         if(row4 >= 0){
             cell = row.getCell(row4);
-            String expenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, expenseAccount, false, 20, 2);
+            String expenseBudget = ReadExcelUtil.readCellDecimal(cell, 3, expenseaccount, false, 20, 2);
             data.put("expensebudget", expenseBudget);
 
         }
 
-        data.put("sourceaccount",sourceAccount);
-        data.put("expenseaccount",expenseAccount);
+        data.put("sourceaccount",sourceaccount);
+        data.put("expenseaccount",expenseaccount);
 
         list.add(data);
 

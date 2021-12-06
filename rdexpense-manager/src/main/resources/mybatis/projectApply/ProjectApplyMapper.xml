@@ -240,7 +240,7 @@
             (#{item.businessId},#{item.january, jdbcType=DECIMAL},#{item.february, jdbcType=DECIMAL},#{item.march, jdbcType=DECIMAL},
             #{item.april, jdbcType=DECIMAL},#{item.may, jdbcType=DECIMAL},#{item.june, jdbcType=DECIMAL},#{item.july, jdbcType=DECIMAL}
             ,#{item.august, jdbcType=DECIMAL},#{item.september, jdbcType=DECIMAL},#{item.october, jdbcType=DECIMAL},#{item.november, jdbcType=DECIMAL}
-            ,#{item.december, jdbcType=DECIMAL},#{item.years},#{item.expenseAccount}
+            ,#{item.december, jdbcType=DECIMAL},#{item.years},#{item.expenseaccount}
             )
         </foreach>
     </insert>

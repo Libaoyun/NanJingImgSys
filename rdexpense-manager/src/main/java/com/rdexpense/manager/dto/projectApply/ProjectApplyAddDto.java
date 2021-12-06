@@ -1,5 +1,6 @@
 package com.rdexpense.manager.dto.projectApply;
 
+import com.common.entity.PageData;
 import com.rdexpense.manager.dto.base.OrganizationDto;
 import com.rdexpense.manager.dto.file.CreateFileDto;
 import io.swagger.annotations.ApiModel;
@@ -141,7 +142,7 @@ public class ProjectApplyAddDto extends OrganizationDto implements Serializable 
     private List<BudgetAddDto> budgetList;
 
     @ApiModelProperty(value = "经费预算（每月预算）")
-    private List<BudgetMonthDto> monthList;
+    private List<PageData> monthList;
 
     @ApiModelProperty(value = "拨款计划")
     private List<AppropriationPlanDto> appropriationPlan;
