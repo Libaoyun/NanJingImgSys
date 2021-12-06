@@ -6,11 +6,11 @@ import store from '@/store'
  * @param {*} data     表格选中数据
  * @param {*} type   按钮类型
  * 审批状态：
- * DICT10070001: 已保存
- * DICT10070002: 已提交
- * DICT10070003: 审批中
- * DICT10070004: 审批不通过
- * DICT10070005: 已完成
+ * DICT10171001: 未提交
+ * DICT10171002: 审批中
+ * DICT10171003: 已废除
+ * DICT10171004: 被打回
+ * DICT10171005: 已通过
  */
 export function judgeBtn(data, type){
     switch(type){
@@ -42,11 +42,11 @@ function editBtn(data){
         })
         flag = false
     }else{
-        if(data[0].processStatus !== 'DICT10070001'){
+        if(data[0].processStatus !== 'DICT10171001'){
             flag = false
             Message({
                 type: 'info',
-                message: '只有已保存的数据才可以编辑！'
+                message: '只有未提交的数据才可以编辑！'
             })
         }
     }
@@ -64,12 +64,12 @@ function deleteBtn(data){
         flag = false
     }else{
         let statusFlag = data.some((item)=>{
-            return item.processStatus !== 'DICT10070001'
+            return item.processStatus !== 'DICT10171001'
         })
         if(statusFlag){
             Message({
                 type: 'info',
-                message: '只有已保存的数据才可以删除！'
+                message: '只有未提交的数据才可以删除！'
             })
             flag = false
         }
@@ -84,15 +84,15 @@ function submitBtn(data){
     if(data.length !== 1){
         Message({
             type: 'info',
-            message: '请选择一条已保存记录进行提交!'
+            message: '请选择一条未提交记录进行提交!'
         })
         flag = false
     }else{
-        if(data[0].processStatus !== 'DICT10070001'){
+        if(data[0].processStatus !== 'DICT10171001'){
             flag = false
             Message({
                 type: 'info',
-                message: '请选择一条已保存记录进行提交！'
+                message: '请选择一条未提交记录进行提交！'
             })
         }
     }
@@ -116,11 +116,11 @@ function backBtn(data){
                 message: '只有自己已提交的数据才可以撤销！'
             })
         }
-        if(data[0].processStatus !== 'DICT10070002'){
+        if(data[0].processStatus !== 'DICT10171002'){
             flag = false
             Message({
                 type: 'info',
-                message: '只有已提交的数据才可以撤销！'
+                message: '只有审批中的数据才可以撤销！'
             })
         }
     }

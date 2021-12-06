@@ -3,8 +3,14 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
+<<<<<<< HEAD
 import Storage from 'vue-ls'
 import moment from 'moment' //导入模块
+=======
+import 'element-ui/lib/theme-chalk/index.css'
+import Storage from 'vue-ls';
+import moment from 'moment'; //导入模块
+>>>>>>> d942d378c84dec860bf8c2030c2b5581dc226d25
 import '@/api/index'
 import '@/assets/scss/variables.scss'
 import '@/assets/fonts/iconfont/iconfont.css'

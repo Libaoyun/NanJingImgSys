@@ -97,6 +97,13 @@ export default class extends tableMixin {
     created() {
         this.getProjectList();
     }
+    activated() {
+        if(Object.keys(this.$route.params).length > 0){
+           if(this.$route.params.refresh){
+               this.refreshBtn()
+           }
+        }
+    }
     //复选框选中的id值
     get idList(){
         var list = [];

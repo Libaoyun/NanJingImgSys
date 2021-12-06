@@ -6,6 +6,76 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1131",
+      "name": "资料库",
+      "font_class": "ziliaoku",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "8019296",
+      "name": "左双箭头",
+      "font_class": "feichu",
+      "unicode": "e662",
+      "unicode_decimal": 58978
+    },
+    {
+      "icon_id": "7002345",
+      "name": "组织架构",
+      "font_class": "zuzhijiagou",
+      "unicode": "e6c6",
+      "unicode_decimal": 59078
+    },
+    {
+      "icon_id": "4948965",
+      "name": "提交成功",
+      "font_class": "tijiaochenggong",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "3530584",
+      "name": "项目立项",
+      "font_class": "xiangmulixiang",
+      "unicode": "e788",
+      "unicode_decimal": 59272
+    },
+    {
+      "icon_id": "10269097",
+      "name": "废除",
+      "font_class": "feichux",
+      "unicode": "e65e",
+      "unicode_decimal": 58974
+    },
+    {
+      "icon_id": "18170999",
+      "name": "地图连线,连线,连接",
+      "font_class": "map-connect",
+      "unicode": "ea02",
+      "unicode_decimal": 59906
+    },
+    {
+      "icon_id": "2439690",
+      "name": "人员",
+      "font_class": "fl-renyuan",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "980890",
+      "name": "结束",
+      "font_class": "weibiaoti517",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "18289155",
+      "name": "开始1",
+      "font_class": "kaishi1",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
       "icon_id": "8871307",
       "name": "系统",
       "font_class": "xitong",
