@@ -22,9 +22,9 @@
                             <el-button type="text" size="small" @click="approveBtn(props.row)">{{props.row.serialNumber}}</el-button>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="menuName" label="所属模块" :show-overflow-tooltip="true"></el-table-column>
-                    <el-table-column prop="userName" label="发起人" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-                    <el-table-column prop="createdAt" label="发起时间" width="150" align="center" :show-overflow-tooltip="true">
+                    <el-table-column prop="titleName" label="所属模块" width="200" :show-overflow-tooltip="true"></el-table-column>
+                    <el-table-column prop="createUser" label="发起人" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
+                    <el-table-column prop="createTime" label="发起时间" width="150" align="center" :show-overflow-tooltip="true">
                     </el-table-column>
                 </el-table>
                 <div class="pagination-wrapper">
@@ -60,9 +60,9 @@
                             <el-button type="text" size="small" @click="detailBtn(props.row)">{{props.row.serialNumber}}</el-button>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="menuName" label="任务分类" :show-overflow-tooltip="true"></el-table-column>
-                    <el-table-column prop="userName" label="发起人" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-                    <el-table-column prop="createdAt" label="记录时间" width="180" align="center" :show-overflow-tooltip="true">
+                    <el-table-column prop="titleName" label="任务分类" width="200" :show-overflow-tooltip="true"></el-table-column>
+                    <el-table-column prop="createUser" label="发起人" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
+                    <el-table-column prop="createTime" label="记录时间" width="180" align="center" :show-overflow-tooltip="true">
                     </el-table-column>
                 </el-table>
                 <div class="pagination-wrapper">
@@ -142,11 +142,21 @@ export default class extends tableMixin {
         this.listQuery.page = 1;
         this.getList();
     }
-    // 详情
-    detailBtn(data) {
-        this.$router.push({ name: 'userDetail',params:{
-            userInfo:data
-        }})
+    approveBtn(data){
+        this.$router.push({name: data.approveName, params: {
+                routerName: 'myTodo',
+                businessId: data.businessId,
+                waitId: data.waitId
+            }
+        })
+    }
+    detailBtn(data){
+        this.$router.push({name: data.detailName, params: {
+                routerName: 'myTodo',
+                businessId: data.businessId,
+                waitId: data.waitId
+            }
+        })
     }
     // 表格分页：每页显示条数变化触发
     handleSizeChange(value) {
@@ -158,20 +168,6 @@ export default class extends tableMixin {
     handleCurrentChange(value) {
         this.listQuery.page = value;
         this.getList();
-    }
-    approveBtn(data){
-        this.$router.push({name: data.router, params: {
-                routerName: 'myTodo',
-                businessId: data.requestCode
-            }
-        })
-    }
-    detailBtn(data){
-        this.$router.push({name: data.detailRouter, params: {
-                routerName: 'myTodo',
-                businessId: data.requestCode
-            }
-        })
     }
 }
 </script>

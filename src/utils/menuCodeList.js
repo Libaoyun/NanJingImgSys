@@ -9,9 +9,16 @@ export const menuCodeList = {
     onlineManualsList:10006,
     ruleConfigurationList:10008,
     operationLogList:10007,
+<<<<<<< HEAD
+    disclosureList: 20002,
+    reportList: 20003,
+    contractList: 20001,
+}
+=======
     flowManageList:10009,
     setProjectApplyList:30000,
     checkFinalList:4001,
     expenseList: 2001,
     changeList: 2006,
 }
+>>>>>>> d942d378c84dec860bf8c2030c2b5581dc226d25

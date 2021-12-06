@@ -884,6 +884,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin,rule) {
             // 研发项目立项申请-经费预算（每月预算）
             this.baseInfo.detailForm.monthList = data || []
             if(data[0]) {
+                this.yms = []
                 this.initTableHeader(data[0])
             }
         }else if(index === 7) {
@@ -956,12 +957,34 @@ export default class extends Mixins(tableMixin,dictionaryMixin,rule) {
                     params.operationType = 2; //1-保存,2-提交
                     this.loadingBtn = loadingBtnIndex;
                     this.$API.apiUpdateSetProjectApply(params).then(res=>{
-                        this.loadingBtn = 0;
-                        this.$message({
-                            type: 'success',
-                            message: '提交成功!'
-                        });
-                        this.resetData(true)
+                        if(res.data) {
+                            this.$confirm(res.data, '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                params.confirmSubmit = 1
+                                this.$API.apiUpdateSetProjectApply(params).then(res=>{
+                                    this.loadingBtn = 0;
+                                    this.$message({
+                                        type: 'success',
+                                        message: '提交成功!'
+                                    });
+                                    this.resetData(true)
+                                }).catch(()=>{
+                                    this.loadingBtn = 0;
+                                })
+                            }).catch(()=>{
+                                this.loadingBtn = 0;
+                            })
+                        }else {
+                            this.loadingBtn = 0;
+                            this.$message({
+                                type: 'success',
+                                message: '提交成功!'
+                            });
+                            this.resetData(true)
+                        }
                     }).catch(() => {
                         this.loadingBtn = 0;
                     })

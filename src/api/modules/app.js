@@ -3,14 +3,13 @@ import axios from 'axios'
 import Vue from 'vue'
 import { ACCESS_TOKEN } from '@/utils/storage'
 
-
 // 用户登录
 export function apiUserLogin(data) {
-    return fetch({
-      url: '/rdexpense/login/externalUser',
-      method: 'post',
-      data
-    })
+  return fetch({
+    url: '/rdexpense/login/externalUser',
+    method: 'post',
+    data,
+  })
 }
 
 // 用户退出
@@ -18,7 +17,7 @@ export function apiLogout(data) {
   return fetch({
     url: '/rdexpense/login/logout',
     method: 'post',
-    data
+    data,
   })
 }
 
@@ -27,39 +26,41 @@ export function apiGetUserInfo(data) {
   return fetch({
     url: '/rdexpense/login/getUserInfo',
     method: 'post',
-    data
+    data,
   })
 }
 
 // 获取路由菜单
-export function apiGenerateRoute (params) {
+export function apiGenerateRoute(params) {
   return fetch({
-      url: '/rdexpense/menu/queryRoutingMenuTree',
-      method: 'get',
-      params
+    url: '/rdexpense/menu/queryRoutingMenuTree',
+    method: 'get',
+    params,
   })
 }
 
 // 导出excel，pdf,合同
-export function apiExportFile ({ url, data}) {
+export function apiExportFile({ url, data }) {
   return axios({
-      headers:{
-          token:Vue.ls.get(ACCESS_TOKEN)
-      },
-      responseType:'blob',
-      url: url,
-      method: 'post',
-      data
+    headers: {
+      token: Vue.ls.get(ACCESS_TOKEN),
+    },
+    responseType: 'blob',
+    url: url,
+    method: 'post',
+    data,
   })
 }
 // 获取数据字典数据
-export function apiGetDictionariesList (data) {
+export function apiGetDictionariesList(data) {
   return fetch({
-      url: '/rdexpense/dataDictionary/queryPullDownDictionariesList',
-      method: 'post',
-      data
+    url: '/rdexpense/dataDictionary/queryPullDownDictionariesList',
+    method: 'post',
+    data,
   })
 }
+<<<<<<< HEAD
+=======
 
 // 获取代办列表
 export function apiGetTodoList (data) {
@@ -78,3 +79,4 @@ export function apiGetDoneList (data) {
       data
   })
 }
+>>>>>>> d942d378c84dec860bf8c2030c2b5581dc226d25
