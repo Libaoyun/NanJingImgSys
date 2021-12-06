@@ -132,6 +132,14 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID", 256);
+
+        // 编辑时，状态只能为已保存
+        PageData recordData = (PageData) dao.findForObject("ProjectApplyMapper.queryApplyDetail", pd);
+        String requestStatus = recordData.getString("processStatus");
+        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0])) {
+            throw new MyException(ConstantMsgUtil.ERR_SUBMIT_FAIL.desc());
+        }
+
         CheckParameter.checkDefaultParams(pd);
         String operationType = pd.getString("operationType");
         if(operationType.equals("2")){
@@ -624,7 +632,7 @@ public class ProjectApplyController extends BaseController {
     private void checkParam(PageData pd,int flag) {
 
         CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserId"), "编制人ID", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUser"), "编制人", 256);
+        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserName"), "编制人", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("createdDate"), "编制日期", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectName"), "项目名称", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("unitName"), "单位名称", 256);
@@ -641,9 +649,9 @@ public class ProjectApplyController extends BaseController {
         CheckParameter.stringLengthAndEmpty(pd.getString("startYear"), "起始年度", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("endYear"), "结束年度", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("zipCode"), "邮编", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("projectTypeCode"), "项目类型编码", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("projectTypeCode"), "项目类型编码", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectType"), "项目类型", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("professionalCategoryCode"), "专业类别编码", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("professionalCategoryCode"), "专业类别编码", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("professionalCategory"), "专业类别", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("identify"), "是否鉴定", 256);
         CheckParameter.stringLengthAndEmpty1(pd.getString("researchContents"), "研究内容题要", 200);
@@ -751,7 +759,20 @@ public class ProjectApplyController extends BaseController {
             budgetList = JSONObject.parseArray(pd.getString("budgetList"), PageData.class);
         }
 
-        checkBudget(budgetList);
+        if(!CollectionUtils.isEmpty(budgetList)){
+            for(PageData budget : budgetList){
+                if(StringUtils.isNotBlank(budget.getString("sourceAccount"))){
+                    CheckParameter.checkDecimal(budget.getString("sourceBudget"), "来源预算数",20,2);
+                }
+
+                CheckParameter.stringLengthAndEmpty(budget.getString("expenseAccount"), "支出科目", 256);
+                CheckParameter.checkDecimal(budget.getString("expenseBudget"), "支出预算数",20,2);
+
+            }
+        }else{
+            throw new MyException("经费预算不能为空");
+
+        }
 
 
         //校验经费预算（每月填报）
@@ -762,7 +783,20 @@ public class ProjectApplyController extends BaseController {
             monthList = JSONObject.parseArray(pd.getString("monthList"), PageData.class);
         }
 
-        checkBudget(monthList);
+        if(!CollectionUtils.isEmpty(monthList)){
+            for(PageData budget : monthList){
+                if(StringUtils.isNotBlank(budget.getString("sourceaccount"))){
+                    CheckParameter.checkDecimal(budget.getString("sourcebudget"), "来源预算数",20,2);
+                }
+
+                CheckParameter.stringLengthAndEmpty(budget.getString("expenseaccount"), "支出科目", 256);
+                CheckParameter.checkDecimal(budget.getString("expensebudget"), "支出预算数",20,2);
+
+            }
+        }else{
+            throw new MyException("经费预算不能为空");
+
+        }
 
 
         //校验拨款计划
@@ -776,7 +810,7 @@ public class ProjectApplyController extends BaseController {
         if(!CollectionUtils.isEmpty(appropriationList)){
             for(PageData appropriationPlan : appropriationList){
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("years"), "年度", 256);
-                CheckParameter.checkDecimal(appropriationPlan.getString("计划(万元)"), "人员费",20,2);
+                CheckParameter.checkDecimal(appropriationPlan.getString("planAmount"), "计划(万元)",20,2);
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("creatorUserId"), "编制人ID", 256);
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("creatorUser"), "编制人", 256);
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("createTime"), "编制时间", 256);
@@ -789,23 +823,6 @@ public class ProjectApplyController extends BaseController {
 
     }
 
-
-    private void checkBudget(List<PageData> list){
-        if(!CollectionUtils.isEmpty(list)){
-            for(PageData budget : list){
-                if(StringUtils.isNotBlank(budget.getString("sourceAccount"))){
-                    CheckParameter.checkDecimal(budget.getString("sourceBudget"), "来源预算数",20,2);
-                }
-
-                CheckParameter.stringLengthAndEmpty(budget.getString("expenseAccount"), "支出科目", 256);
-                CheckParameter.checkDecimal(budget.getString("expenseBudget"), "支出预算数",20,2);
-
-            }
-        }else{
-            throw new MyException("经费预算不能为空");
-
-        }
-    }
 
 
     private String submitCheck(PageData pd,int flag){
@@ -908,7 +925,7 @@ public class ProjectApplyController extends BaseController {
 
             //查询规则配置的阈值
             //2:材料费,3:机械设备使用费,4:人工费,5:其他费用
-            List<PageData> ruleList = (List<PageData>) dao.findForList("",pd);
+            List<PageData> ruleList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryRuleList",pd);
             BigDecimal materialRate = new BigDecimal(75);//材料
             BigDecimal equipmentRate = new BigDecimal(15);//设备
             BigDecimal artificialRate= new BigDecimal(10);//人工

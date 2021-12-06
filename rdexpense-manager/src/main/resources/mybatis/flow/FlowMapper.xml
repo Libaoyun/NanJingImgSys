@@ -22,8 +22,10 @@
     handle_strategy as handleStrategy,
     back_flag as backFlag,
     menu_code as menuCode,
-    status,
-    business_id as businessId
+    d.status,
+    business_id as businessId,
+           detail_name as detailName,
+           approve_name as approveName
     </sql>
 
 
@@ -216,7 +218,9 @@
            handle_strategy,
            back_flag,
            menu_code,
-           business_id
+           business_id,
+           detail_name,
+           approve_name
 
            )
         VALUES (  #{processInstId},
@@ -236,7 +240,9 @@
                   #{handleStrategy},
                   #{backFlag},
                   #{menuCode},
-                  #{businessId}
+                  #{businessId},
+                  #{detailName},
+                  #{approveName}
 
                   )
     </insert>
@@ -367,5 +373,13 @@
             activity_id = #{processInstId}
     </select>
 
+    <select id="queryButton" resultType="pd" parameterType="pd" >
+        select
+            r.menu_code,r.com_button,name
+        from uq_button_routing r
+                 left join uq_function_menu m on r.menu_code = m.menu_code
+        where r.auth_menu_code = #{menuCode}
+
+    </select>
 
 </mapper>

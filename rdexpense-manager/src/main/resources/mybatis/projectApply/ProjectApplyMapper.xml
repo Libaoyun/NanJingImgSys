@@ -621,5 +621,13 @@
         where activity_id = #{processInstId}
     </select>
 
+    <select id="queryRuleList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            rule_type as ruleType,
+            rule_value as ruleValue
+        FROM  sys_rule_config
+        where status = 1
+    </select>
 
 </mapper>

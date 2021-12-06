@@ -20,6 +20,12 @@ public class ApproveDoneListDTO implements Serializable {
     @ApiModelProperty(value = "主键ID")
     private String id;
 
+    @ApiModelProperty(value = "待办ID")
+    private String waitId;
+
+    @ApiModelProperty(value = "业务主键ID")
+    private String businessId;
+
     @ApiModelProperty(value = "流程实例ID")
     private String processInstId;
 
@@ -66,5 +72,11 @@ public class ApproveDoneListDTO implements Serializable {
 
     @ApiModelProperty(value = "待办已办状态(0：待办，1：已办)")
     private String status;
+
+    @ApiModelProperty(value = "详情名称")
+    private String detailName;
+
+    @ApiModelProperty(value = "审批名称")
+    private String approveName;
 
 }

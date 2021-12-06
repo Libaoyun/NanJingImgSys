@@ -869,6 +869,21 @@ public class FlowServiceImpl implements FlowService {
         doneData.put("backFlag",currentApproveNode.getString("backFlag"));
         doneData.put("menuCode",pd.getString("menuCode"));
         doneData.put("businessId",pd.getString("businessId"));
+
+
+        List<PageData> list = (List<PageData>) baseDao.findForList("FlowMapper.queryButton",pd);
+        if(!CollectionUtils.isEmpty(list)){
+            for(PageData data : list){
+                String com_button = data.getString("com_button");
+                String name = data.getString("name");
+                if(com_button.equals("a10003")){
+                    doneData.put("detailName",name);
+                }else if(com_button.equals("a10004")){
+                    doneData.put("approveName",name);
+                }
+            }
+        }
+
         int result = baseDao.insert("FlowMapper.insertApprovalNotDone", doneData);
 
         if(result > 0){
