@@ -90,7 +90,7 @@
                     <el-input  v-model="baseInfo.email" placeholder="请输入电子邮箱"></el-input>
                 </el-form-item>
                 <el-form-item label="其他:" prop="fax">
-                    <el-input  v-model="baseInfo.fax" placeholder="请输入其他联系方式"></el-input>
+                    <el-input maxlength="30" v-model="baseInfo.fax" placeholder="请输入其他联系方式"></el-input>
                 </el-form-item>
                 <el-form-item label="员工状态:" prop="employeeStatusCode">
                     <el-select v-model="baseInfo.employeeStatusCode" placeholder="请选择员工状态" @change="baseInfo.employeeStatus = GET_DICTIONARY_TEXT(employeeStatusList,baseInfo.employeeStatusCode)">
@@ -115,16 +115,16 @@
                     <el-date-picker v-model="baseInfo.leaveDate" value-format="yyyy-MM-dd" type="date" placeholder="请选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="国籍:" prop="nationality">
-                    <el-input  v-model="baseInfo.nationality" placeholder="请输入国籍"></el-input>
+                    <el-input maxlength="30" v-model="baseInfo.nationality" placeholder="请输入国籍"></el-input>
                 </el-form-item>
                 <el-form-item label="籍贯:" prop="nativePlace">
-                    <el-input  v-model="baseInfo.nativePlace" placeholder="请输入籍贯"></el-input>
+                    <el-input maxlength="30" v-model="baseInfo.nativePlace" placeholder="请输入籍贯"></el-input>
                 </el-form-item>
                 <el-form-item label="民族:" prop="nation">
-                    <el-input  v-model="baseInfo.nation" placeholder="请输入民族"></el-input>
+                    <el-input maxlength="30" v-model="baseInfo.nation" placeholder="请输入民族"></el-input>
                 </el-form-item>
                 <el-form-item label="宗教:" prop="religion">
-                    <el-input  v-model="baseInfo.religion" placeholder="请输入宗教"></el-input>
+                    <el-input maxlength="30" v-model="baseInfo.religion" placeholder="请输入宗教"></el-input>
                 </el-form-item>
             </el-form>
         </card-global>
