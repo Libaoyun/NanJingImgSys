@@ -161,16 +161,11 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     }
     // 编辑
     editBtn(){
-        if(this.selected.length !== 1){
-            this.$message({
-                type: 'info',
-                message: '请选择一条记录!'
-            })
-            return
+        if(this.JUDGE_BTN(this.selected, 'edit')){
+            this.$router.push({ name: 'setProjectApplyEdit',params:{
+                businessId:this.selected[0].businessId
+            }})
         }
-        this.$router.push({ name: 'setProjectApplyEdit',params:{
-            businessId:this.selected[0].businessId
-        }})
     }
     // 详情
     detailBtn(data) {
@@ -185,40 +180,36 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     }
     // 删除
     deleteBtn(loadingBtnIndex){
-        if(this.selected.length == 0){
-            this.$message({
-                type: 'info',
-                message: '请至少选择一条记录!'
+        if(this.JUDGE_BTN(this.selected, 'delete')){
+            this.$confirm('确定删除已选择的记录, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+            }).then((e) => {
+                const params = {
+                    businessIdList:this.idList,
+                    creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+                    creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+                    menuCode : this.MENU_CODE_LIST.setProjectApplyList
+                }
+            this.loadingBtn = loadingBtnIndex
+            this.$API.apiDeleteSetProjectApply(params).then(res=>{
+                this.loadingBtn = 0
+                this.$message({
+                type: 'success',
+                message: '删除成功!'
+                });
+                this.resetPageNum();
+                this.$refs.tableData.clearSelection();
+                this.getSetProjectApplyList();
+            }).catch(()=>{
+                this.loadingBtn = 0;
             })
-            return
-        }
-        this.$confirm('确定删除已选择的记录, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then((e) => {
-            const params = {
-                businessIdList:this.idList,
-                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
-                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
-                menuCode : this.MENU_CODE_LIST.setProjectApplyList
-            }
-          this.loadingBtn = loadingBtnIndex
-          this.$API.apiDeleteSetProjectApply(params).then(res=>{
-            this.loadingBtn = 0
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
+            }).catch(() => {    
+                this.loadingBtn = 0     
             });
-            this.resetPageNum();
-            this.$refs.tableData.clearSelection();
-            this.getSetProjectApplyList();
-          }).catch(()=>{
-              this.loadingBtn = 0;
-          })
-        }).catch(() => {    
-          this.loadingBtn = 0     
-        });
+        }
+        
     }
     // 下载模板
     downloadBtn() {

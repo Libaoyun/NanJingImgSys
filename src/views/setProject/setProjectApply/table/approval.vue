@@ -108,34 +108,10 @@
                             <span>{{scope.$index + 1}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="years" label="年度" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'progressPlan.'+scope.$index+'.years'">
-                                <el-date-picker v-model="scope.row.years" type="year" format="yyyy"></el-date-picker>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="planTarget" label="计划及目标" width="300" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'progressPlan.'+scope.$index+'.planTarget'">
-                                <span>{{scope.row.planTarget}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'progressPlan.'+scope.$index+'.creatorUser'">
-                                <span>{{scope.row.creatorUser}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="createTime" label="编制时间" width="180" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'progressPlan.'+scope.$index+'.createTime'">
-                                <span>{{scope.row.createTime}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="years" label="年度" width="100" align="center"></el-table-column>
+                    <el-table-column prop="planTarget" label="计划及目标" width="300" align="center"></el-table-column>
+                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="编制时间" width="180" align="center"></el-table-column>
                 </el-table>
             </el-form>
         </card-global>
@@ -152,34 +128,10 @@
                             <span>{{scope.$index + 1}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="unitName" label="参加单位" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'attendUnit.'+scope.$index+'.unitName'">
-                                <span>{{scope.row.unitName}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="taskDivision" label="研究任务及分工" width="300" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'attendUnit.'+scope.$index+'.taskDivision'">
-                                <span>{{scope.row.taskDivision}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'attendUnit.'+scope.$index+'.creatorUser'">
-                                <span>{{scope.row.creatorUser}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="createTime" label="编制时间" width="180" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'attendUnit.'+scope.$index+'.createTime'">
-                                <span>{{scope.row.createTime}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="unitName" label="参加单位" width="100" align="center"></el-table-column>
+                    <el-table-column prop="taskDivision" label="研究任务及分工" width="300" align="center"></el-table-column>
+                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="编制时间" width="180" align="center"></el-table-column>
                 </el-table>
             </el-form>
         </card-global>
@@ -196,125 +148,23 @@
                             <span>{{scope.$index + 1}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="userName" label="姓名" width="120" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.userName'">
-                                <span>{{scope.row.userName}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="idCard" label="身份证号码" width="160" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.idCard'">
-                                <span>{{scope.row.idCard}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="age" label="年龄" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.age'">
-                                <span>{{scope.row.age}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="gender" label="性别" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.gender'">
-                                <span>{{scope.row.gender}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="education" label="学历" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.education'">
-                                <span>{{scope.row.education}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="belongDepartment" label="所属部门" width="120" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.belongDepartment'">
-                                <span>{{scope.row.belongDepartment}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="belongPost" label="职务职称" width="120" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.belongPost'">
-                                <span>{{scope.row.belongPost}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="majorStudied" label="所学专业" width="140" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.majorStudied'">
-                                <span>{{scope.row.majorStudied}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="majorWorked" label="现从事专业" width="140" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.majorWorked'">
-                                <span>{{scope.row.majorWorked}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="belongUnit" label="所在单位" width="140" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.belongUnit'">
-                                <span>{{scope.row.belongUnit}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="taskDivision" label="研究任务及分工" width="140" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.taskDivision'">
-                                <span>{{scope.row.taskDivision}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="workRate" label="全时率" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.workRate'">
-                                <span>{{scope.row.workRate}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="telephone" label="联系电话" width="140" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.telephone'">
-                                <span>{{scope.row.telephone}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="startDate" label="参与研发开始日期" width="160" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.startDate'">
-                                <span>{{scope.row.startDate}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="endDate" label="参与研发结束日期" width="160" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.endDate'">
-                                <span>{{scope.row.endDate}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.creatorUser'">
-                                <span>{{scope.row.creatorUser}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="createTime" label="编制时间" width="180" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'researchUser.'+scope.$index+'.createTime'">
-                                <span>{{scope.row.createTime}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="userName" label="姓名" width="120" align="center"></el-table-column>
+                    <el-table-column prop="idCard" label="身份证号码" width="160" align="center"></el-table-column>
+                    <el-table-column prop="age" label="年龄" width="100" align="center"></el-table-column>
+                    <el-table-column prop="gender" label="性别" width="100" align="center"></el-table-column>
+                    <el-table-column prop="education" label="学历" width="100" align="center"></el-table-column>
+                    <el-table-column prop="belongDepartment" label="所属部门" width="120" align="center"></el-table-column>
+                    <el-table-column prop="belongPost" label="职务职称" width="120" align="center"></el-table-column>
+                    <el-table-column prop="majorStudied" label="所学专业" width="140" align="center"></el-table-column>
+                    <el-table-column prop="majorWorked" label="现从事专业" width="140" align="center"></el-table-column>
+                    <el-table-column prop="belongUnit" label="所在单位" width="140" align="center"></el-table-column>
+                    <el-table-column prop="taskDivision" label="研究任务及分工" width="140" align="center"></el-table-column>
+                    <el-table-column prop="workRate" label="全时率" width="100" align="center"></el-table-column>
+                    <el-table-column prop="telephone" label="联系电话" width="140" align="center"></el-table-column>
+                    <el-table-column prop="startDate" label="参与研发开始日期" width="160" align="center"></el-table-column>
+                    <el-table-column prop="endDate" label="参与研发结束日期" width="160" align="center"></el-table-column>
+                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="编制时间" width="180" align="center"></el-table-column>
                 </el-table>
             </el-form>
         </card-global>
@@ -586,34 +436,10 @@
                             <span>{{scope.$index + 1}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="years" label="年度" width="100" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'appropriationPlan.'+scope.$index+'.years'">
-                                <span>{{scope.row.years}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="planAmount" label="计划 (万元)" width="300" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'appropriationPlan.'+scope.$index+'.planAmount'">
-                                <span>{{scope.row.planAmount}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'appropriationPlan.'+scope.$index+'.creatorUser'">
-                                <span>{{scope.row.creatorUser}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="createTime" label="编制时间" width="180" align="center">
-                        <template slot-scope="scope">
-                            <el-form-item :prop="'appropriationPlan.'+scope.$index+'.createTime'">
-                                <span>{{scope.row.createTime}}</span>
-                            </el-form-item>
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="years" label="年度" width="100" align="center"></el-table-column>
+                    <el-table-column prop="planAmount" label="计划 (万元)" width="300" align="center"></el-table-column>
+                    <el-table-column prop="creatorUser" label="编制人" width="80" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="编制时间" width="180" align="center"></el-table-column>
                 </el-table>
             </el-form>
         </card-global>

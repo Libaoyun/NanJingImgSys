@@ -42,11 +42,11 @@ function editBtn(data){
         })
         flag = false
     }else{
-        if(data[0].processStatus !== 'DICT10171001'){
+        if(data[0].processStatus !== 'DICT10171001' || data[0].processStatus !== 'DICT10171004'){
             flag = false
             Message({
                 type: 'info',
-                message: '只有未提交的数据才可以编辑！'
+                message: '只有未提交或被打回的数据才可以编辑！'
             })
         }
     }
@@ -64,12 +64,12 @@ function deleteBtn(data){
         flag = false
     }else{
         let statusFlag = data.some((item)=>{
-            return item.processStatus !== 'DICT10171001'
+            return item.processStatus !== 'DICT10171001' && item.processStatus !== 'DICT10171004'
         })
         if(statusFlag){
             Message({
                 type: 'info',
-                message: '只有未提交的数据才可以删除！'
+                message: '只有未提交或被打回的数据才可以删除！'
             })
             flag = false
         }
@@ -88,11 +88,11 @@ function submitBtn(data){
         })
         flag = false
     }else{
-        if(data[0].processStatus !== 'DICT10171001'){
+        if(data[0].processStatus !== 'DICT10171001' || data[0].processStatus !== 'DICT10171004'){
             flag = false
             Message({
                 type: 'info',
-                message: '请选择一条未提交记录进行提交！'
+                message: '请选择一条未提交或被打回记录进行提交！'
             })
         }
     }
