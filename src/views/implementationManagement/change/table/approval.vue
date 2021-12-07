@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page">
+  <div class="page">
     <card-global>
       <div>
         <el-form
@@ -143,9 +143,14 @@
       <template v-else>444</template>
     </card-global>
     <!-- 附件上传 -->
-    <upload-approval-global type="detail" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
+    <upload-approval-global type="approval" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
+    <!--审批-->
+    <approval-global ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
+      <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
+      <loading-btn class="rejectOrigin" size="mini" @click="rejectOrigin(2)" :loading="loadingBtn">退回发起人</loading-btn>
+      <loading-btn size="mini" @click="rejectPre(3)" :loading="loadingBtn">退回上节点</loading-btn>
     </div>
   </div>
 </template>
@@ -154,120 +159,116 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import tableMixin from "@/mixins/tableMixin";
 @Component({
-  name: "detail",
+  name: "approval",
   components: {},
 })
 export default class extends tableMixin {
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
+  processInstId = null
+  serialNumber = null
   
   activated() {
-    if (Object.keys(this.$route.params).length > 0) {
-      if (this.$route.params.recordId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.recordId);
+    if(Object.keys(this.$route.params).length > 0){
+      if(this.$route.params.businessId){
+        this.initData(this.$route.params.businessId)
       }
+      if(this.$route.params.routerName){
+        this.routerName = this.$route.params.routerName
+      }else{
+        this.routerName = 'changeList'
+      }
+      Object.assign(this,this.$route.params.ids)
     }
   }
   // 初始化新建数据
-  initData() {
+  initData(businessId) {
     this.$refs["baseForm"].resetFields();
     this.$refs["changeForm"].resetFields();
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
+    this.$API.apiCheckFinalDetail({businessId}).then((res) => {
+      this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
+      this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
+      this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
+      !res.data.attachmentList && (this.baseInfo.attachmentList = [])
+    })
+  }
+  resolve(loadingBtn){
+    // 审批意见校验通过
+    this.$refs.approval.isCheckComplete().then((remark)=>{
+      this.loadingBtn = loadingBtn;
+      var params = {
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.setProjectApplyList,
+        approveComment:remark,
+        approveType:1,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiApprovalSetProjectApply(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
+  }
+    // 退回发起人
+  rejectOrigin(loadingBtn){
+    // 审批意见校验通过
+    this.$refs.approval.isCheckComplete().then((remark)=>{
+      this.loadingBtn = loadingBtn;
+      var params = {
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.setProjectApplyList,
+        approveComment:remark,
+        approveType:3,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiApprovalSetProjectApply(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
+  }
+    // 退回上节点
+  rejectOrigin(loadingBtn){
+    // 审批意见校验通过
+    this.$refs.approval.isCheckComplete().then((remark)=>{
+      this.loadingBtn = loadingBtn;
+      var params = {
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.setProjectApplyList,
+        approveComment:remark,
+        approveType:2,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiApprovalSetProjectApply(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
   }
   // 返回按钮
   backBtn() {
-    this.$store.commit("DELETE_TAB", this.$route.path);
-    this.$router.push({ name: "changeList" });
-  }
-
-  getRecordDetail(recordId) {
-    this.baseInfo = {
-      orgNumber: 'JJJJ123', // 单据编号
-      createUser: this.$store.getters.userInfo?.userName, // 创建人
-      createTime: new Date(), // 创建时间
-      projectName: '地铁车站防水技术研究2', // 项目名称
-      projectLeader: '慕踊前', // 项目负责人
-      phone: '13888888888', // 联系电话
-      changeType: '3', // 变更类型
-
-      // 变更说明
-      changeInfo: {
-        originalProjectCnt: '要求变更的原项目相关部分内容', // 要求变更的原项目相关部分内容
-        advise: '要求变更的内容或建议', // 要求变更的内容或建议
-        reason: '变更理由变更理由', // 变更理由
-        implementationSituation: '项目实施情况项目实施情况', // 项目实施情况
-        feeUse: '经费使用情况经费使用情况', // 经费使用情况
-      },
-      // 变更明细
-      detailForm: {
-        detailList:[
-          {
-            userName: '慕踊前',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '女',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          },
-          {
-            userName: 'Licy',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '男',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          },
-          {
-            isNew: 1,
-            userName: 'Licy',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '男',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          }
-        ]
-      },
-      // 附件
-      attachmentList: [],
-    };
+    this.resetData()
   }
   // 设置空数据
   getBaseInfo() {
@@ -296,11 +297,16 @@ export default class extends tableMixin {
       attachmentList: [],
     };
   }
+  // 清空数据
+  resetData(isRefresh) {
+    this.$store.commit('DELETE_TAB', this.$route.path);
+    this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-.create-page {
+.page {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;

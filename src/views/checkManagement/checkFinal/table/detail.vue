@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page">
+  <div class="page">
     <card-global>
       <div>
         <el-form
@@ -23,6 +23,9 @@
           </el-form-item>
           <el-form-item label="成果名称" prop="jobTitle">
             <span>{{ baseInfo.jobTitle }}</span>
+          </el-form-item>
+          <el-form-item label="申请评审单位" prop="unitName">
+            {{baseInfo.unitName}}
           </el-form-item>
           <el-form-item label="项目负责人" prop="applyUserName">
             <span>{{ baseInfo.applyUserName }}</span>
@@ -114,14 +117,14 @@
         <el-table-column prop="creatorUser" label="编制人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
         <el-table-column prop="createTime" label="编制时间" width="180" align="center" :show-overflow-tooltip="true">
           <template slot-scope="scope">
-            {{ scope.row.createTime | formatTime('yyyy-MM-dd') }}
+            {{ scope.row.createTime | formatDate }}
           </template>
         </el-table-column>
 
       </el-table>
     </card-global>
     <!-- 附件上传 -->
-    <upload-approval-global type="detail" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
+    <approval-global type="detail" ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
     </div>
@@ -138,10 +141,11 @@ import tableMixin from "@/mixins/tableMixin";
 export default class extends tableMixin {
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
+  processInstId = null
+  serialNumber = null
   // 设置空数据
   getBaseInfo() {
     return {
-      serialNumber: this.$store.getters.currentOrganization?.organizationId, // 单据编号
       createUser: this.$store.getters.userInfo?.userName, // 创建人
       createUserId: this.$store.getters.userInfo?.userCode, // 结题申报人ID
       createTime: new Date(), // 创建时间
@@ -164,37 +168,44 @@ export default class extends tableMixin {
     };
   }
   activated() {
-    if (Object.keys(this.$route.params).length > 0) {
-      if (this.$route.params.businessId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.businessId);
+    if(Object.keys(this.$route.params).length > 0){
+      if(this.$route.params.businessId){
+        this.initData(this.$route.params.businessId)
       }
+      if(this.$route.params.routerName){
+        this.routerName = this.$route.params.routerName
+      }else{
+        this.routerName = 'checkFinalList'
+      }
+      Object.assign(this,this.$route.params.ids)
     }
   }
 
   // 初始化新建数据
-  initData() {
+  initData(businessId) {
     this.$refs["baseForm"].resetFields();
     this.$refs["checkForm"].resetFields();
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
-  }
-  getRecordDetail(businessId) {
     this.$API.apiCheckFinalDetail({businessId}).then((res) => {
       this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
       this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
       this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
+      !res.data.attachmentList && (this.baseInfo.attachmentList = [])
     })
   }
   // 返回按钮
   backBtn() {
-    this.$store.commit("DELETE_TAB", this.$route.path);
-    this.$router.push({ name: "checkFinalList" });
+    this.resetData()
+  }
+  // 清空数据
+  resetData(isRefresh) {
+    this.$store.commit('DELETE_TAB', this.$route.path);
+    this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.create-page {
+.page {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;

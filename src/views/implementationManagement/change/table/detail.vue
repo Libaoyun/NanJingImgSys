@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page">
+  <div class="page">
     <card-global>
       <div>
         <el-form
@@ -143,25 +143,9 @@
       <template v-else>444</template>
     </card-global>
     <!-- 附件上传 -->
-    <upload-approval-global type="approval" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
-    <!--审批-->
-    <approval-global ref="approval"></approval-global>
+    <upload-approval-global type="detail" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
-      <loading-btn
-        size="mini"
-        type="primary"
-        @click="reject(2)"
-        :loading="loadingBtn"
-        >回退</loading-btn
-      >
-      <loading-btn
-        size="mini"
-        type="primary"
-        @click="resolve(1)"
-        :loading="loadingBtn"
-        >同意</loading-btn
-      >
     </div>
   </div>
 </template>
@@ -170,7 +154,7 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import tableMixin from "@/mixins/tableMixin";
 @Component({
-  name: "approval",
+  name: "detail",
   components: {},
 })
 export default class extends tableMixin {
@@ -178,137 +162,37 @@ export default class extends tableMixin {
   baseInfo = this.getBaseInfo();
   
   activated() {
-    if (Object.keys(this.$route.params).length > 0) {
-      if (this.$route.params.recordId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.recordId);
+    if(Object.keys(this.$route.params).length > 0){
+      if(this.$route.params.businessId){
+        this.initData(this.$route.params.businessId)
       }
+      if(this.$route.params.routerName){
+        this.routerName = this.$route.params.routerName
+      }else{
+        this.routerName = 'changeList'
+      }
+      Object.assign(this,this.$route.params.ids)
     }
   }
   // 初始化新建数据
-  initData() {
+  initData(businessId) {
     this.$refs["baseForm"].resetFields();
     this.$refs["changeForm"].resetFields();
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
-  }
-  // 审批回退 (拒绝)
-  reject(loadingBtn) {
-    // 审批意见校验拒绝
-    this.$refs.approval.isCheckComplete().then(remark => {
-      this.loadingBtn = loadingBtn;
-      var params = {
-        menuCode: this.MENU_CODE_LIST.changeList,
-        noted: remark,
-        processInstId: this.baseInfo.processInstId
-      };
-    });
-  }
-  // 审批同意
-  resolve(loadingBtn) {
-    // 审批意见校验通过
-    this.$refs.approval.isCheckComplete().then(remark => {
-      this.loadingBtn = loadingBtn;
-      var params = {
-        menuCode: this.MENU_CODE_LIST.changeList,
-        noted: remark,
-        processInstId: this.baseInfo.processInstId
-      };
-    });
+    this.$API.apiCheckFinalDetail({businessId}).then((res) => {
+      this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
+      this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
+      this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
+      !res.data.attachmentList && (this.baseInfo.attachmentList = [])
+    })
   }
   // 返回按钮
   backBtn() {
-    this.$store.commit("DELETE_TAB", this.$route.path);
-    this.$router.push({ name: "changeList" });
+    this.resetData()
   }
-
-  getRecordDetail(recordId) {
-    this.baseInfo = {
-      orgNumber: 'JJJJ123', // 单据编号
-      createUser: this.$store.getters.userInfo?.userName, // 创建人
-      createTime: new Date(), // 创建时间
-      projectName: '地铁车站防水技术研究2', // 项目名称
-      projectLeader: '慕踊前', // 项目负责人
-      phone: '13888888888', // 联系电话
-      changeType: '3', // 变更类型
-
-      // 变更说明
-      changeInfo: {
-        originalProjectCnt: '要求变更的原项目相关部分内容', // 要求变更的原项目相关部分内容
-        advise: '要求变更的内容或建议', // 要求变更的内容或建议
-        reason: '变更理由变更理由', // 变更理由
-        implementationSituation: '项目实施情况项目实施情况', // 项目实施情况
-        feeUse: '经费使用情况经费使用情况', // 经费使用情况
-      },
-      // 变更明细
-      detailForm: {
-        detailList:[
-          {
-            userName: '慕踊前',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '女',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          },
-          {
-            userName: 'Licy',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '男',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          },
-          {
-            isNew: 1,
-            userName: 'Licy',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '男',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          }
-        ]
-      },
-      // 附件
-      attachmentList: [],
-    };
-    this.$refs.uploadApprovalGlobal.getApproveNote(this.MENU_CODE_LIST.changeList,this.baseInfo.processInstId);
+  // 清空数据
+  resetData(isRefresh) {
+    this.$store.commit('DELETE_TAB', this.$route.path);
+    this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
   }
   // 设置空数据
   getBaseInfo() {
@@ -341,13 +225,10 @@ export default class extends tableMixin {
 </script>
 
 <style lang="scss" scoped>
-.create-page {
+.page {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;
-  .base-form /deep/ .el-form-item{
-    width: 33%!important;
-  }
   .check-form /deep/ .el-form-item{
     width: 100%!important;
   }

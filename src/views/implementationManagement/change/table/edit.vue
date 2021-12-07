@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page">
+  <div class="page">
     <card-global>
       <div>
         <el-form
@@ -544,9 +544,8 @@ export default class extends tableMixin {
   
   activated() {
     if (Object.keys(this.$route.params).length > 0) {
-      if (this.$route.params.recordId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.recordId);
+      if (this.$route.params.businessId) {
+        this.initData(this.$route.params.businessId);
       }
     }
   }
@@ -555,69 +554,77 @@ export default class extends tableMixin {
   initData() {
     this.$refs["baseForm"].resetFields();
     this.$refs["changeForm"].resetFields();
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
+    this.$API.apiCheckFinalDetail({businessId}).then((res) => {
+      this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
+      this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
+      this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
+      !res.data.attachmentList && (this.baseInfo.attachmentList = [])
+    })
+  }
+  // 格式化保存提交的数据
+  formatSendData(data) {
+    data = JSON.parse(JSON.stringify(data))
+    
+    data.creatorOrgId = this.$store.getters.currentOrganization.organizationId
+    data.creatorOrgName = this.$store.getters.currentOrganization.organizationName
+    data.menuCode = this.MENU_CODE_LIST.checkFinalList
+
+    data.directoryAndUnit = data.checkInfo.directoryAndUnit // 经济技术文件目录及提供单位(长度：1024)
+    data.projectAbstract = data.checkInfo.projectAbstract // 成果内容简介(长度：1024)
+    delete data.checkInfo
+
+    data.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
+    return data
   }
   // 保存按钮
   saveBtn(loadIndex) {
     const _self = this;
-    let formArr = ["baseForm", 'changeForm'];
-    let resultArr = [];
-    formArr.forEach((item) => {
-      //根据表单的ref校验
-      resultArr.push(checkForm(_self, item));
-    });
-    this.baseInfo.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
-    Promise.all(resultArr).then(() => {
-      this.$confirm("确定保存当前表单?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      }).then(() => {
-        // 调接口
-        let params = Object.assign(
-          {
-            creatorOrgId:
-              this.$store.getters.currentOrganization.organizationId,
-            creatorOrgName:
-              this.$store.getters.currentOrganization.organizationName,
-            menuCode: this.MENU_CODE_LIST.changeList,
-          },
-          this.baseInfo
-        );
-        console.log('保存数据：', params)
-        // this.loadingBtn = loadIndex;
-        // this.$API
-        //   .apiAddProject(params)
-        //   .then((res) => {
-        //     this.$message({
-        //       type: "success",
-        //       message: "新增成功!",
-        //     });
-        //     this.$store.commit("DELETE_TAB", this.$route.path);
-        //     this.$router.push({ name: "changeList" });
-        //   })
-        //   .finally(() => {
-        //     this.loadingBtn = 0;
-        //   });
+    const params = this.formatSendData(this.baseInfo)
+    this.loadingBtn = loadIndex;
+    this.$API
+      .apiCheckFinalSaveOrUpdate(params)
+      .then((res) => {
+        this.loadingBtn = 0;
+        this.$message({
+          type: "success",
+          message: "编辑成功!",
+        });
+        this.resetData(true)
+      })
+      .finally(() => {
+        this.loadingBtn = 0;
       });
-    });
   }
   // 提交按钮
   submitBtn(loadIndex) {
     const _self = this;
-    let formArr = ["baseForm", 'changeForm'];
+    let formArr = ["baseForm", 'checkForm'];
     let resultArr = [];
     formArr.forEach((item) => {
       //根据表单的ref校验
       resultArr.push(checkForm(_self, item));
     });
+    const params = this.formatSendData(this.baseInfo)
+    params.flag = 3
     Promise.all(resultArr).then(() => {
       this.$confirm("确定提交当前表单?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       }).then(() => {
-        // API
+        this.loadingBtn = loadIndex;
+        this.$API
+          .apiCheckFinalSubmit(params)
+          .then((res) => {
+            this.$message({
+              type: "success",
+              message: "提交成功!",
+            });
+            this.resetData(true)
+          })
+          .finally(() => {
+            this.loadingBtn = 0;
+          });
       });
     });
   }
@@ -628,98 +635,12 @@ export default class extends tableMixin {
       cancelButtonText: "取消",
       type: "warning",
     }).then(() => {
-      this.$store.commit("DELETE_TAB", this.$route.path);
-      this.$router.push({ name: "changeList" });
+      this.resetData()
     });
   }
-
-  getRecordDetail(recordId) {
-    this.baseInfo = {
-      orgNumber: 'JJJJ123', // 单据编号
-      createUser: this.$store.getters.userInfo?.userName, // 创建人
-      createTime: new Date(), // 创建时间
-      projectName: '地铁车站防水技术研究2', // 项目名称
-      projectLeader: '慕踊前', // 项目负责人
-      phone: '13888888888', // 联系电话
-      changeType: '3', // 变更类型
-
-      // 变更说明
-      changeInfo: {
-        originalProjectCnt: '要求变更的原项目相关部分内容', // 要求变更的原项目相关部分内容
-        advise: '要求变更的内容或建议', // 要求变更的内容或建议
-        reason: '变更理由变更理由', // 变更理由
-        implementationSituation: '项目实施情况项目实施情况', // 项目实施情况
-        feeUse: '经费使用情况经费使用情况', // 经费使用情况
-      },
-      // 变更明细
-      detailForm: {
-        detailList:[
-          {
-            userName: '慕踊前',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '女',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          },
-          {
-            userName: 'Licy',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '男',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          },
-          {
-            isNew: 1,
-            userName: 'Licy',
-            idcard: '2121029102930102',
-            age: '32',
-            sex: '男',
-            education: '本科',
-            department: '研发部',
-            job: '部员',
-            major: '土木工程',
-            work: '技术管理',
-            company: '省道464项目',
-            task: '技术管理，现场技术管理，现场技术管理，现场',
-            fullTimeRate: '100',
-            phone: '18911113333',
-            startDate: '2021-01-01',
-            endDate: '2021-01-01',
-            status: '正常',
-            creator: '慕踊前',
-            createdTime: '2021-12-31  18:00:00'
-          }
-        ]
-      },
-      // 附件
-      attachmentList: [],
-    };
+  resetData(bool) {
+    this.$store.commit("DELETE_TAB", this.$route.path);
+    this.$router.push({ name: "changeList", params: { refresh: bool } });
   }
   // 设置空数据
   getBaseInfo() {
@@ -751,10 +672,14 @@ export default class extends tableMixin {
   // 选择项目名称
   chooseProject () {
     $alert.alertProjects().then(data => {
-      console.log('选择的项目数据', data)
-      this.$set(this.baseInfo, "projectName", data.projectName);
-      this.$set(this.baseInfo, "projectLeader", data.applicant);
-      this.$set(this.baseInfo, "phone", data.phone);
+      this.$set(this.baseInfo, "jobTitle", data.projectName); // 成果名称
+      this.$set(this.baseInfo, "applyUserName", data.applyUserName); // 项目负责人
+      this.$set(this.baseInfo, 'applyUserId', data.applyUserId); // 项目负责人ID 
+      this.$set(this.baseInfo, "postName", data.postName); //负责人岗位
+      this.$set(this.baseInfo, "telephone", data.telephone);
+      this.$set(this.baseInfo, "startYear", data.startYear);
+      this.$set(this.baseInfo, "endYear", data.endYear);
+      this.$set(this.baseInfo, 'projectApplyMainId', data.businessId) // 项目ID
     });
   }
   // 用户变更-添加
@@ -790,7 +715,6 @@ export default class extends tableMixin {
   }
   // 用户变更-删除某一行
   handleDeleteRow(scope) {
-    console.log('删除下标：', scope.$index)
     this.baseInfo.detailForm.detailList.splice(scope.$index, 1)
   }
   // 选择变更类型
@@ -877,7 +801,7 @@ export default class extends tableMixin {
 </script>
 
 <style lang="scss" scoped>
-.create-page {
+.page {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;
