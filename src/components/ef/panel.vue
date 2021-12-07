@@ -89,6 +89,15 @@
                     sourceId: undefined,
                     targetId: undefined
                 },
+                originActiveElement: {
+                    // 可选值 node 、line
+                    type: undefined,
+                    // 节点ID
+                    nodeId: undefined,
+                    // 连线ID
+                    sourceId: undefined,
+                    targetId: undefined
+                },
                 zoom: 1,
                 btnLoading:false,
                 dataHasChange:false,//监听data是否变化
@@ -162,6 +171,7 @@
                 return new Promise((resolve,reject)=>{
                     this.jsPlumb = jsPlumb.getInstance()
                     this.$nextTick(() => {
+                        this.activeElement = Object.assign({},this.originActiveElement)
                         // 默认加载流程A的数据、在这里可以根据具体的业务返回符合流程数据格式的数据即可
                         this.$API.apiGetFlow({menuCode:this.selected.menuCode}).then(res=>{
                             this.interfaceData = res.data
