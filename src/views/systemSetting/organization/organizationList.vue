@@ -49,7 +49,7 @@ import tableMixin from '@/mixins/tableMixin'
 import $alert from './alert'
 
 @Component({
-    name: 'organization',
+    name: 'organizationList',
     components: {
     
     }
@@ -72,7 +72,7 @@ export default class extends tableMixin {
         label:'orgName'
     }
 
-    created(){
+    mounted(){
         this.getOrganizationTree();
     }
     // 获取组织树
