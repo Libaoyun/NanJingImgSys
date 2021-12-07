@@ -1,5 +1,6 @@
 <template>
     <div class="navbar">
+        <div class="title">研发费用辅助管理系统</div>
         <el-select v-model="selectedOrganization" @change="changeOrganization" size="small" :popper-append-to-body="false">
             <el-option v-for="item in organizationList" :label="item.organizationName" :value="item.organizationId" :key="item.organizationId"></el-option>
         </el-select>
@@ -66,6 +67,13 @@ export default class extends Vue {
     line-height: 60px;
     text-align: right;
     padding: 0 15px;
+    .title {
+        float: left;
+        font-size: 22px;
+        font-family: Microsoft YaHei;
+        color: #0050bc;
+        font-weight: 700;
+    }
 }
 .el-select {
     margin-right: 20px;
