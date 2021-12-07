@@ -13,6 +13,7 @@
                 :data="projectTree" 
                 :props="projectProps" 
                 highlight-current
+                check-strictly
                 :default-expanded-keys="defaultExpandedKeys"
                 node-key="id"
                 show-checkbox
