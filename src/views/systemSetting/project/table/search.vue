@@ -25,8 +25,8 @@
                         <el-option label="否" value="0"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="创建人" prop="createUser">
-                    <el-input v-model.trim="searchParams.createUser" placeholder="请输入创建人"></el-input>
+                <el-form-item label="创建人" prop="createUserName">
+                    <el-input v-model.trim="searchParams.createUserName" placeholder="请输入创建人"></el-input>
                 </el-form-item>
                 <el-form-item label="创建时间" prop="createTime">
                     <el-date-picker
