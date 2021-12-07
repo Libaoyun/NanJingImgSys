@@ -39,11 +39,11 @@ public class ItemClosureCheckListDto extends BaseEntity implements Serializable 
     @ApiModelProperty(value = "申请评审验收单位")
     private String creatorOrg;
 
-    @ApiModelProperty(value = "结题申报人ID")
-    private String creatorUserId;
+    @ApiModelProperty(value = "结题申报人ID/编制人ID")
+    private String createUserId;
 
-    @ApiModelProperty(value = "结题申报人")
-    private String creatorUser;
+    @ApiModelProperty(value = "结题申报人/编制人")
+    private String createUser;
 
     @ApiModelProperty(value = "申请评审日期")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
@@ -91,5 +91,14 @@ public class ItemClosureCheckListDto extends BaseEntity implements Serializable 
     @ApiModelProperty(value = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
+
+    @ApiModelProperty(value = "审批实例ID")
+    private String processInstId;
+
+    @ApiModelProperty(value = "所属单位名称(长度：256)")
+    private String unitName;
+
+    @ApiModelProperty(value = "流程状态集合，传编码")
+    private List<String> statusList;
 
 }

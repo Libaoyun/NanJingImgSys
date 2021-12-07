@@ -132,7 +132,7 @@ public class DictionaryServiceImpl implements DictionaryService {
     public void deleteDictionaryInfo(PageData pd) {
         List<String> list = JSONArray.parseArray(pd.getString("ids"), String.class);
         //删除风险数据表数据
-        baseDao.batchDelete("RiskDataMapper.deleteRiskData", list);
+        baseDao.batchDelete("DictionaryMapper.deleteDictionaryInfo", list);
     }
 
 
@@ -164,6 +164,17 @@ public class DictionaryServiceImpl implements DictionaryService {
         }
 
         return result;
+    }
+
+    /**
+     * 查询数据字典类型数据,根据字典类型ID
+     * @return
+     */
+    @Override
+    public List<PageData> queryDictionaryTypeByPid(PageData pd) {
+        List<PageData> dictTypeList = (List<PageData>) baseDao.findForList("DictioinaryTypeMapper.selectListByTypeId",pd);
+
+        return dictTypeList;
     }
 
     /**

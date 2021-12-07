@@ -13,6 +13,7 @@ import com.rdexpense.manager.dto.system.dictionary.*;
 import com.rdexpense.manager.service.system.DictionaryService;
 import com.rdexpense.manager.util.LogUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -174,11 +175,34 @@ public class DictionaryController extends BaseController {
      */
     @ApiOperation(value = "查询字典类型数据")
     @GetMapping("/queryDictionaryType")
-    ResponseEntity<List<DictionaryTypeListDto>> queryDictionaryType(){
+    public ResponseEntity<List<DictionaryTypeListDto>> queryDictionaryType(){
         PageData pd = this.getParams();
         try{
 
             List<PageData> list = dictionaryService.queryDictionaryType();
+
+            return ResponseEntity.success(PropertyUtil.covertListModel(list, DictionaryTypeListDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
+        } catch (Exception e) {
+            logger.error("查询字典类型数据,request=[{}]", pd);
+            throw new MyException(ERR_QUERY_FAIL.desc(), e);
+        }
+
+
+    }
+
+    @ApiOperation(value = "根据类型父结点PID，查询字典类型数据")
+    @GetMapping("/queryDictionaryTypeByPid")
+    @ApiImplicitParam(name = "dicTypeParentId", value = "字典类型父结点PID", required = true, dataType = "String")
+    public ResponseEntity<List<DictionaryTypeListDto>> queryDictionaryTypeByPid(){
+
+        PageData pd = this.getParams();
+        String dicTypeParentId = pd.getString("dicTypeParentId");
+        if (StringUtils.isBlank(dicTypeParentId)) {
+            throw new MyException("父结点PID不能为空");
+        }
+        try{
+
+            List<PageData> list = dictionaryService.queryDictionaryTypeByPid(pd);
 
             return ResponseEntity.success(PropertyUtil.covertListModel(list, DictionaryTypeListDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (Exception e) {
@@ -274,7 +298,7 @@ public class DictionaryController extends BaseController {
         CheckParameter.stringLengthAndEmpty(dicEnumName, "枚举值",64);
 
         String  dicEnumId = pd.getString("dicEnumId");
-        CheckParameter.stringLengthAndEmpty(dicEnumId, "枚举值编码",16);
+        CheckParameter.stringLengthAndEmpty(dicEnumId, "枚举值编码",64);
 
         String  remark = pd.getString("remark");
         CheckParameter.stringLengthAndEmpty(remark, "描述",1024);

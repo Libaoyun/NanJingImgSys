@@ -31,4 +31,6 @@ public interface DictionaryService {
     void modifyDictionType(PageData pd);
 
     void removeDictionType(PageData pd);
+
+    List<PageData> queryDictionaryTypeByPid(PageData pd);
 }

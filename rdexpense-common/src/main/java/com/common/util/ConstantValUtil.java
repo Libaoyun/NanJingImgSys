@@ -14,7 +14,7 @@ public class ConstantValUtil {
     public static final String BUCKET_PRIVATE = "private1";
 
     // 审批状态：10171001-未提交, 10171002-审批中, 10171003-已废除, 10171004-被打回 10171005-已通过
-    public static final String[] APPROVAL_STATUS = {"DICT10171001", "DICT10171002", "DICT10171003", "DICT10071004", "DICT10171005"};
+    public static final String[] APPROVAL_STATUS = {"DICT10171001", "DICT10171002", "DICT10171003", "DICT10171004", "DICT10171005"};
 
 
     // 审批处理结果：DICT10181001-发起, DICT10181002-同意, DICT10181003-回退上一个节点, DICT10181004-回退到发起人

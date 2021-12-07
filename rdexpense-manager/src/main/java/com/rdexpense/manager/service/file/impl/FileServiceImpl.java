@@ -92,6 +92,20 @@ public class FileServiceImpl implements FileService {
 
 
     /**
+     * 删除附件
+     * @param pd
+     */
+
+    @Override
+    public void deleteAttachment(PageData pd) {
+        String businessIdListStr = pd.getString("businessIdList");
+
+        List<String> businessIdList = JSONObject.parseArray(businessIdListStr, String.class);
+        //删除文件
+        dao.batchDelete("FileMapper.batchDeleteFile", businessIdList);
+    }
+
+    /**
      * 查询附件详情
      * @param pd
      * @return
@@ -103,6 +117,9 @@ public class FileServiceImpl implements FileService {
             AwsUtil.queryOneUrl(attachmentList, ConstantValUtil.BUCKET_PRIVATE);
             pd.put("attachmentList", attachmentList);
 
+        } else {
+            List<PageData> List = new ArrayList<>();
+            pd.put("attachmentList", List);
         }
 
         return pd;

@@ -10,12 +10,10 @@ import com.common.util.ExcelUtil;
 import com.common.util.PDFUtil;
 import com.common.util.SequenceUtil;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.rdexpense.manager.service.file.FileService;
 import com.rdexpense.manager.service.flow.FlowService;
 import com.rdexpense.manager.service.itemClosureCheck.ItemClosureCheckService;
-import com.rdexpense.manager.service.system.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +55,7 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
         List<String> pageDataList = JSONArray.parseArray(pd.getString("statusList"), String.class);
         pd.put("processStatusList", pageDataList);
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+        pd.put("selsctCreateUser", pd.getString("selsctCreateUser"));
         List<PageData> userInfoList = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureCheckList", pd);
 
         return userInfoList;
@@ -71,12 +69,16 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
     @Override
     public List<PageData> queryProjectApplyList(PageData pd) {
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[4]);
+        List<String> projectTypeCodeList = JSONArray.parseArray(pd.getString("projectTypeCodeList"), String.class);
+        pd.put("projectTypeCodeList", projectTypeCodeList);
+        List<String> professionalCategoryCodeList = JSONArray.parseArray(pd.getString("professionalCategoryCodeList"), String.class);
+        pd.put("professionalCategoryCodeList", professionalCategoryCodeList);
         List<PageData> pageDataList = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryProjectApplyList", pd);
         return pageDataList;
     }
 
     /**
-     * 查询已审批完成的研发项目申请列表
+     * 查询已审批完成的研发项目申请的用户信息
      * @param pd
      * @return
      */
@@ -97,6 +99,7 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
      * @param pd
      */
     @Override
+    @Transactional
     public void saveOrUpdate(PageData pd) {
         //查询是否已经结项
 //        if (!pd.getString("jobTitle").isEmpty()){
@@ -108,12 +111,15 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
 
         //如果ID为空，则为保存
         if (pd.getString("id").isEmpty()){
-            String businessId = "RDPI" + UUID.randomUUID().toString();//生成业务主键ID
-            String serialNumber = SequenceUtil.generateSerialNo("RDPI");//生成流水号
-
-            pd.put("businessId", businessId);
-            pd.put("serialNumber", serialNumber);
-            pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+            //判断是直接保存，还是提交时保存
+            //直接保存
+            if (pd.getString("flag").isEmpty()){
+                pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+                String serialNumber = SequenceUtil.generateSerialNo("ICCK");//生成流水号
+                String businessId = "ICCK" + UUID.randomUUID().toString();//生成业务主键ID
+                pd.put("serialNumber", serialNumber);
+                pd.put("businessId", businessId);
+            }
 
             //1、插入主表
             baseDao.insert("ItemClosureCheckMapper.insertMain", pd);
@@ -123,11 +129,14 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
             List<PageData> researchUserList = JSONObject.parseArray(researchUser, PageData.class);
             if (!CollectionUtils.isEmpty(researchUserList)) {
                 for (PageData detailData : researchUserList) {
-                    detailData.put("businessId", businessId);
+                    detailData.put("businessId", pd.getString("businessId"));
                 }
 
                 baseDao.batchInsert("ItemClosureCheckMapper.batchInsertResearchUser", researchUserList);
             }
+
+            // 插入到附件表
+            fileService.insert(pd);
 
         } else {
             //编辑
@@ -147,10 +156,12 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
 
                 baseDao.batchInsert("ItemClosureCheckMapper.batchInsertResearchUser", researchUserList);
             }
-        }
 
-        // 插入到附件表
-        fileService.insert(pd);
+            //先删除附件表
+            fileService.deleteAttachment(pd);
+            //再插入附件表
+            fileService.insert(pd);
+        }
     }
 
 
@@ -163,12 +174,25 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
     public void submit(PageData pd) {
 
         //1：列表提交，2：保存提交，3：编辑提交
-        if (!pd.getString("flag").equals("1")) {
-            //先保存或编辑
-            saveOrUpdate(pd);
-        }
+        if (pd.getString("flag").equals("2")){
+            String serialNumber = SequenceUtil.generateSerialNo("ICCK");//生成流水号
+            String businessId = "ICCK" + UUID.randomUUID().toString();//生成业务主键ID
+            pd.put("serialNumber", serialNumber);
+            pd.put("businessId", businessId);
+            //保存提交，先生成单据编号，再启动工作流，然后再保存数据
+            flowService.startFlow(pd);
 
-        flowService.startFlow(pd);
+            saveOrUpdate(pd);
+        } else if (pd.getString("flag").equals("3")){
+            //编辑提交，先启动工作流，然后再保存数据
+            flowService.startFlow(pd);
+
+            saveOrUpdate(pd);
+        } else {
+
+            //列表提交，直接启动工作流
+            flowService.startFlow(pd);
+        }
 
         //更改主表状态
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[1]);
@@ -200,7 +224,7 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
         }
 
         //编辑主表的审批状态、审批人等信息
-        baseDao.update("ItemClosureCheckMapper.updateMainProcessStatus", pd);
+        baseDao.update("ItemClosureCheckMapper.updateMainApproveProcessStatus", pd);
     }
 
     /**
@@ -215,6 +239,9 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
         baseDao.batchDelete("ItemClosureCheckMapper.deleteItemClosure", idList);
         //删除研发项目结项验收研发人员信息表
         baseDao.batchDelete("ItemClosureCheckMapper.deleteItemClosureUserInfo", idList);
+
+        //先删除附件表
+        fileService.deleteAttachment(pd);
     }
 
     /**
@@ -246,11 +273,11 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
     public HSSFWorkbook exportExcel(PageData pageData) {
         String title = "研发项目结题验收";
         String[] head = {"序号", "单据编号", "成果名称", "当前审批人", "申请评审验收单位", "结题申报人", "申请评审日期", "项目负责人", "岗位", "联系电话", "起始年度",
-                "结束年度", "任务来源", "成果内容简介", "编制人", "创建日期", "更新日期"};
-        String idStr = pageData.getString("idList");
+                "结束年度", "成果内容简介", "编制人", "创建日期", "更新日期"};
+        String idStr = pageData.getString("businessIdList");
         List<String> listId = JSONObject.parseArray(idStr, String.class);
         //根据idList查询主表
-        List<PageData> checkInfoList = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureCheckDetail", listId);
+        List<PageData> checkInfoList = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureCheckDetailExportExcel", listId);
 
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet(title + 1);
@@ -300,7 +327,7 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("creatorUser"));
+                cell.setCellValue(pd.getString("createUser"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -328,19 +355,11 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("taskSource"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
                 cell.setCellValue(pd.getString("projectAbstract"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("directoryAndUnit"));
-                cell.setCellStyle(styleCell);
-
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("checkRemark"));
+                cell.setCellValue(pd.getString("createUser"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -383,16 +402,17 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
 
         //设置基本信息
         int width1[] = {140, 400, 140, 300, 140, 160, 150, 250};//每栏的宽度
-        String[] argArr1 = {"编制单位", data.getString("creatorOrg"), "创建人", data.getString("creatorUser"), "创建时间", data.getString("createdDate"), "单据编号", data.getString("serialNumber"),
-                "成果名称",data.getString("jobTitle"),"项目负责人",data.getString("applyUserName"),"负责人岗位",data.getString("postName")
-                ,"联系电话",data.getString("telephone"),"起始年度",data.getString("startYear"),"结束年度",data.getString("endYear")
-                ,"结题申报人",data.getString("creatorUser"),"申请评审日期",data.getString("createdDate"),"任务来源",data.getString("taskSource")
-                ,"成果内容简介",data.getString("projectAbstract"),"经济技术文件目录及提供单位",data.getString("directoryAndUnit"),"申请评审单位意见",data.getString("checkRemark")};
+        String[] argArr1 = {
+                "编制单位", data.getString("creatorOrgName"), "创建人", data.getString("createUser"),
+                "创建时间", data.getString("createdDate"), "单据编号", data.getString("serialNumber"),
+                "成果名称",data.getString("jobTitle"),"项目负责人",data.getString("applyUserName"),
+                "负责人岗位",data.getString("postName"),"联系电话",data.getString("telephone"),
+                "起始年度",data.getString("startYear"),"结束年度",data.getString("endYear"),
+                "结题申报人",data.getString("creatorUser"),"申请评审日期",data.getString("createdDate"),
+                "成果内容简介",data.getString("projectAbstract"), "经济技术文件目录及提供单位",data.getString("directoryAndUnit")};
         HashMap<Integer,Integer> mergeMap=new HashMap<>();
-        mergeMap.put(26,7);
-        mergeMap.put(28, 7);
-        mergeMap.put(30, 7);
-        mergeMap.put(31, 7);
+        mergeMap.put(25,7);
+        mergeMap.put(27, 7);
         PdfPTable baseTableHaveMerge = PDFUtil.createBaseTableHaveMerge(width1, argArr1, mergeMap);
 
         //人员信息
@@ -400,7 +420,8 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
                 "全时率", "联系电话", "参与研究开始日期", "参与研究结束日期", "编制人"};
         int width2[] = {100, 200, 250, 150, 150, 150, 200, 200, 200, 200,200, 200, 200, 200, 200,200, 200};//每栏的宽度
         //明细数据写入
-        JSONArray list = JSONArray.parseArray(data.getString("userInfoList"));
+        List<PageData> list = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureUserInfoList", data);
+
         String[] argDetail = null;
         List<String> detailList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {

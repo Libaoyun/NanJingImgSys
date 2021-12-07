@@ -143,6 +143,7 @@ public class Swagger2Configuration {
                 ))
                 .paths(Predicates.or(
                         //这里添加你需要展示的接口,同一包下根据url路径设置加入文档,忽略哪些文档
+                        PathSelectors.ant("/itemExpenses/**"),//研发项目费用支出管理
                         PathSelectors.ant("/itemClosureCheck/**"),//研发项目结题验收
                         PathSelectors.ant("/projectApply/**")//项目立项申请
 
