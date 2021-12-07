@@ -13,6 +13,13 @@
                     </el-upload>  
                     <span>{{uploadName||'未选择'}}</span>
                 </el-form-item>
+                <el-form-item>
+                    <el-progress
+                        v-if="uploadProgress"
+                        :percentage="uploadProgress"
+                        color="#5cb87a"
+                    ></el-progress>
+                </el-form-item>
                 <el-form-item label="备注:" prop="remark">
                     <el-input  v-model="fileInfo.remark" placeholder="请输入备注" type="textarea"></el-input>
                 </el-form-item>
@@ -47,6 +54,7 @@ export default class extends tableMixin {
         remark: '',
         fileList:[]
     }
+    uploadProgress = 0
     uploadName = ''
     validateFile = (rule,value,callback)=>{
         if(this.fileInfo.fileList.length===0){
@@ -108,11 +116,27 @@ export default class extends tableMixin {
     handleUpolad(file){
         var fd = new FormData();
         fd.append('file',file.file);
-        this.$API.apiUploadFile(fd).then(res=>{
+        this.$API.apiUploadFile(fd, (progressEvent) => {
+          this.onUploadProgress(progressEvent, file.file.uid);
+        }).then(res=>{
+            this.uploadProgress = 100
             this.fileInfo.fileList[0] = res.data
             this.uploadName = res.data.fileName
             return true;
-        }).catch(err=>{})
+        }).catch(err=>{
+
+        }).finally(()=>{
+            setTimeout(()=>{
+                this.uploadProgress = 0
+            },500)
+        })
+    }
+    onUploadProgress(progressEvent, uid) {
+        let percent = ((progressEvent.loaded / progressEvent.total) * 100) | 0; //调用onProgress方法来显示进度条，需要传递个对象 percent为进度值
+        if(percent == 100) {
+            percent = 99
+        }
+        this.uploadProgress = percent;
     }
     uploadChange (file,filelist) {
         if(filelist.length&&filelist.length>1) {
