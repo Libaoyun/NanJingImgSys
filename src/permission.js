@@ -28,7 +28,7 @@ router.beforeEach((to, from, next) => {
 
 // 设置标题
 router.afterEach((to, from) => {
-    var title = '研究开发费用管理系统';
+    var title = '研发费用辅助管理系统';
     to.meta && to.meta.title && (title = to.meta.title + '-' + title);
     document.title = title;
 });

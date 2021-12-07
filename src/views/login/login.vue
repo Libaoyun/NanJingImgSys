@@ -3,7 +3,7 @@
     <div class="login-frame">
       <div class="login-title">
         <!-- <div class="login-logo"><img src="@/assets/images/logo.png" alt=""></div> -->
-        <h2>研究开发费用管理系统</h2>
+        <h2>研发费用辅助管理系统</h2>
       </div>
       <div class="login-form">
         <el-form :rules="loginRules" ref="loginAccountForm" :model="loginInfo">
