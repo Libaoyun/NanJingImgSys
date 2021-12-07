@@ -160,6 +160,7 @@ export default class extends tableMixin {
         return data.dicTypeName.indexOf(value) !== -1;
     }
     handleProjectNodeClick(data) {
+        this.listQuery.page = 1;
         this.selected = data;
         if(data.dicTypeFlag != '1'){
             this.dictionaryDisabled = true
