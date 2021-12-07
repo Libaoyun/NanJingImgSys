@@ -27,7 +27,7 @@
         <el-table
             ref="tableData"
             :data="tableData"
-            :row-key="getRowKeys"
+            row-key="id"
             :height="tableHeight"
             :border="tableConfig.border"
             v-loading="listLoading"
@@ -136,9 +136,6 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
         })
         return list;
     };
-    getRowKeys(row) {
-        return row.id
-    }
     // 查询外部用户列表
     getUserList(){
         var params = {};

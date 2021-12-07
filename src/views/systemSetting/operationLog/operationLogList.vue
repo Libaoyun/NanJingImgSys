@@ -10,6 +10,7 @@
         <el-table
             ref="tableData"
             :data="tableData"
+            row-key="id"
             :height="tableHeight"
             :border="tableConfig.border"
             v-loading="listLoading"
@@ -17,7 +18,7 @@
             @selection-change="tableSelectionChange"
             class="global-table-default"
             style="width: 100%;">
-            <el-table-column type="selection" width="55" align="center" ></el-table-column>
+            <el-table-column type="selection" width="55" align="center" :reserve-selection="true"></el-table-column>
             <el-table-column label="序号" width="55" align="center" :show-overflow-tooltip="true">
                 <template slot-scope="props">
                     <span>{{(listQuery.page-1)*listQuery.limit + props.$index + 1}}</span>
@@ -113,6 +114,9 @@ export default class extends tableMixin {
             this.searchParams = {};
             // 清除表格筛选条件
             this.$refs.tableData.clearFilter();
+            this.filterParams = {};
+            // 清除多选表格选中
+            this.$refs.tableData.clearSelection();
             this.getOperationLog();
         }
     }

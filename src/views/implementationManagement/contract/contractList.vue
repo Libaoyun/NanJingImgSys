@@ -63,6 +63,7 @@
     <el-table
         ref="tableData"
         :data="tableData"
+        row-key="id"
         :height="tableHeight"
         :border="tableConfig.border"
         v-loading="listLoading"
@@ -76,6 +77,7 @@
           type="selection"
           width="55"
           align="center"
+          :reserve-selection="true"
       ></el-table-column>
       <el-table-column label="序号" type="index" width="55" align="center">
         <template slot-scope="scope">
@@ -309,6 +311,7 @@ export default class extends tableMixin {
               message: '删除成功!',
             });
             this.resetPageNum();
+            this.$refs.tableData.clearSelection();
             this.getContractList();
           })
               .catch(() => {
@@ -371,6 +374,8 @@ export default class extends tableMixin {
       // 清除表格筛选条件
       this.$refs.tableData.clearFilter();
       this.filterParams = {};
+      // 清除多选表格选中
+      this.$refs.tableData.clearSelection();
       this.getContractList();
     }
   }

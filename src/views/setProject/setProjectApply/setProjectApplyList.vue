@@ -27,7 +27,7 @@
         <el-table
             ref="tableData"
             :data="tableData"
-            :row-key="getRowKeys"
+            row-key="id"
             :height="tableHeight"
             :border="tableConfig.border"
             v-loading="listLoading"
@@ -125,9 +125,6 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
         })
         return list;
     };
-    getRowKeys(row) {
-        return row.id
-    }
     // 查询外部用户列表
     getSetProjectApplyList(){
         var params = {};
@@ -289,8 +286,6 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                                         type: 'success',
                                         message: '提交成功!'
                                     });
-                                    // 清除多选表格选中
-                                    this.$refs.tableData.clearSelection();
                                     this.getSetProjectApplyList();
                                 }).catch(()=>{
                                     this.loadingBtn = 0
@@ -304,8 +299,6 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                                 type: 'success',
                                 message: '提交成功!'
                             });
-                            // 清除多选表格选中
-                            this.$refs.tableData.clearSelection();
                             this.getSetProjectApplyList();
                         }
                     }).catch(()=>{

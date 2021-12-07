@@ -29,15 +29,17 @@
                     <div class="searchBtn iconfont icon-sousuo" @click="listQuery.page = 1;getStationUserList()"></div>
                 </div>
                 <el-table
+                ref="tableData"
                 v-loading="listLoading"
                 :data="userList"
+                row-key="userCode"
                 :max-height="395"
                 :element-loading-spinner="tableConfig.loadingIcon"
                 :border="tableConfig.border"
                 class="global-table-default"
                 @selection-change="tableSelectionChange"
                 style="width: 100%;">
-                    <el-table-column type="selection" width="55" align="center" ></el-table-column>
+                    <el-table-column type="selection" width="55" align="center" :reserve-selection="true"></el-table-column>
                     <el-table-column label="序号" type="index" width="50" align="center">
                         <template slot-scope="scope">
                             <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
@@ -163,6 +165,7 @@ export default class HandleUser extends tableMixin {
     }
     handleProjectNodeClick(data) {
         this.currentProject = data
+        this.$refs.tableData.clearSelection();
         this.getStationUserList()
     }
     // 表格：复选框变化时触发,删除编辑

@@ -33,10 +33,12 @@
             </div>
             <div class="search-group">
                 <el-input placeholder="授权对象" v-model="search.authName"></el-input>
-                <div class="searchBtn iconfont icon-sousuo" @click="listQuery.page = 1;getAuthProjectUser()"></div>
+                <div class="searchBtn iconfont icon-sousuo" @click="refreshBtn"></div>
             </div>
             <el-table
+                ref="tableData"
                 :data="userList"
+                row-key="userId"
                 :max-height="tableConfig.maxHeight"
                 :border="tableConfig.border"
                 :element-loading-spinner="tableConfig.loadingIcon"
@@ -44,7 +46,7 @@
                 @selection-change="tableSelectionChange"
                 class="global-table-default"
                 style="width: calc(100% - 3px)">
-                <el-table-column type="selection" width="55" align="center" ></el-table-column>
+                <el-table-column type="selection" width="55" align="center" :reserve-selection="true"></el-table-column>
                 <el-table-column label="序号" type="index" width="50" align="center">
                     <template slot-scope="scope">
                         <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
@@ -139,7 +141,7 @@ export default class extends tableMixin {
     }
     created(){
         eventBus.$on('refreshList',()=>{
-            this.getAuthProjectUser();
+            this.refreshBtn();
         })
     }
     mounted() {
@@ -184,12 +186,12 @@ export default class extends tableMixin {
     // 添加授权人员
     addAuthUser(selected) {
         this.userDialog = false
-        this.getAuthProjectUser()
+        this.refreshBtn()
     }
     // 添加授权岗位
     addAuthPosition(selected) {
         this.positionDialog = false
-        this.getAuthProjectUser()
+        this.refreshBtn()
     }
     // 授权
     menuAuth() {
@@ -204,10 +206,16 @@ export default class extends tableMixin {
               type: 'success',
               message: '删除成功!'
             });
+            this.$refs.tableData.clearSelection();
             this.getAuthProjectUser()
         }).catch((err)=>{
 
         })
+    }
+    refreshBtn() {
+        this.listQuery.page = 1;
+        this.$refs.tableData.clearSelection();
+        this.getAuthProjectUser()
     }
     filterProjectTreeNode(value, data){
         if (!value) return true;
@@ -221,7 +229,7 @@ export default class extends tableMixin {
         project[0].organizationName = data.organizationName || '';
         this.project = project;
         console.log(this.project)
-        this.getAuthProjectUser()
+        this.refreshBtn()
     }
     // 删除授权对象
     deleteUser(data){
