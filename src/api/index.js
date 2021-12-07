@@ -15,7 +15,9 @@ import * as disclosureApi from './modules/implementationManagement/disclosure';
 import * as reportApi from './modules/implementationManagement/report';
 import * as flowManageApi from './modules/systemSetting/flowManage';
 import * as setProjectApplyApi from './modules/setProject/setProjectApply';
-import * as checkFinalApi from './modules/checkManagement/checkFinal'
+import * as checkFinalApi from './modules/checkManagement/checkFinal';
+import * as expenseApi from './modules/implementationManagement/expense';
+import * as changeApi from './modules/implementationManagement/change';
 
 let api = Object.assign(
     appApi,
@@ -35,6 +37,8 @@ let api = Object.assign(
     flowManageApi,
     setProjectApplyApi,
     checkFinalApi,
+    expenseApi,
+    changeApi,
 );
 
 Vue.prototype.$API = api
