@@ -143,6 +143,10 @@
       height: auto;
       overflow: auto;
     }
+    .global-table-default{
+        max-height: 500px;
+        overflow: auto;
+    }
     .el-form-item {
       width: 45% !important;
       .el-select {

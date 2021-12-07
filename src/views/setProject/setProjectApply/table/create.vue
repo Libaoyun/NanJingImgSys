@@ -2,6 +2,9 @@
     <div style="padding-bottom: 46px">
         <!-- 主信息 -->
         <card-global cardTitle="主信息">
+            <template v-slot:button>
+                <upload-template importUrl="apiUploadMain" @importBtn="importTemplate($event,0)"></upload-template>
+            </template>
             <el-form ref="doForm" :inline="true" :rules="formRules" :model="baseInfo" size="mini" label-position="right" label-width="80px">
                 <el-form-item label="申请单号:" prop="serialNumber">
                     <el-input v-model="baseInfo.serialNumber" placeholder="自动生成RDPI" disabled></el-input>
@@ -852,7 +855,10 @@ export default class extends Mixins(tableMixin,dictionaryMixin,rule) {
     }
     // 导入模板
     importTemplate(data,index) {
-        if(index === 1) {
+        if(index === 0) {
+            // 主信息
+            this.baseInfo = Object.assign(this.baseInfo,data)
+        }else if(index === 1) {
             // 立项调研信息
             const keysArr = ['currentSituation','purposeSignificance','contentMethod','targetResults','basicConditions','innovationPoints','feasibilityAnalysis']
             keysArr.forEach(item=>{

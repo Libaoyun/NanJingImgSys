@@ -72,7 +72,7 @@ export default class extends tableMixin {
     activated() {
         this.activeName = this.hasAttach ? 'first' : 'second'
         this.approvalRecordList = []
-        this.$refs['approvalForm'].resetFields()
+        this.$refs['approvalForm']?.resetFields()
         this.getApprovalRecordList()
     }
 
