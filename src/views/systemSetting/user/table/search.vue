@@ -25,8 +25,8 @@
                 <el-form-item label="所属职务" prop="postName">
                     <el-input v-model.trim="searchParams.postName" placeholder="请输入所属职务"></el-input>
                 </el-form-item>
-                <el-form-item label="创建人" prop="createUser">
-                    <el-input v-model.trim="searchParams.createUser" placeholder="请输入创建人"></el-input>
+                <el-form-item label="创建人" prop="selectCreateUser">
+                    <el-input v-model.trim="searchParams.selectCreateUser" placeholder="请输入创建人"></el-input>
                 </el-form-item>
                 <el-form-item label="创建时间" prop="createTime">
                     <el-date-picker
