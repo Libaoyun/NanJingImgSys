@@ -4,7 +4,7 @@
             <div>
                 <el-form ref="doForm" :inline="true" :rules="formRules" :model="baseInfo" size="mini" label-position="right" label-width="80px">
                     <el-form-item label="用户编号:" prop="userCode">
-                        <el-input v-model="baseInfo.userCode" placeholder="请输入用户编号"></el-input>
+                        <el-input v-model="baseInfo.userCode" disabled></el-input>
                     </el-form-item>
                     <el-form-item label="用户名称:" prop="userName">
                         <el-input  v-model="baseInfo.userName" placeholder="请输入用户名称"></el-input>
