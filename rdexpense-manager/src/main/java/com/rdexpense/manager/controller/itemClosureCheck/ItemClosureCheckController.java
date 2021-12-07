@@ -22,6 +22,7 @@ import com.rdexpense.manager.dto.base.FlowApproveDto;
 import com.rdexpense.manager.dto.itemClosureCheck.ItemClosureCheckDetailDto;
 import com.rdexpense.manager.dto.itemClosureCheck.ItemClosureCheckListDto;
 import com.rdexpense.manager.dto.itemClosureCheck.ItemClosureProjectApplyListDto;
+import com.rdexpense.manager.dto.projectApply.ProgressPlanDto;
 import com.rdexpense.manager.dto.projectApply.ProjectApplyListDto;
 import com.rdexpense.manager.dto.projectApply.ProjectApplySearchDto;
 import com.rdexpense.manager.dto.projectApply.ResearchUserDto;
@@ -104,11 +105,11 @@ public class ItemClosureCheckController extends BaseController {
     @ApiImplicitParam(name = "id", value = "研发项目申请表ID", required = true, dataType = "String")
     public ResponseEntity<PageInfo<ResearchUserDto>> queryApplyUserList() {
         PageData pd = this.getParams();
+        ResponseEntity result = null;
         try {
-            PageHelper.startPage(pd.getInt("pageNum"), pd.getInt("pageSize"));
             List<PageData> list = itemClosureCheckService.queryApplyUserList(pd);
-            PageInfo<PageData> pageInfo = new PageInfo<>(list);
-            return ResponseEntity.success(PropertyUtil.pushPageList(pageInfo, ResearchUserDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ProgressPlanDto.class));
+            return result;
         } catch (Exception e) {
             logger.error("查询已审批完成的研发项目的人员信息列表,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), e.getMessage());
@@ -143,10 +144,10 @@ public class ItemClosureCheckController extends BaseController {
 
     @PostMapping("/queryDetail")
     @ApiOperation(value = "查询研发项目结题验收申请详情", notes = "查询研发项目结题验收申请详情")
-    @ApiImplicitParam(name = "id", value = "主键ID", required = true, dataType = "String")
+    @ApiImplicitParam(name = "businessId", value = "业务主键businessId", required = true, dataType = "String")
     public ResponseEntity<ItemClosureCheckDetailDto> queryDetail() {
         PageData pd = this.getParams();
-        CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID",64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键businessId",64);
         try {
 
             PageData pageData = itemClosureCheckService.getItemClosureCheckDetail(pd);
@@ -188,9 +189,13 @@ public class ItemClosureCheckController extends BaseController {
             //先保存或编辑校验
             submitCheckParam(pd);
         } else {
+            PageData pageData = itemClosureCheckService.getItemClosureCheckDetail(pd);
+            pageData.put("menuCode",pd.getString("menuCode"));
+            //启动工作流时会进行校验
+            pd.put("serialNumber",pageData.getString("serialNumber"));
             //列表提交校验
-            submitCheckParam(pd);
-            CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID",64);
+            submitCheckParam(pageData);
+            CheckParameter.stringLengthAndEmpty(pageData.getString("businessId"), "业务主键businessId",64);
         }
 
         ResponseEntity result = null;

@@ -343,7 +343,7 @@
         set
             approve_user_id = #{approveUserId},
             approve_user_name = #{approveUserName},
-            approve_time = #{approveTime},
+            approve_time = getdate(),
             process_inst_id = #{processInstId},
             process_status = #{processStatus},
             next_approve_user_id = #{nextApproveUserId},
@@ -352,6 +352,21 @@
             update_user_id       = #{createUserId},
             update_time          = getdate()
         where business_id = #{businessId}
+    </update>
+
+    <update id="updateMainApproveProcessStatus" parameterType="pd">
+        update item_closure_check
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{approveUserName},
+            update_user_id       = #{approveUserId},
+            update_time          = getdate()
+        where process_inst_id = #{processInstId}
     </update>
 
 

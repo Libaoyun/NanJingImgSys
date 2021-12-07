@@ -111,12 +111,15 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
 
         //如果ID为空，则为保存
         if (pd.getString("id").isEmpty()){
-            String businessId = "ICCK" + UUID.randomUUID().toString();//生成业务主键ID
-            String serialNumber = SequenceUtil.generateSerialNo("ICCK");//生成流水号
-
-            pd.put("businessId", businessId);
-            pd.put("serialNumber", serialNumber);
-            pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+            //判断是直接保存，还是提交时保存
+            //直接保存
+            if (pd.getString("flag").isEmpty()){
+                pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+                String serialNumber = SequenceUtil.generateSerialNo("ICCK");//生成流水号
+                String businessId = "ICCK" + UUID.randomUUID().toString();//生成业务主键ID
+                pd.put("serialNumber", serialNumber);
+                pd.put("businessId", businessId);
+            }
 
             //1、插入主表
             baseDao.insert("ItemClosureCheckMapper.insertMain", pd);
@@ -126,7 +129,7 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
             List<PageData> researchUserList = JSONObject.parseArray(researchUser, PageData.class);
             if (!CollectionUtils.isEmpty(researchUserList)) {
                 for (PageData detailData : researchUserList) {
-                    detailData.put("businessId", businessId);
+                    detailData.put("businessId", pd.getString("businessId"));
                 }
 
                 baseDao.batchInsert("ItemClosureCheckMapper.batchInsertResearchUser", researchUserList);
@@ -166,12 +169,25 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
     public void submit(PageData pd) {
 
         //1：列表提交，2：保存提交，3：编辑提交
-        if (!pd.getString("flag").equals("1")) {
-            //先保存或编辑
-            saveOrUpdate(pd);
-        }
+        if (pd.getString("flag").equals("2")){
+            String serialNumber = SequenceUtil.generateSerialNo("ICCK");//生成流水号
+            String businessId = "ICCK" + UUID.randomUUID().toString();//生成业务主键ID
+            pd.put("serialNumber", serialNumber);
+            pd.put("businessId", businessId);
+            //保存提交，先生成单据编号，再启动工作流，然后再保存数据
+            flowService.startFlow(pd);
 
-        flowService.startFlow(pd);
+            saveOrUpdate(pd);
+        } else if (pd.getString("flag").equals("3")){
+            //编辑提交，先启动工作流，然后再保存数据
+            flowService.startFlow(pd);
+
+            saveOrUpdate(pd);
+        } else {
+
+            //列表提交，直接启动工作流
+            flowService.startFlow(pd);
+        }
 
         //更改主表状态
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[1]);
@@ -202,8 +218,9 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
             flowService.backOriginalNode(pd);
         }
 
+        System.out.println("============"+pd.toString());
         //编辑主表的审批状态、审批人等信息
-        baseDao.update("ItemClosureCheckMapper.updateMainProcessStatus", pd);
+        baseDao.update("ItemClosureCheckMapper.updateMainApproveProcessStatus", pd);
     }
 
     /**
