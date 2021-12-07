@@ -94,7 +94,7 @@ public class Swagger2Configuration {
                 .globalOperationParameters(pars);//************把消息头添加
     }
 
-    @Bean(value = "研发项目进展报告")
+    @Bean(value = "研发项目实施管理")
     public Docket progressReport() {
         //在配置好的配置类中增加此段代码即可
         ParameterBuilder ticketPar = new ParameterBuilder();
@@ -106,7 +106,7 @@ public class Swagger2Configuration {
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
-                .groupName("2.研发项目")
+                .groupName("3.研发项目实施管理")
                 .select()
                 .apis(Predicates.or(basePackage("com.rdexpense.manager.controller")
                 ))
@@ -125,7 +125,7 @@ public class Swagger2Configuration {
 
 
 
-    @Bean(value = "业务功能模块管理")
+    @Bean(value = "研发项目立项管理")
     public Docket applyApi() {
         //在配置好的配置类中增加此段代码即可
         ParameterBuilder ticketPar = new ParameterBuilder();
@@ -137,7 +137,7 @@ public class Swagger2Configuration {
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
-                .groupName("业务功能模块管理")
+                .groupName("2.研发项目立项管理")
                 .select()
                 .apis(Predicates.or(basePackage("com.rdexpense.manager.controller")
                 ))

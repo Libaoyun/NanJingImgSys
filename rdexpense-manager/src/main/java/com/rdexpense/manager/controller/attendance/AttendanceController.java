@@ -1,7 +1,6 @@
-package com.rdexpense.manager.controller.projectApply;
+package com.rdexpense.manager.controller.attendance;
 
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.common.base.dao.mysql.BaseDao;
 import com.common.base.exception.MyException;
@@ -10,21 +9,15 @@ import com.common.entity.ResponseEntity;
 import com.common.util.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.RectangleReadOnly;
-import com.itextpdf.text.pdf.PdfWriter;
 import com.rdexpense.manager.controller.base.BaseController;
 import com.rdexpense.manager.dto.base.BusinessIdListDto;
-import com.rdexpense.manager.dto.base.FlowAbolishDto;
-import com.rdexpense.manager.dto.base.FlowApproveDto;
 import com.rdexpense.manager.dto.base.UploadTemplateFileDto;
 import com.rdexpense.manager.dto.projectApply.*;
-import com.rdexpense.manager.service.projectApply.ProjectApplyService;
+import com.rdexpense.manager.service.attendance.AttendanceService;
 import com.rdexpense.manager.util.FileParamsUtil;
 import com.rdexpense.manager.util.LogUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -35,9 +28,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,7 +42,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
 import static com.common.util.ConstantMsgUtil.*;
-import static com.common.util.ConstantMsgUtil.ERR_EXPORT_FAIL;
 import static com.common.util.DateCheckUtil.checkOrder;
 
 /**
@@ -60,14 +50,14 @@ import static com.common.util.DateCheckUtil.checkOrder;
  * @date 2020/3/31 16:27
  */
 @RestController
-@RequestMapping("/projectApply")
-@Api(value = "项目立项申请", tags = "项目立项申请")
-public class ProjectApplyController extends BaseController {
+@RequestMapping("/attendance")
+@Api(value = "人员考勤管理", tags = "人员考勤管理")
+public class AttendanceController extends BaseController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProjectApplyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AttendanceController.class);
 
     @Autowired
-    private ProjectApplyService projectApplyService;
+    private AttendanceService attendanceService;
 
     @Autowired
     private BaseDao dao;
@@ -75,7 +65,7 @@ public class ProjectApplyController extends BaseController {
     @Autowired
     private LogUtil logUtil;
 
-    private static final String FILE_PREFIX = "项目立项申请_";
+    private static final String FILE_PREFIX = "研发人员考勤管理";
 
 
     @PostMapping("/queryList")
@@ -84,50 +74,41 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         try {
             PageHelper.startPage(pd.getInt("pageNum"), pd.getInt("pageSize"));
-            List<PageData> list = projectApplyService.queryList(pd);
+            List<PageData> list = attendanceService.queryList(pd);
             PageInfo<PageData> pageInfo = new PageInfo<>(list);
             return ResponseEntity.success(PropertyUtil.pushPageList(pageInfo, ProjectApplyListDto.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (Exception e) {
-            logger.error("查询项目立项申请列表,request=[{}]", pd);
+            logger.error("查询研发人员考勤管理列表,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), e.getMessage());
         }
     }
 
 
 
-    @ApiOperation(value = "立项申请(新建/提交)")
+    @ApiOperation(value = "新增考勤")
     @PostMapping("/add")
-    public ResponseEntity addApply(ProjectApplyAddDto projectApplyAddDto) {
+    public ResponseEntity addAttendance(ProjectApplyAddDto projectApplyAddDto) {
         PageData pd = this.getParams();
         CheckParameter.checkDefaultParams(pd);
-        String operationType = pd.getString("operationType");
-        if(operationType.equals("2")){
-            checkParam(pd,2);
-            String check = submitCheck(pd,2);
-            if(StringUtils.isNotBlank(check)){
-                return ResponseEntity.success(check, check);
-            }
-
-        }
 
         ResponseEntity result = null;
         try {
 
-            projectApplyService.addApply(pd);
+            attendanceService.addAttendance(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_SAVE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("新增项目立项申请失败,request=[{}]", pd);
+            logger.error("新增研发人员考勤管理失败,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_SAVE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_SAVE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 1, "项目立项申请", pd);
+            logUtil.saveLogData(result.getCode(), 1, FILE_PREFIX, pd);
         }
     }
 
-    @ApiOperation(value = "立项申请(编辑/提交)")
+    @ApiOperation(value = "编辑考勤")
     @PostMapping("/update")
-    public ResponseEntity updateApply(ProjectApplyAddDto projectApplyAddDto) {
+    public ResponseEntity updateAttendance(ProjectApplyAddDto projectApplyAddDto) {
 
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID", 256);
@@ -154,37 +135,37 @@ public class ProjectApplyController extends BaseController {
         ResponseEntity result = null;
         try {
 
-            projectApplyService.updateApply(pd);
+            attendanceService.updateAttendance(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_UPDATE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("修改项目立项申请失败,request=[{}]", pd);
+            logger.error("修改研发人员考勤管理失败,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_UPDATE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_UPDATE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 2, "项目立项申请", pd);
+            logUtil.saveLogData(result.getCode(), 2, FILE_PREFIX, pd);
         }
     }
 
 
 
-    @ApiOperation(value = "删除申请")
+    @ApiOperation(value = "删除考勤")
     @PostMapping("/delete")
-    public ResponseEntity deleteApply(BusinessIdListDto businessIdListDto) {
+    public ResponseEntity deleteAttendance(BusinessIdListDto businessIdListDto) {
         PageData pd = this.getParams();
         CheckParameter.checkBusinessIdList(pd);
 
         ResponseEntity result = null;
         try {
-            projectApplyService.deleteApply(pd);
+            attendanceService.deleteAttendance(pd);
             result = ResponseEntity.success(null, ConstantMsgUtil.INFO_DELETE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("删除项目立项申请失败,request=[{}]", pd);
+            logger.error("删除研发人员考勤管理失败,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_DELETE_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_DELETE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 3, "项目立项申请", pd);
+            logUtil.saveLogData(result.getCode(), 3, FILE_PREFIX, pd);
         }
 
 
@@ -192,254 +173,75 @@ public class ProjectApplyController extends BaseController {
 
 
 
-    @ApiOperation(value = "查询申请详情")
+    @ApiOperation(value = "查询详情")
     @PostMapping("/queryDetail")
     @ApiImplicitParam(name = "businessId", value = "业务主键ID", required = true, dataType = "String")
     public ResponseEntity<ProjectApplyDetailDto> getApplyDetail() {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID", 128);
         try {
-            PageData pageData = projectApplyService.getApplyDetail(pd);
+            PageData pageData = attendanceService.getApplyDetail(pd);
             return PropertyUtil.pushData(pageData, ProjectApplyDetailDto.class, ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (MyException e) {
-            logger.error("查询项目立项申请详情失败,request=[{}]", pd);
+            logger.error("查询研发人员考勤管理详情失败,request=[{}]", pd);
             return ResponseEntity.failure(ERR_QUERY_FAIL.val(), ERR_QUERY_FAIL.desc());
         }
     }
 
 
-    @ApiOperation(value = "列表提交")
-    @PostMapping(value = "/submit")
-    @ApiImplicitParams(value = {
-            @ApiImplicitParam(name = "businessId", value = "业务主键id", required = true, dataType = "string"),
-            @ApiImplicitParam(name = "menuCode", value = "菜单编码", required = true, dataType = "Integer")})
-    public ResponseEntity submitRecord(){
-        PageData pd = this.getParams();
-        CheckParameter.checkPositiveInt(pd.getString("menuCode"), "菜单编码");
-        ResponseEntity result = null;
-        // 编辑时，状态只能为已保存
-        PageData recordData = projectApplyService.getApplyDetail(pd);
-        String requestStatus = recordData.getString("processStatus");
-        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0]) && !requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[3])) {
-            throw new MyException(ConstantMsgUtil.ERR_SUBMIT_FAIL.desc());
-        }
-
-        checkParam(recordData,1);
-
-        String check =  submitCheck(recordData,1);
-        if(StringUtils.isNotBlank(check)){
-            return ResponseEntity.success(check, check);
-        }
-
-
-        try {
-            pd.put("serialNumber",recordData.getString("serialNumber"));
-            projectApplyService.submitRecord(pd);
-            result = ResponseEntity.success(null, ConstantMsgUtil.INFO_SUBMIT_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            result = ResponseEntity.failure(ConstantMsgUtil.ERR_SUBMIT_FAIL.val(), e.getMessage());
-            logger.error("项目立项申请提交失败,request=[{}]", pd);
-            throw new MyException(ConstantMsgUtil.ERR_SUBMIT_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 4, "项目立项申请", pd);
-        }
-    }
-
-
-    @ApiOperation(value = "审批(同意/回退)")
-    @PostMapping(value = "/approve")
-    public ResponseEntity approveRecord(FlowApproveDto flowApproveDto){
-        PageData pd = this.getParams();
-        checkApprove(pd);
-        ResponseEntity result = null;
-        try {
-            projectApplyService.approveRecord(pd);
-            result = ResponseEntity.success(null, ConstantMsgUtil.INFO_APPROVE_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            result = ResponseEntity.failure(ConstantMsgUtil.ERR_APPROVE_FAIL.val(), e.getMessage());
-            logger.error("项目立项申请审批失败,request=[{}]", pd);
-            throw new MyException(ConstantMsgUtil.ERR_APPROVE_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 8, "项目立项申请", pd);
-        }
-    }
-
-
-    @ApiOperation(value = "废除（未开发）")
-    @PostMapping(value = "/abolish")
-    public ResponseEntity abolishRecord(FlowAbolishDto flowAbolishDto){
-        PageData pd = this.getParams();
-        CheckParameter.checkDefaultParams(pd);
-        ResponseEntity result = null;
-        try {
-            projectApplyService.approveRecord(pd);
-            result = ResponseEntity.success(null, ConstantMsgUtil.INFO_APPROVE_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            result = ResponseEntity.failure(ConstantMsgUtil.ERR_APPROVE_FAIL.val(), e.getMessage());
-            logger.error("项目立项申请废除失败,request=[{}]", pd);
-            throw new MyException(ConstantMsgUtil.ERR_APPROVE_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 9, "项目立项申请", pd);
-        }
-    }
 
 
 
-    @ApiOperation(value = "导入全部数据")
-    @PostMapping(value = "/uploadAll")
-    public ResponseEntity upload(UploadTemplateFileDto dto) {
-        PageData pd = FileParamsUtil.checkParams(dto);
-        ResponseEntity result = null;
-        try {
-            projectApplyService.uploadAll(dto.getFile(),pd);
-            result = ResponseEntity.success(null, INFO_UPLOAD_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            result = ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-            logger.error("导入立项申请全部数据失败,request=[{}]", pd);
-            throw new MyException(ERR_UPLOAD_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 7, "立项申请全部数据", pd);
-        }
-
-    }
-
-
-
-    @ApiOperation(value = "导入主信息")
-    @PostMapping("/uploadMain")
-    public ResponseEntity<ProjectApplyMainDto> uploadMain(UploadTemplateFileDto dto) throws Exception{
-        PageData pd = FileParamsUtil.checkParams(dto);
-        ResponseEntity result = null;
-        try {
-            PageData pageData = projectApplyService.uploadMain(dto.getFile(),pd);
-
-            result = PropertyUtil.pushData(pageData, ProjectApplyMainDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
-            return result;
-        } catch (MyException e) {
-            logger.error("导入立项申请主信息失败,request=[{}]", pd);
-            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), e.getErrorMsg());
-        }
-    }
-
-
-    @ApiOperation(value = "导入立项调研信息")
-    @PostMapping("/uploadSurvey")
-    public ResponseEntity<ProjectApplySurveyDto> uploadSurvey(UploadTemplateFileDto dto) throws Exception{
-        PageData pd = FileParamsUtil.checkParams(dto);
-        ResponseEntity result = null;
-        try {
-            PageData pageData = projectApplyService.uploadSurvey(dto.getFile(),pd);
-            result = PropertyUtil.pushData(pageData, ProjectApplySurveyDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
-            return result;
-        } catch (MyException e) {
-            logger.error("导入立项调研信息失败,request=[{}]", pd);
-            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }
-    }
-
-
-    @ApiOperation(value = "导入进度计划")
-    @PostMapping(value = "/uploadProgress")
+    @ApiOperation(value = "导入考勤表")
+    @PostMapping(value = "/uploadAttendance")
     public ResponseEntity<List<ProgressPlanDto>> uploadProgress(UploadTemplateFileDto dto) {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            List<PageData> list = projectApplyService.uploadProgress(dto.getFile(),pd);
+            List<PageData> list = attendanceService.uploadAttendance(dto.getFile(),pd);
             result = ResponseEntity.success(PropertyUtil.covertListModel(list, ProgressPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("导入进度计划失败,request=[{}]", pd);
+            logger.error("导入研发人员考勤表失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
         }
     }
 
 
-    @ApiOperation(value = "导入参加单位")
-    @PostMapping(value = "/uploadUnit")
-    public ResponseEntity<List<AttendUnitDto>> uploadUnit(UploadTemplateFileDto dto) {
+    @ApiOperation(value = "导入工资表")
+    @PostMapping(value = "/uploadSalary")
+    public ResponseEntity<List<AttendUnitDto>> uploadSalary(UploadTemplateFileDto dto) {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            List<PageData> list = projectApplyService.uploadUnit(dto.getFile(),pd);
+            List<PageData> list = attendanceService.uploadSalary(dto.getFile(),pd);
             result = ResponseEntity.success(PropertyUtil.covertListModel(list, AttendUnitDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("导入参加单位失败,request=[{}]", pd);
+            logger.error("导入研发人员工资失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
         }
     }
 
 
-    @ApiOperation(value = "导入研究人员（初始）")
-    @PostMapping(value = "/uploadUser")
-    public ResponseEntity<List<ResearchUserDto>> uploadUser(UploadTemplateFileDto dto) {
+    @ApiOperation(value = "生成分摊表")
+    @PostMapping(value = "/generateShare")
+    public ResponseEntity<List<AttendUnitDto>> uploadShare(UploadTemplateFileDto dto) {
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
-            List<PageData> list = projectApplyService.uploadUser(dto.getFile(),pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(list, ResearchUserDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            List<PageData> list = attendanceService.generateShare(dto.getFile(),pd);
+            result = ResponseEntity.success(PropertyUtil.covertListModel(list, AttendUnitDto.class), ConstantMsgUtil.INFO_SAVE_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("导入研究人员（初始）失败,request=[{}]", pd);
-            return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
-        }
-    }
-
-
-    @ApiOperation(value = "导入经费预算")
-    @PostMapping("/uploadBudget")
-    public ResponseEntity<List<BudgetAddDto>> uploadBudget(UploadTemplateFileDto dto) throws Exception{
-        PageData pd = FileParamsUtil.checkParams(dto);
-        ResponseEntity result = null;
-        try {
-            List<PageData> list = projectApplyService.uploadBudget(dto.getFile(),pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(list, BudgetAddDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
-            return result;
-        } catch (MyException e) {
-            logger.error("导入经费预算失败,request=[{}]", pd);
-            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }
-    }
-
-    @ApiOperation(value = "导入经费预算（每月预算）")
-    @PostMapping("/uploadMonth")
-    public ResponseEntity uploadMonth(UploadTemplateFileDto dto) throws Exception {
-        PageData pd = FileParamsUtil.checkParams(dto);
-        ResponseEntity result = null;
-        try {
-            List<PageData> list = projectApplyService.uploadMonth(dto.getFile(), pd);
-            result = ResponseEntity.success(list, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
-            return result;
-        } catch (MyException e) {
-            logger.error("导入经费预算（每月预算）失败,request=[{}]", pd);
-            return ResponseEntity.failure(ERR_UPLOAD_FAIL.val(), ERR_UPLOAD_FAIL.desc());
-        }
-
-    }
-
-
-    @ApiOperation(value = "导入拨款计划")
-    @PostMapping(value = "/uploadAppropriation")
-    public ResponseEntity<List<AppropriationPlanDto>> uploadAppropriation(UploadTemplateFileDto dto) {
-        PageData pd = FileParamsUtil.checkParams(dto);
-        ResponseEntity result = null;
-        try {
-            List<PageData> list = projectApplyService.uploadAppropriation(dto.getFile(),pd);
-            result = ResponseEntity.success(PropertyUtil.covertListModel(list, AppropriationPlanDto.class), ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            logger.error("导入拨款计划失败,request=[{}]", pd);
+            logger.error("生成分摊表失败,request=[{}]", pd);
             return ResponseEntity.failure(ConstantMsgUtil.ERR_UPLOAD_FAIL.val(), e.getMessage());
         }
     }
 
 
 
-    @ApiOperation(value = "导出Excel")
+    @ApiOperation(value = "导出excel")
     @PostMapping(value = "/exportExcel")
     public ResponseEntity exportExcel(BusinessIdListDto businessIdListDto) {
         PageData pd = this.getParams();
@@ -458,8 +260,8 @@ public class ProjectApplyController extends BaseController {
             List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
 
             if(businessIdList.size() == 1){
-                HSSFWorkbook wb = projectApplyService.exportExcel(businessIdList.get(0));
-                String fileName = FILE_PREFIX+date+"_"+number+".xls";
+                HSSFWorkbook wb = attendanceService.exportExcel(businessIdList.get(0));
+                String fileName = FILE_PREFIX+"_"+date+"_"+number+".xls";
                 response.setHeader("Content-Disposition",
                         "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
                 OutputStream out = response.getOutputStream();
@@ -468,13 +270,13 @@ public class ProjectApplyController extends BaseController {
 
             }else {
                 //文件名
-                String fileName = FILE_PREFIX+date+"_"+number+".zip";
+                String fileName = FILE_PREFIX+"_"+date+"_"+number+".zip";
                 //输出流
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 // 压缩流
                 ZipOutputStream zos = new ZipOutputStream(bos);
                 //生成excel
-                projectApplyService.exportZip(1,businessIdList, zos, bos,FILE_PREFIX);
+                attendanceService.exportZip(businessIdList, zos, bos,FILE_PREFIX);
                 zos.flush();
                 zos.close();
                 //写入返回response
@@ -492,140 +294,10 @@ public class ProjectApplyController extends BaseController {
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_EXPORT_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_EXPORT_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 6, "项目立项申请EXCEL", pd);
+            logUtil.saveLogData(result.getCode(), 6, FILE_PREFIX, pd);
         }
     }
 
-
-
-    @ApiOperation(value = "导出PDF")
-    @PostMapping(value = "/exportPdf")
-    public ResponseEntity exportPdf(BusinessIdListDto businessIdListDto) {
-        PageData pd = this.getParams();
-        CheckParameter.checkBusinessIdList(pd);
-        ResponseEntity result = null;
-
-        HttpServletResponse response = this.getResponse();
-        try {
-
-            String businessIdStr = pd.getString("businessIdList");
-            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
-            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
-            String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
-            String number = SerialNumberUtil.generateSerialNo("projectApplyPdf");
-
-
-            if(businessIdList.size() == 1){
-                projectApplyService.exportWordPdf(2,businessIdList.get(0),response,FILE_PREFIX);
-            }else {
-                //文件名
-                String fileName = FILE_PREFIX+date+"_"+number+".zip";
-                //输出流
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                // 压缩流
-                ZipOutputStream zos = new ZipOutputStream(bos);
-
-                projectApplyService.exportZip(2,businessIdList, zos, bos,FILE_PREFIX);
-                zos.flush();
-                zos.close();
-                //写入返回response
-                response.reset();
-                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
-                OutputStream out = new BufferedOutputStream(response.getOutputStream());
-                out.write(bos.toByteArray());
-                out.flush();
-                out.close();
-            }
-
-
-            result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
-            throw new MyException(ERR_EXPORT_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 6, "项目立项申请PDF", pd);
-        }
-    }
-
-
-
-    @ApiOperation(value = "导出WORD")
-    @PostMapping(value = "/exportWord")
-    public ResponseEntity exportWord(BusinessIdListDto businessIdListDto) {
-        PageData pd = this.getParams();
-        ResponseEntity result = null;
-        CheckParameter.checkBusinessIdList(pd);
-
-        HttpServletResponse response = this.getResponse();
-        try {
-            String businessIdStr = pd.getString("businessIdList");
-            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
-            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
-            String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
-            String number = SerialNumberUtil.generateSerialNo("projectApplyWord");
-
-
-            if(businessIdList.size() == 1){
-                projectApplyService.exportWordPdf(1,businessIdList.get(0),response,FILE_PREFIX);
-
-            }else {
-                //文件名
-                String fileName = FILE_PREFIX+date+"_"+number+".zip";
-                //输出流
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                // 压缩流
-                ZipOutputStream zos = new ZipOutputStream(bos);
-
-                projectApplyService.exportZip(3,businessIdList, zos, bos,FILE_PREFIX);
-                zos.flush();
-                zos.close();
-                //写入返回response
-                response.reset();
-                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
-                OutputStream out = new BufferedOutputStream(response.getOutputStream());
-                out.write(bos.toByteArray());
-                out.flush();
-                out.close();
-            }
-            result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
-            throw new MyException(ERR_EXPORT_FAIL.desc(), e);
-        } finally {
-            logUtil.saveLogData(result.getCode(), 6, "项目立项申请PDF", pd);
-        }
-    }
-
-
-    @ApiOperation(value = "预览合同")
-    @PostMapping(value = "/preview")
-    public ResponseEntity preview(ProjectApplyAddDto projectApplyAddDto) {
-        PageData pd = this.getParams();
-        HttpServletResponse response = this.getResponse();
-        try {
-            //业务主数据
-            projectApplyService.preview(pd,response);
-
-            ResponseEntity result = ResponseEntity.success(null, INFO_PREVIEW_SUCCESS.desc());
-            return result;
-        } catch (Exception e) {
-            throw new MyException(ERR_PREVIEW_FAIL.desc(), e);
-        }
-    }
-
-
-
-
-    private void checkApprove(PageData pd){
-        CheckParameter.checkDefaultParams(pd);
-
-        CheckParameter.stringLengthAndEmpty(pd.getString("waitId"), "待办列表waitId", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("approveComment"), "审批意见", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("approveType"), "审批类型", 256);
-
-    }
 
 
 
@@ -940,9 +612,6 @@ public class ProjectApplyController extends BaseController {
                 for(PageData data : ruleList){
                     String ruleType = data.getString("ruleType");
                     String ruleValue = data.getString("ruleValue");
-                    if(StringUtils.isBlank(ruleValue)){
-                        continue;
-                    }
                     if(ruleType.equals("5")){
                         otherRate = new BigDecimal(ruleValue);
                     }else if(ruleType.equals("2")){
@@ -956,29 +625,25 @@ public class ProjectApplyController extends BaseController {
             }
 
 
-            try {
-                //1、材料费不得超过总预算的75%
+            //1、材料费不得超过总预算的75%
 
-                if(material.divide(total).multiply(new BigDecimal(100)).compareTo(materialRate) == 1){
-                    buffer.append("材料费");
-                }
+            if(material.divide(total).multiply(new BigDecimal(100)).compareTo(materialRate) == 1){
+                buffer.append("材料费");
+            }
 
-                //2、机械使用费不得低于总预算的15%
-                if(equipment.divide(total).multiply(new BigDecimal(100)).compareTo(equipmentRate) == -1){
-                    buffer.append("、机械设备费");
-                }
+            //2、机械使用费不得低于总预算的15%
+            if(equipment.divide(total).multiply(new BigDecimal(100)).compareTo(equipmentRate) == -1){
+                buffer.append("、机械设备费");
+            }
 
-                //3、人工费不得低于总预算的10%
-                if(artificial.divide(total).multiply(new BigDecimal(100)).compareTo(artificialRate) == -1){
-                    buffer.append("、人工费");
-                }
+            //3、人工费不得低于总预算的10%
+            if(artificial.divide(total).multiply(new BigDecimal(100)).compareTo(artificialRate) == -1){
+                buffer.append("、人工费");
+            }
 
-                //4、其他费用不得低于总预算的10%
-                if(other.divide(total).multiply(new BigDecimal(100)).compareTo(otherRate) == 1){
-                    buffer.append("、其他费用");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            //4、其他费用不得低于总预算的10%
+            if(other.divide(total).multiply(new BigDecimal(100)).compareTo(otherRate) == 1){
+                buffer.append("、其他费用");
             }
 
         }

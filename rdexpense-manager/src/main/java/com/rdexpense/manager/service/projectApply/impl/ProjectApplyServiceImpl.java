@@ -325,7 +325,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
         if (!CollectionUtils.isEmpty(budgetList)) {
             for (PageData detailData : budgetList) {
-                String expenseaccount = detailData.getString("expenseaccount");
+                String expenseaccount = detailData.getString("expenseAccount");
                 String expenseaccountcode = null;
                 if (map != null) {
                     expenseaccountcode = map.get(expenseaccount);
