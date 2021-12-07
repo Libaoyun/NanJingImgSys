@@ -100,7 +100,15 @@ export default class extends tableMixin {
     @Prop() editDialog
     @Prop() loadingBtn
     @Prop() routerMenuInfo
-    routerMenuFormRule = {};
+    routerMenuFormRule = {
+        menuCode:[
+            {
+                pattern: /^\d{0,9}$/,
+                message: "菜单编码只能为数值",
+                trigger: "blur",
+            }
+        ]
+    };
     closeDialog() {
         this.$emit('update:editDialog',false);
         this.$refs['routerMenuForm'].resetFields();

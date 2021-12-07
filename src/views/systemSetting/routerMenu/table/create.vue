@@ -100,7 +100,15 @@ export default class extends tableMixin {
     @Prop() createDialog
     @Prop() loadingBtn
     
-    routerMenuFormRule = {};
+    routerMenuFormRule = {
+        menuCode:[
+            {
+                pattern: /^\d{0,9}$/,
+                message: "菜单编码只能为数值",
+                trigger: "blur",
+            }
+        ]
+    };
     routerMenuInfo={
         menuCode:'',
         title:'',
