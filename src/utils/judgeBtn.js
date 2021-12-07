@@ -42,7 +42,7 @@ function editBtn(data){
         })
         flag = false
     }else{
-        if(data[0].processStatus !== 'DICT10171001' || data[0].processStatus !== 'DICT10171004'){
+        if(data[0].processStatus !== 'DICT10171001' && data[0].processStatus !== 'DICT10171004'){
             flag = false
             Message({
                 type: 'info',
@@ -84,11 +84,11 @@ function submitBtn(data){
     if(data.length !== 1){
         Message({
             type: 'info',
-            message: '请选择一条未提交记录进行提交!'
+            message: '请选择一条记录进行提交!'
         })
         flag = false
     }else{
-        if(data[0].processStatus !== 'DICT10171001' || data[0].processStatus !== 'DICT10171004'){
+        if(data[0].processStatus !== 'DICT10171001' && data[0].processStatus !== 'DICT10171004'){
             flag = false
             Message({
                 type: 'info',
