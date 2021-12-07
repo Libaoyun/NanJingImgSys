@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page">
+  <div class="page">
     <card-global>
       <div>
         <el-form
@@ -23,6 +23,9 @@
           </el-form-item>
           <el-form-item label="成果名称" prop="jobTitle">
             <span>{{ baseInfo.jobTitle }}</span>
+          </el-form-item>
+          <el-form-item label="申请评审单位" prop="unitName">
+            {{baseInfo.unitName}}
           </el-form-item>
           <el-form-item label="项目负责人" prop="applyUserName">
             <span>{{ baseInfo.applyUserName }}</span>
@@ -114,32 +117,19 @@
         <el-table-column prop="creatorUser" label="编制人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
         <el-table-column prop="createTime" label="编制时间" width="180" align="center" :show-overflow-tooltip="true">
           <template slot-scope="scope">
-            {{ scope.row.createTime | formatTime('yyyy-MM-dd') }}
+            {{ scope.row.createTime | formatDate }}
           </template>
         </el-table-column>
 
       </el-table>
     </card-global>
-    <!-- 附件上传 -->
-    <upload-approval-global type="approval" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
     <!--审批-->
-    <approval-global ref="approval"></approval-global>
+    <approval-global type="approval" ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
-      <loading-btn
-        size="mini"
-        type="primary"
-        @click="reject(2)"
-        :loading="loadingBtn"
-        >回退</loading-btn
-      >
-      <loading-btn
-        size="mini"
-        type="primary"
-        @click="resolve(1)"
-        :loading="loadingBtn"
-        >同意</loading-btn
-      >
+      <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
+      <loading-btn class="rejectOrigin" size="mini" @click="reject(3)" :loading="loadingBtn">退回发起人</loading-btn>
+      <loading-btn size="mini" @click="reject(2)" :loading="loadingBtn">退回上节点</loading-btn>
     </div>
   </div>
 </template>
@@ -154,10 +144,11 @@ import tableMixin from "@/mixins/tableMixin";
 export default class extends tableMixin {
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
+  processInstId = null
+  serialNumber = null
   // 设置空数据
   getBaseInfo() {
     return {
-      serialNumber: this.$store.getters.currentOrganization?.organizationId, // 单据编号
       createUser: this.$store.getters.userInfo?.userName, // 创建人
       createUserId: this.$store.getters.userInfo?.userCode, // 结题申报人ID
       createTime: new Date(), // 创建时间
@@ -180,88 +171,96 @@ export default class extends tableMixin {
     };
   }
   activated() {
-    if (Object.keys(this.$route.params).length > 0) {
-      if (this.$route.params.businessId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.businessId);
-        this.$refs.approval.restData();
+    if(Object.keys(this.$route.params).length > 0){
+      if(this.$route.params.businessId){
+        this.initData(this.$route.params.businessId)
       }
+      if(this.$route.params.routerName){
+        this.routerName = this.$route.params.routerName
+      }else{
+        this.routerName = 'checkFinalList'
+      }
+      Object.assign(this,this.$route.params.ids)
     }
   }
 
   // 初始化新建数据
-  initData() {
-    this.$refs["baseForm"].resetFields();
-    this.$refs["checkForm"].resetFields();
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
-  }
-  getRecordDetail(businessId) {
+  initData(businessId) {
+    this.processInstId = null
+    this.serialNumber = null
+    this.$refs.baseForm?.resetFields();
+    this.$refs.checkForm?.resetFields();
     this.$API.apiCheckFinalDetail({businessId}).then((res) => {
       this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
       this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
       this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
+      !res.data.attachmentList && (this.baseInfo.attachmentList = [])
     })
   }
-  // 审批回退 (拒绝)
-  reject(loadingBtn) {
-    // 审批意见校验拒绝
-    this.$refs.approval.isCheckComplete().then(remark => {
-      this.loadingBtn = loadingBtn;
-      var params = {
-        menuCode: this.MENU_CODE_LIST.checkFinalList,
-        noted: remark,
-        processInstId: this.baseInfo.processInstId
-      };
-      // this.$API
-      //   .apiRejectMaterialRegister(params)
-      //   .then(res => {
-      //     this.$message({
-      //       type: "success",
-      //       message: "审批成功"
-      //     });
-      //     this.backBtn();
-      //     this.loadingBtn = 0;
-      //   })
-      //   .catch(err => {
-      //     this.loadingBtn = 0;
-      //   });
-    });
-  }
-  // 审批同意
-  resolve(loadingBtn) {
+  
+  resolve(loadingBtn){
     // 审批意见校验通过
-    this.$refs.approval.isCheckComplete().then(remark => {
+    this.$refs.approval.isCheckComplete().then((remark)=>{
       this.loadingBtn = loadingBtn;
       var params = {
-        menuCode: this.MENU_CODE_LIST.checkFinalList,
-        noted: remark,
-        processInstId: this.baseInfo.processInstId
-      };
-      // this.$API
-      //   .apiApproveMaterialRegister(params)
-      //   .then(res => {
-      //     this.$message({
-      //       type: "success",
-      //       message: "审批成功"
-      //     });
-      //     this.backBtn();
-      //     this.loadingBtn = 0;
-      //   })
-      //   .catch(err => {
-      //     this.loadingBtn = 0;
-      //   });
-    });
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.checkFinalList,
+        approveComment:remark,
+        approveType:1,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiCheckFinalApproval(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
+  }
+  // 退回上节点
+  reject(loadingBtn){
+    // 审批意见校验通过
+    this.$refs.approval.isCheckComplete().then((remark)=>{
+      this.loadingBtn = loadingBtn;
+      var params = {
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.checkFinalList,
+        approveComment:remark,
+        approveType:loadingBtn,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiCheckFinalApproval(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
   }
   // 返回按钮
   backBtn() {
-    this.$store.commit("DELETE_TAB", this.$route.path);
-    this.$router.push({ name: "checkFinalList" });
+    this.resetData()
+  }
+  // 清空数据
+  resetData(isRefresh) {
+    this.$store.commit('DELETE_TAB', this.$route.path);
+    this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.create-page {
+.page {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;

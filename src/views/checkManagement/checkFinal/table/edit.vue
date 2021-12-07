@@ -33,6 +33,9 @@
               @click.native="chooseProject"
             ></el-input>
           </el-form-item>
+          <el-form-item label="申请评审单位" prop="unitName">
+            <el-input v-model="baseInfo.unitName" placeholder="自动带入" disabled></el-input>
+          </el-form-item>
           <el-form-item label="项目负责人" prop="applyUserName">
             <el-input v-model="baseInfo.applyUserName" placeholder="自动带入" disabled></el-input>
           </el-form-item>
@@ -79,12 +82,16 @@
           <el-input
             type="textarea"
             v-model="baseInfo.checkInfo.projectAbstract"
+            maxlength="500"
+            show-word-limit
           ></el-input>
         </el-form-item>
         <el-form-item label="经济技术文件目录及提供单位" prop="directoryAndUnit">
           <el-input
             type="textarea"
             v-model="baseInfo.checkInfo.directoryAndUnit"
+            maxlength="500"
+            show-word-limit
           ></el-input>
         </el-form-item>
       </el-form>
@@ -127,7 +134,7 @@
         <el-table-column prop="creatorUser" label="编制人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
         <el-table-column prop="createTime" label="编制时间" width="180" align="center" :show-overflow-tooltip="true">
           <template slot-scope="scope">
-            {{ scope.row.createTime | formatTime('yyyy-MM-dd') }}
+            {{ scope.row.createTime | formatDate }}
           </template>
         </el-table-column>
 
@@ -186,7 +193,6 @@ export default class extends tableMixin {
   // 设置空数据
   getBaseInfo() {
     return {
-      serialNumber: this.$store.getters.currentOrganization?.organizationId, // 单据编号
       createUser: this.$store.getters.userInfo?.userName, // 创建人
       createUserId: this.$store.getters.userInfo?.userCode, // 结题申报人ID
       createTime: new Date(), // 创建时间
@@ -211,23 +217,20 @@ export default class extends tableMixin {
   activated() {
     if (Object.keys(this.$route.params).length > 0) {
       if (this.$route.params.businessId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.businessId);
+        this.initData(this.$route.params.businessId);
       }
     }
   }
 
   // 初始化新建数据
-  initData() {
-    this.$refs["baseForm"].resetFields();
-    this.$refs["checkForm"].resetFields();
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
-  }
-  getRecordDetail(businessId) {
+  initData(businessId) {
+    this.$refs.baseForm?.resetFields();
+    this.$refs.checkForm?.resetFields();
     this.$API.apiCheckFinalDetail({businessId}).then((res) => {
       this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
       this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
       this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
+      !res.data.attachmentList && (this.baseInfo.attachmentList = [])
     })
   }
   // 格式化保存提交的数据
@@ -322,6 +325,7 @@ export default class extends tableMixin {
       this.$set(this.baseInfo, "startYear", data.startYear);
       this.$set(this.baseInfo, "endYear", data.endYear);
       this.$set(this.baseInfo, 'projectApplyMainId', data.businessId) // 项目ID
+      this.$set(this.baseInfo, 'unitName', data.unitName) // 审批评审验收单位
       
       this.userInfoList(data.businessId)
     });
@@ -331,7 +335,7 @@ export default class extends tableMixin {
     this.baseInfo.userInfoList = []
     this.$API.apiCheckFinalUserList({businessId}).then(res=>{
       if(res.data){
-        this.baseInfo.userInfoList = res.data;
+        this.baseInfo.userInfoList = res.data || [];
       }
     })
   }

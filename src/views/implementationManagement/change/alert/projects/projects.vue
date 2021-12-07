@@ -13,8 +13,24 @@
       <div class="right">
         <div class="search-group">
           <el-input
-            placeholder="编制人"
-            v-model.trim="search.creatorUserName"
+            placeholder="申请单号"
+            v-model.trim="search.serialNumber"
+            @keyup.enter.native="
+              listQuery.page = 1;
+              getProjectList();
+            "
+          ></el-input>
+          <el-input
+            placeholder="项目名称"
+            v-model.trim="search.projectName"
+            @keyup.enter.native="
+              listQuery.page = 1;
+              getProjectList();
+            "
+          ></el-input>
+          <el-input
+            placeholder="申请人"
+            v-model.trim="search.applyUserName"
             @keyup.enter.native="
               listQuery.page = 1;
               getProjectList();
@@ -38,6 +54,7 @@
           highlight-current-row
           @current-change="chooseTable"
           @row-dblclick="chooseProject"
+          @filter-change="filterChange"
           ref="singleTable"
           style="width: 100%"
         >
@@ -53,20 +70,31 @@
               <span>{{scope.$index + 1}}</span>
             </template>
           </el-table-column>
-          <el-table-column width="150" prop="applyNumber" label="申请单号" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="150" prop="serialNumber" label="申请单号" align="center" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column width="150" prop="projectName" label="项目名称" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="100" prop="applicant" label="申请人" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="120" prop="phone" label="联系电话" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="120" prop="job" label="岗位" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="120" prop="department" label="所属单位名称" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="100" prop="projectType" label="项目类型" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="150" prop="summary" label="研究内容提要" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="150" prop="funds" label="申请经费（万元）" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="100" prop="applyUserName" label="申请人" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="120" prop="postName" label="岗位" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="120" prop="telephone" label="电话" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="120" prop="unitName" label="所属单位名称" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="100" prop="projectType" column-key="projectTypeCodeList" :filters="projectTypeList" label="项目类型" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="150" prop="researchContents" label="研究内容提要" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="150" prop="applyAmount" label="申请经费（万元）" align="center" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column width="100" prop="startYear" label="起始年度" align="center" :show-overflow-tooltip="true"></el-table-column>
           <el-table-column width="100" prop="endYear" label="结束年度" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="100" prop="category" label="专业类别" align="center" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column width="100" prop="creator" label="编制人" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="100" prop="professionalCategory" label="专业类别" column-key="professionalCategoryCodeList" :filters="professionalCategroyList" align="center" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column width="100" prop="createUser" label="编制人" align="center" :show-overflow-tooltip="true"></el-table-column>
         </el-table>
+        <div class="pagination-wrapper">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="listQuery.page" 
+            :page-sizes="tableConfig.pageSizeList" 
+            :page-size="listQuery.limit"
+            :layout="tableConfig.layout"
+            :total="total">
+          </el-pagination>
+        </div>
       </div>
     </div>
     <span slot="footer" class="dialog-footer">
@@ -79,75 +107,84 @@
 </template>
 
 <script>
-import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { Component,Mixins, Vue, Prop, Watch } from "vue-property-decorator";
 import tableMixin from "@/mixins/tableMixin";
+import dictionaryMixin from '@/mixins/dictionaryMixin'
 import store from "@/store";
 
 @Component({
   name: "projects",
 })
-export default class projects extends tableMixin {
+export default class projects extends Mixins(tableMixin,dictionaryMixin) {
   projectsDialog = false;
   listLoading = false;
   tableData = [];
+  filterParams = {}
   total = 0;
   search = {
-    projectName: "",
+    serialNumbe: '',
+    projectName: '',
+    applyUserName: ''
   };
   tableRadio = null;
   init() {
     this.tableData = [];
     this.total = 0;
+    this.search.serialNumbe = "";
     this.search.projectName = "";
+    this.search.applyUserName = "";
     this.tableRadio = null;
-    // this.listQuery.page = 1;
-    // this.listQuery.limit = 20;
+    this.listQuery.page = 1;
+    this.listQuery.limit = 20;
+    this.getProjectTypeList() // 项目类型
+    this.getProfessionalCategroyList() // 专业类别
     this.getProjectList();
   }
   // 查询项目部
   getProjectList() {
-    // this.listLoading = true;
+    this.listLoading = true;
     var data = {};
-    // data.pageNum = this.listQuery.page;
-    // data.pageSize = this.listQuery.limit;
-    // data.scopeCode = store.getters.currentNavProjectTree.scopeCode;
-    // (data.isProject = store.getters.currentNavProjectTree.isProject),
-    //   (data = Object.assign(data, this.search));
-    // this.$API
-    //   .apiGetMaterialList(data)
-    //   .then((res) => {
-    //     this.listLoading = false;
-    //     if (res.data) {
-    //       this.tableData = res.data.list;
-    //       this.total = res.data.total;
-    //     }
-    //   })
-    //   .catch(() => {
-    //     this.listLoading = true;
-    //   });
-    for(let i=0; i<30; i++) {
-      this.tableData.push(
-        {
-          applyNumber: 'RDPI202109070001',
-          projectName: '地铁车站防水技术研究' + i,
-          applicant: '慕踊前',
-          phone: '13888888888',
-          job: '项目总工',
-          department: '中铁十一局集团有限公司乌鲁中铁十一局集团有限公司乌鲁',
-          projectType: '自主研发',
-          summary: '乌鲁木齐市市轨道交通乌鲁木齐市市轨道交通',
-          funds: '234.000000',
-          startYear: '2021-01-01',
-          endYear: '2021-01-01',
-          category: 'C：地下工程',
-          creator: '慕踊前'
+    data.pageNum = this.listQuery.page;
+    data.pageSize = this.listQuery.limit;
+    data.creatorOrgId = store.getters.currentOrganization?.organizationId;
+    data.creatorOrgName = store.getters.currentOrganization.organizationName;
+    data = Object.assign(data, this.search, this.filterParams)
+    this.$API
+      .apiCheckFinalProjectList(data)
+      .then((res) => {
+        this.listLoading = false;
+        if (res.data) {
+          this.tableData = res.data.list;
+          this.total = res.data.total;
         }
-      )
+      })
+      .catch(() => {
+        this.listLoading = true;
+      });
+  }
+  deleteEmptyElm(obj) {
+    for(const key in obj) {
+      if(obj.hasOwnProperty(key)) {
+        if(['',null,undefined].includes(obj[key]) || obj[key] instanceof Array) {
+          delete obj[key]
+        }
+      }
     }
+    return obj
   }
   closeDialog() {
     this.projectsDialog = false;
+    this.search = {}
+    // 清除表格筛选条件
+    this.filterParams = {};
+
     this.$refs.singleTable.setCurrentRow();
+  }
+  // 表格：表头筛选条件变化时触发
+  filterChange(value){
+    this.filterParams = value;
+    this.listQuery.page = 1;
+    this.getProjectList();
   }
   // 表格分页：每页显示条数变化触发
   handleSizeChange(value) {
@@ -196,7 +233,7 @@ export default class projects extends tableMixin {
       text-align: right;
       .el-input {
         display: inline-block;
-        width: 300px;
+        width: 100px;
         margin-right: 10px;
         &::v-deep {
           .el-input__inner {

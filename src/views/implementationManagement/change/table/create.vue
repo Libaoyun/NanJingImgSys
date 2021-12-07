@@ -1,5 +1,5 @@
 <template>
-  <div class="create-page">
+  <div class="page">
     <card-global>
       <div>
         <el-form
@@ -108,7 +108,7 @@
           :show-message="false"
         >
           <el-table
-            :data="baseInfo.detailForm.detailList"
+            :data="baseInfo.detailForm.cycleList"
             :border="tableConfig.border"
             class="global-table-default"
             style="width: 100%;">
@@ -123,7 +123,7 @@
                 <el-form-item
                   v-if="scope.row.editable===1"
                   style="width: 100%"
-                  :prop="'detailList.'+scope.$index+'.startYear'"
+                  :prop="'cycleList.'+scope.$index+'.startYear'"
                   :rules="formRules['startYear']"
                   :ref="'startYear'+scope.$index"
                 >
@@ -142,7 +142,7 @@
                 <el-form-item
                   v-if="scope.row.editable===1"
                   style="width: 100%"
-                  :prop="'detailList.'+scope.$index+'.endYear'"
+                  :prop="'cycleList.'+scope.$index+'.endYear'"
                   :rules="formRules['endYear']"
                   :ref="'endYear'+scope.$index"
                 >
@@ -162,7 +162,49 @@
         </el-form>
       </template>
       <!-- 预算变更 -->
-      <template v-else-if="baseInfo.changeType === '2'">222</template>
+      <template v-else-if="baseInfo.changeType === '2'">
+        <el-form ref="budgetForm" :inline="true" :rules="budgetRules" :model="baseInfo.detailForm" size="mini" :show-message="false">
+          <el-table
+            :data="baseInfo.detailForm.budgetList"
+            :border="tableConfig.border"
+            class="global-table-default"
+            style="width: 100%">
+            <el-table-column label="经费来源预算" align="center">
+              <el-table-column prop="sourceAccount" label="科目" align="center">
+                <template slot-scope="scope">
+                  <el-form-item :prop="'budgetList.'+scope.$index+'.sourceAccount'">
+                    <span>{{scope.row.sourceAccount}}</span>
+                  </el-form-item>
+                </template>
+              </el-table-column>
+              <el-table-column prop="sourceBudget" label="预算数 (万元)" align="center">
+                <template slot-scope="scope">
+                  <el-form-item v-if="scope.$index<=6" :prop="'budgetList.'+scope.$index+'.sourceBudget'" :rules="budgetRules['sourceBudget']">
+                    <el-input-number :controls="false" :precision="2" v-model="scope.row.sourceBudget"></el-input-number>
+                  </el-form-item>
+                </template>
+              </el-table-column>
+            </el-table-column>
+            
+            <el-table-column label="经费支出预算" align="center">
+              <el-table-column prop="expenseAccount" label="科目" align="center">
+                <template slot-scope="scope">
+                  <el-form-item :prop="'budgetList.'+scope.$index+'.expenseAccount'">
+                    <span>{{scope.row.expenseAccount}}</span>
+                  </el-form-item>
+                </template>
+              </el-table-column>
+              <el-table-column prop="expenseBudget" label="预算数 (万元)" align="center">
+                <template slot-scope="scope">
+                  <el-form-item :prop="'budgetList.'+scope.$index+'.expenseBudget'" :rules="budgetRules['expenseBudget']">
+                    <el-input-number :controls="false" :precision="2" v-model="scope.row.expenseBudget"></el-input-number>
+                  </el-form-item>
+                </template>
+              </el-table-column>
+            </el-table-column>
+          </el-table>
+        </el-form>
+      </template>
       <!-- 人员变更 -->
       <template v-else-if="baseInfo.changeType === '3'">
         <el-form
@@ -175,7 +217,7 @@
           :show-message="false"
         >
           <el-table
-            :data="baseInfo.detailForm.detailList"
+            :data="baseInfo.detailForm.userList"
             :border="tableConfig.border"
             class="global-table-default"
             style="width: 100%;">
@@ -186,7 +228,7 @@
             </el-table-column>
             <el-table-column prop="userName" label="姓名" width="100" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.userName'" :rules="formRules['userName']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.userName'" :rules="formRules['userName']">
                   <el-input v-model="scope.row.userName" type="text" placeholder="姓名"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.userName}}</span>
@@ -194,7 +236,7 @@
             </el-table-column>
             <el-table-column prop="idcard" label="身份证号码" width="140" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.idcard'" :rules="formRules['idcard']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.idcard'" :rules="formRules['idcard']">
                   <el-input v-model="scope.row.idcard" type="text" placeholder="身份证号码"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.idcard}}</span>
@@ -202,7 +244,7 @@
             </el-table-column>
             <el-table-column prop="age" label="年龄" width="80" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.age'" :rules="formRules['age']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.age'" :rules="formRules['age']">
                   <el-input v-model="scope.row.age" type="text" placeholder="年龄"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.age}}</span>
@@ -210,7 +252,7 @@
             </el-table-column>
             <el-table-column prop="sex" label="性别" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.sex'" :rules="formRules['sex']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.sex'" :rules="formRules['sex']">
                   <el-select v-model="scope.row.sex" placeholder="请选择">
                     <el-option label="男" value="男"></el-option>
                     <el-option label="女" value="女"></el-option>
@@ -221,7 +263,7 @@
             </el-table-column>
             <el-table-column prop="education" label="学历" width="80" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.education'" :rules="formRules['education']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.education'" :rules="formRules['education']">
                   <el-input v-model="scope.row.education" type="text" placeholder="学历"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.education}}</span>
@@ -229,7 +271,7 @@
             </el-table-column>
             <el-table-column prop="department" label="所属部门" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.department'" :rules="formRules['department']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.department'" :rules="formRules['department']">
                   <el-input v-model="scope.row.department" type="text" placeholder="所属部门"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.department}}</span>
@@ -237,7 +279,7 @@
             </el-table-column>
             <el-table-column prop="job" label="职务职称" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.job'" :rules="formRules['job']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.job'" :rules="formRules['job']">
                   <el-input v-model="scope.row.job" type="text" placeholder="职务职称"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.job}}</span>
@@ -245,7 +287,7 @@
             </el-table-column>
             <el-table-column prop="major" label="所学专业" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.major'" :rules="formRules['major']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.major'" :rules="formRules['major']">
                   <el-input v-model="scope.row.major" type="text" placeholder="所学专业"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.major}}</span>
@@ -253,7 +295,7 @@
             </el-table-column>
             <el-table-column prop="work" label="现从事专业" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.work'" :rules="formRules['work']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.work'" :rules="formRules['work']">
                   <el-input v-model="scope.row.work" type="text" placeholder="现从事专业"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.work}}</span>
@@ -261,7 +303,7 @@
             </el-table-column>
             <el-table-column prop="company" label="所在单位" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.company'" :rules="formRules['company']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.company'" :rules="formRules['company']">
                   <el-input v-model="scope.row.company" type="text" placeholder="所在单位"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.company}}</span>
@@ -269,7 +311,7 @@
             </el-table-column>
             <el-table-column prop="task" label="研究任务及分工" width="140" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.task'" :rules="formRules['task']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.task'" :rules="formRules['task']">
                   <el-input v-model="scope.row.task" type="text" placeholder="研究任务及分工"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.task}}</span>
@@ -277,7 +319,7 @@
             </el-table-column>
             <el-table-column prop="fullTimeRate" label="全时率" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.fullTimeRate'" :rules="formRules['fullTimeRate']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.fullTimeRate'" :rules="formRules['fullTimeRate']">
                   <el-input v-model="scope.row.fullTimeRate" type="text" placeholder="全时率"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.fullTimeRate}}</span>
@@ -285,7 +327,7 @@
             </el-table-column>
             <el-table-column prop="phone" label="联系电话" width="120" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.phone'" :rules="formRules['phone']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.phone'" :rules="formRules['phone']">
                   <el-input v-model="scope.row.phone" type="text" placeholder="联系电话"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.phone}}</span>
@@ -295,7 +337,7 @@
               <template slot-scope="scope">
                 <el-form-item
                   style="width: 100%"
-                  :prop="'detailList.'+scope.$index+'.startDate'"
+                  :prop="'userList.'+scope.$index+'.startDate'"
                   :rules="formRules['startDate']"
                   :ref="'startDate'+scope.$index"
                 >
@@ -312,7 +354,7 @@
               <template slot-scope="scope">
                 <el-form-item
                   style="width: 100%"
-                  :prop="'detailList.'+scope.$index+'.endDate'"
+                  :prop="'userList.'+scope.$index+'.endDate'"
                   :rules="formRules['endDate']"
                   :ref="'endDate'+scope.$index"
                 >
@@ -329,7 +371,7 @@
               <template slot-scope="scope">
                 <el-form-item
                   style="width: 100%"
-                  :prop="'detailList.'+scope.$index+'.status'"
+                  :prop="'userList.'+scope.$index+'.status'"
                   :rules="formRules['status']"
                 >
                   <el-select v-model="scope.row.status" placeholder="请选择">
@@ -341,7 +383,7 @@
             </el-table-column>
             <el-table-column prop="creator" label="编制人" width="100" align="center" :show-overflow-tooltip="true">
               <template slot-scope="scope">
-                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'detailList.'+scope.$index+'.creator'" :rules="formRules['creator']">
+                <el-form-item v-if="scope.row.isNew===1" style="width: 100%" :prop="'userList.'+scope.$index+'.creator'" :rules="formRules['creator']">
                   <el-input v-model="scope.row.creator" type="text" placeholder="编制人"></el-input>
                 </el-form-item>
                 <span v-else>{{scope.row.creator}}</span>
@@ -352,7 +394,7 @@
                 <el-form-item
                   v-if="scope.row.isNew===1"
                   style="width: 100%"
-                  :prop="'detailList.'+scope.$index+'.createdTime'"
+                  :prop="'userList.'+scope.$index+'.createdTime'"
                   :rules="formRules['createdTime']"
                 >
                   <el-date-picker
@@ -416,11 +458,11 @@ export default class extends tableMixin {
     const changeType = this.baseInfo.changeType
     let startDate, endDate;
     if(changeType === '1') {
-      startDate = this.baseInfo.detailForm.detailList[validateIndex].startYear
-      endDate = this.baseInfo.detailForm.detailList[validateIndex].endYear
+      startDate = this.baseInfo.detailForm.cycleList[validateIndex].startYear
+      endDate = this.baseInfo.detailForm.cycleList[validateIndex].endYear
     } else if(changeType === '3') {
-      startDate = this.baseInfo.detailForm.detailList[validateIndex].startDate
-      endDate = this.baseInfo.detailForm.detailList[validateIndex].endDate
+      startDate = this.baseInfo.detailForm.userList[validateIndex].startDate
+      endDate = this.baseInfo.detailForm.userList[validateIndex].endDate
     }
     if(!startDate || !endDate){
       callback();
@@ -444,7 +486,7 @@ export default class extends tableMixin {
   }
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
-  // 基本信息表单校验规则
+  // 基本信息  表单校验规则
   baseFormRules = {
     projectName: [
       { required: true, message: "点击选择审批完成的研发项目", trigger: "change" }
@@ -453,7 +495,7 @@ export default class extends tableMixin {
       { required: true, message: "请选择变更类型", trigger: "change" }
     ]
   }
-  // 变更说明
+  // 变更说明  表单校验规则
   changeFormRules = {
     originalProjectCnt: [
       { required: true, message: "请输入", trigger: "change" }
@@ -471,7 +513,16 @@ export default class extends tableMixin {
       { required: true, message: "请输入", trigger: "change" }
     ],
   }
-  // 变更明细
+  // 预算变更  表单校验规则
+  budgetRules = {
+    sourceBudget: [
+      { required: true, message: '', trigger: 'change' }
+    ],
+    expenseBudget: [
+      { required: true, message: '', trigger: 'change' }
+    ],
+  }
+  // 变更明细  表单校验规则
   formRules = {
     startYear: [
       { required: true, message: "请选择开始年度", trigger: "change" },
@@ -562,7 +613,9 @@ export default class extends tableMixin {
       },
       // 变更明细
       detailForm: {
-        detailList:[]
+        cycleList:[], // 周期变更
+        budgetList: [], // 预算变更
+        userList: [], // 人员变更
       },
       // 附件
       attachmentList: [],
@@ -578,54 +631,44 @@ export default class extends tableMixin {
   
   // 初始化新建数据
   initData() {
-    this.$refs["baseForm"].resetFields();
-    this.$refs["changeForm"].resetFields();
+    this.$refs.baseForm?.resetFields();
+    this.$refs.changeForm?.resetFields();
+    this.$refs.budgetForm?.resetFields(); // 预算变更
     this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
+  }
+  // 格式化保存提交的数据
+  formatSendData(data) {
+    data = JSON.parse(JSON.stringify(data))
+    
+    data.creatorOrgId = this.$store.getters.currentOrganization.organizationId
+    data.creatorOrgName = this.$store.getters.currentOrganization.organizationName
+    data.menuCode = this.MENU_CODE_LIST.checkFinalList
+
+    data.directoryAndUnit = data.checkInfo.directoryAndUnit // 经济技术文件目录及提供单位(长度：1024)
+    data.projectAbstract = data.checkInfo.projectAbstract // 成果内容简介(长度：1024)
+    delete data.checkInfo
+
+    data.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
+    return data
   }
   // 保存按钮
   saveBtn(loadIndex) {
     const _self = this;
-    let formArr = ["baseForm", 'changeForm'];
-    let resultArr = [];
-    formArr.forEach((item) => {
-      //根据表单的ref校验
-      resultArr.push(checkForm(_self, item));
-    });
-    this.baseInfo.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
-    Promise.all(resultArr).then(() => {
-      this.$confirm("确定保存当前表单?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      }).then(() => {
-        // 调接口
-        let params = Object.assign(
-          {
-            creatorOrgId:
-              this.$store.getters.currentOrganization.organizationId,
-            creatorOrgName:
-              this.$store.getters.currentOrganization.organizationName,
-            menuCode: this.MENU_CODE_LIST.changeList,
-          },
-          this.baseInfo
-        );
-        console.log('保存数据：', params)
-        // this.loadingBtn = loadIndex;
-        // this.$API
-        //   .apiAddProject(params)
-        //   .then((res) => {
-        //     this.$message({
-        //       type: "success",
-        //       message: "新增成功!",
-        //     });
-        //     this.$store.commit("DELETE_TAB", this.$route.path);
-        //     this.$router.push({ name: "changeList" });
-        //   })
-        //   .finally(() => {
-        //     this.loadingBtn = 0;
-        //   });
+    const params = this.formatSendData(this.baseInfo)
+    this.loadingBtn = loadIndex;
+    this.$API
+      .apiCheckFinalSaveOrUpdate(params)
+      .then((res) => {
+        this.loadingBtn = 0;
+        this.$message({
+          type: "success",
+          message: "保存成功!",
+        });
+        this.resetData(true)
+      })
+      .finally(() => {
+        this.loadingBtn = 0;
       });
-    });
   }
   // 提交按钮
   submitBtn(loadIndex) {
@@ -636,13 +679,27 @@ export default class extends tableMixin {
       //根据表单的ref校验
       resultArr.push(checkForm(_self, item));
     });
+    const params = this.formatSendData(this.baseInfo)
+    params.flag = 2
     Promise.all(resultArr).then(() => {
       this.$confirm("确定提交当前表单?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       }).then(() => {
-        // API
+        this.loadingBtn = loadIndex;
+        this.$API
+          .apiCheckFinalSubmit(params)
+          .then((res) => {
+            this.$message({
+              type: "success",
+              message: "提交成功!",
+            });
+            this.resetData(true)
+          })
+          .finally(() => {
+            this.loadingBtn = 0;
+          });
       });
     });
   }
@@ -653,9 +710,12 @@ export default class extends tableMixin {
       cancelButtonText: "取消",
       type: "warning",
     }).then(() => {
-      this.$store.commit("DELETE_TAB", this.$route.path);
-      this.$router.push({ name: "changeList" });
+      this.resetData()
     });
+  }
+  resetData(bool) {
+    this.$store.commit("DELETE_TAB", this.$route.path);
+    this.$router.push({ name: "changeList", params: { refresh: bool } });
   }
   // 选择项目名称
   chooseProject () {
@@ -691,7 +751,7 @@ export default class extends tableMixin {
     }
     this.$refs[formName].validate(valid => {
       if (valid) {
-        this.baseInfo.detailForm.detailList.push(userTmpl)
+        this.baseInfo.detailForm.userList.push(userTmpl)
       } else {
         return false;
       }
@@ -700,7 +760,7 @@ export default class extends tableMixin {
   // 用户变更-删除某一行
   handleDeleteRow(scope) {
     console.log('删除下标：', scope.$index)
-    this.baseInfo.detailForm.detailList.splice(scope.$index, 1)
+    this.baseInfo.detailForm.userList.splice(scope.$index, 1)
   }
   // 选择变更类型
   handleChangeType(value) {
@@ -710,10 +770,10 @@ export default class extends tableMixin {
   }
   // 获取变更明细
   getChangeDetail() {
-    this.baseInfo.detailForm.detailList = []
+    this.baseInfo.detailForm = {}
     switch(this.baseInfo.changeType) {
       case '1': 
-        this.baseInfo.detailForm.detailList = [
+        this.baseInfo.detailForm.cycleList = [
           {
             status: '变更前',
             startYear: '2021-01-01',
@@ -735,7 +795,7 @@ export default class extends tableMixin {
       case '2':
         break
       case '3':
-        this.baseInfo.detailForm.detailList = [
+        this.baseInfo.detailForm.userList = [
           {
             userName: '慕踊前',
             idcard: '2121029102930102',
@@ -786,7 +846,7 @@ export default class extends tableMixin {
 </script>
 
 <style lang="scss" scoped>
-.create-page {
+.page {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;

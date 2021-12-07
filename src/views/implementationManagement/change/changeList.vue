@@ -38,45 +38,30 @@
           <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="serialNumber" label="单据编号" width="180" align="center" :show-overflow-tooltip="true">
+      <el-table-column prop="orgNumber" label="单据编号" width="180" align="center" :show-overflow-tooltip="true">
         <template slot-scope="props">
-          <el-button type="text" size="small" @click="detailBtn(props.row)">{{props.row.serialNumber}}</el-button>
+          <el-button type="text" size="small" @click="detailBtn(props.row)">{{props.row.orgNumber}}</el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="jobTitle" label="成果名称" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="processName" label="单据状态" column-key="statusList" :filters="approvalStatusList" width="100" align="center" :show-overflow-tooltip="true">
-      </el-table-column>
-      <el-table-column prop="approveUserName" label="当前审批人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="unitName" label="审批评审验收单位" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="createUser" label="结题申报人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="createdDate" label="申请评审日期" width="180" align="center" :show-overflow-tooltip="true">
+      <el-table-column prop="orgName" label="项目名称" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="status" label="单据状态" width="100" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
-          {{ scope.row.createdDate | formatTime('yyyy-MM-dd') }}
+          {{['否','是'][scope.row.status]}}
         </template>
       </el-table-column>
-      <el-table-column prop="applyUserName" label="项目负责人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="postName" label="岗位" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="telephone" label="联系电话" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="startYear" label="起始年度" width="180" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{ scope.row.startYear | formatTime('yyyy-MM-dd') }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="endYear" label="结束年度" width="180" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{ scope.row.endYear | formatTime('yyyy-MM-dd') }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="projectAbstract" label="成果内容简介" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="createUser" label="编制人" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="createTime" label="创建日期" width="180" align="center" :show-overflow-tooltip="true">
+      <el-table-column prop="createUser" label="当前审批人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="remark" label="变更类型" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="updateUser" label="项目负责人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="remark" label="负责人联系电话" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="remark" label="编制人" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="updateTime" label="创建日期" width="180" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           {{ scope.row.createTime | formatDate }}
         </template>
       </el-table-column>
       <el-table-column prop="updateTime" label="更新日期" width="180" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
-          {{ scope.row.updateTime | formatDate }}
+          {{ scope.row.createTime | formatDate }}
         </template>
       </el-table-column>
     </el-table>
@@ -102,7 +87,7 @@ import dictionaryMixin from '@/mixins/dictionaryMixin'
 import search from './table/search'
 
 @Component({
-  name: 'checkFinalList',
+  name: 'changeList',
   components: {
     search,
   }
@@ -121,7 +106,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     this.getApprovalStatusList()
   }
   mounted () {
-    this.getCheckFinalList()
+    this.getChangeList()
   }
   activated() {
     if(Object.keys(this.$route.params).length > 0){
@@ -138,16 +123,14 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     })
     return list;
   };
-  // 查询列表
-  getCheckFinalList(){
+  // 查询外部用户列表
+  getChangeList(){
     var params = {};
     params.pageNum = this.listQuery.page; // 页码
     params.pageSize = this.listQuery.limit; // 每页数量
-    params.creatorOrgName = this.$store.getters.currentOrganization.organizationName;
-    params.creatorOrgId = this.$store.getters.currentOrganization.organizationId;
     params = Object.assign(params,this.searchParams,this.filterParams);
     this.listLoading = true
-    this.$API.apiGetCheckFinalList(params).then(res=>{
+    this.$API.apiGetProjectList(params).then(res=>{
       this.listLoading = false
       if(res.data){
         this.tableData = res.data.list;
@@ -163,25 +146,25 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   }
   // 新建
   createBtn(){
-    this.$router.push({ name: 'checkFinalNew',params:{initData: true}})
+    this.$router.push({ name: 'changeNew',params:{initData: true}})
   }
   // 编辑
   editBtn(){
-    if(this.JUDGE_BTN(this.selected, 'delete')){
-      this.$router.push({ name: 'checkFinalEdit',params:{
-        businessId:this.selected[0].businessId
-      }})
+    if(this.selected.length !== 1){
+      this.$message({
+          type: 'info',
+          message: '请选择一条记录!'
+      })
+      return
     }
+    this.$router.push({ name: 'changeEdit',params:{
+      businessId:this.selected[0].businessId
+    }})
   }
   // 详情
   detailBtn(data) {
-    this.$router.push({ name: 'checkFinalDetail',params:{
-      businessId:data.businessId,
-      ids:{
-        waitId:data.waitId,
-        processInstId:data.processInstId,
-        serialNumber:data.serialNumber
-      },
+    this.$router.push({ name: 'changeDetail',params:{
+      record:data
     }})
   }
   // 删除
@@ -256,9 +239,9 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       creatorOrgId : this.$store.getters.currentOrganization.organizationId,
       creatorOrgName : this.$store.getters.currentOrganization.organizationName,
       businessIdList:this.idList,
-      menuCode:this.MENU_CODE_LIST.checkFinalList
+      menuCode:this.MENU_CODE_LIST.changeList
     };
-    this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/itemClosureCheck/exportExcel',data});
+    this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/organization/exportExcel',data});
   }
   // 导出pdf
   exportPdfBtn(){
@@ -266,9 +249,9 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       creatorOrgId : this.$store.getters.currentOrganization.organizationId,
       creatorOrgName : this.$store.getters.currentOrganization.organizationName,
       businessIdList:this.idList,
-      menuCode:this.MENU_CODE_LIST.checkFinalList
+      menuCode:this.MENU_CODE_LIST.changeList
     }
-    this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/itemClosureCheck/exportPdf',data});
+    this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/organization/exportPDF',data});
   }
   // 打印
   printBtn(){
@@ -276,9 +259,9 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       creatorOrgId : this.$store.getters.currentOrganization.organizationId,
       creatorOrgName : this.$store.getters.currentOrganization.organizationName,
       businessIdList:this.idList,
-      menuCode:this.MENU_CODE_LIST.checkFinalList
+      menuCode:this.MENU_CODE_LIST.changeList
     }
-    this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/itemClosureCheck/exportPdf',data});
+    this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/organization/exportPDF',data});
   }
   // 刷新
   refreshBtn(){
@@ -289,7 +272,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       // 清除表格筛选条件
       this.$refs.tableData.clearFilter();
       this.filterParams = {};
-      this.getCheckFinalList();
+      this.getChangeList();
     }
   }
   // 搜索
@@ -298,13 +281,13 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   }
   searchSubmit(){
     this.listQuery.page = 1
-    this.getCheckFinalList();
+    this.getChangeList();
   }
   // 表格：表头筛选条件变化时触发
   filterChange(value){
     this.filterParams = value;
     this.listQuery.page = 1;
-    this.getCheckFinalList();
+    this.getChangeList();
   }
   // 表格：复选框变化时触发,删除编辑
   tableSelectionChange(value){
@@ -314,12 +297,12 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   handleSizeChange(value) {
     this.listQuery.page = 1;
     this.listQuery.limit = value;
-    this.getCheckFinalList();
+    this.getChangeList();
   }
   // 表格分页：当前页变化触发
   handleCurrentChange(value) {
     this.listQuery.page = value;
-    this.getCheckFinalList();
+    this.getChangeList();
   }
 }
 </script>
