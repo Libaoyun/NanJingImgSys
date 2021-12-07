@@ -12,6 +12,7 @@
             <div style="padding-left:40px">
                 <div>2.项目经费预算各项比例：</div>
                 <el-form-item label="材料费用不得高于" prop="childAge">
+                    <span v-html="'\u00a0\u00a0\u00a0\u00a0'"></span>
                     <el-input v-model.number="realNameRule.ruleList[1].ruleValue" @change="update()"></el-input>
                     <span class="tips">%</span>
                 </el-form-item>
@@ -20,10 +21,12 @@
                     <span class="tips">%</span>
                 </el-form-item>
                 <el-form-item label="人工费用不得低于" prop="childAge">
+                    <span v-html="'\u00a0\u00a0\u00a0\u00a0'"></span>
                     <el-input v-model.number="realNameRule.ruleList[3].ruleValue" @change="update()"></el-input>
                     <span class="tips">%</span>
                 </el-form-item>
                 <el-form-item label="其他费用不得高于" prop="childAge">
+                    <span v-html="'\u00a0\u00a0\u00a0\u00a0'"></span>
                     <el-input v-model.number="realNameRule.ruleList[4].ruleValue" @change="update()"></el-input>
                     <span class="tips">%</span>
                 </el-form-item>
