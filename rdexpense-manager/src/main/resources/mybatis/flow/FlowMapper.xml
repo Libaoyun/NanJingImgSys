@@ -254,6 +254,7 @@
         from bpm_approval_not_done d
         left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 1
+        ORDER BY d.create_time DESC
     </select>
 
     <select id="queryWaitDone" resultType="pd" parameterType="pd">
@@ -262,6 +263,7 @@
         from bpm_approval_not_done d
                  left join bpm_approval_not_done_user u on d.id = u.approve_id
         where u.user_id = #{createUserId} and d.status = 0 and u.status = 0
+        ORDER BY d.create_time DESC
     </select>
 
 

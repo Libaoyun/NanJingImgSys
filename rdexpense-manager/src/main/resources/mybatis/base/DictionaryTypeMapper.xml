@@ -14,12 +14,16 @@
         from uq_dictionary_type
     </select>
 
-    <select id="selectListByTypeId" resultType="pd" parameterType="java.util.List">
+
+
+    <select id="selectListByParentId" parameterType="java.util.List" resultType="pd">
         select id, dic_type_id AS dicTypeId, dic_type_name AS dicTypeName, dic_type_parent_id AS dicTypeParentId,
-               dic_type_flag as dicTypeFlag
+        dic_type_flag as dicTypeFlag
         from uq_dictionary_type
-        where
-            dic_type_parent_id = #{dicTypeParentId}
+        where 1=1 and dic_type_parent_id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
     </select>
 
     <insert id="insertDictionTypeData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">

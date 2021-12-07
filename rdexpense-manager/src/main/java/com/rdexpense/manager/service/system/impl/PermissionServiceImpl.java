@@ -112,6 +112,28 @@ public class PermissionServiceImpl implements PermissionService {
 
     }
 
+    /**
+     * 根据编码，向上递归树
+     *
+     * @param stringBuffer
+     * @param pCode
+     * @param list
+     */
+    private void recursiveOrg(StringBuffer stringBuffer, String pCode, List<PageData> list) {
+        for (PageData data : list) {
+            String orgCode = data.getString("orgId");
+            String parentCode = data.getString("parentId");
+            if (orgCode.equals(pCode)) {
+                stringBuffer.append(data.getString("orgName") + ",");
+                recursiveOrg(stringBuffer, parentCode, list);
+
+            }
+
+        }
+
+    }
+
+
 
     /**
      * 查询授权菜单
