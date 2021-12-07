@@ -104,17 +104,7 @@ export default class addDictionary extends dictionaryMixin {
 <style lang="scss" scoped>
 ::v-deep {
   .global-dialog-default {
-    position: relative;
-    height: 200px;
-
-    .dialog-footer {
-      position: absolute;
-      right: 10px;
-      top: 80%;
-    }
-    .el-select.el-select--mini{
-      width: 100%;
-    }
+    height: auto;
   }
 }
 </style>
