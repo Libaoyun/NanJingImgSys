@@ -172,6 +172,7 @@
                     this.jsPlumb = jsPlumb.getInstance()
                     this.$nextTick(() => {
                         this.activeElement = Object.assign({},this.originActiveElement)
+                        this.data.name = this.selected.title
                         // 默认加载流程A的数据、在这里可以根据具体的业务返回符合流程数据格式的数据即可
                         this.$API.apiGetFlow({menuCode:this.selected.menuCode}).then(res=>{
                             this.interfaceData = res.data
