@@ -375,4 +375,16 @@
         WHERE u.user_id = #{userCode,jdbcType=VARCHAR}
     </select>
 
+    <select id="queryAuthDatas" resultType="pd" parameterType="java.util.List">
+        SELECT distinct
+            u.scope_code as organizationId,
+            i.org_name   as organizationName,
+            i.company_id as companyId
+        FROM uq_authority_user u
+                 left join sys_organization_info i on i.id = u.scope_code
+        WHERE u.user_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

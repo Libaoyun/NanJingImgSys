@@ -154,8 +154,18 @@ public class LoginServiceImpl implements LoginService {
         pageData.put("postId",data.getString("postCode"));
         pageData.put("post",data.getString("postName"));
 
+        List<String> codeList = new ArrayList<>();
+        codeList.add(userCode);
+        if(StringUtils.isNotBlank(pageData.getString("postId"))){
+            for(String s : pageData.getString("postId").split(",")){
+                codeList.add(s);
+            }
 
-        List<PageData> authList = (List<PageData>) baseDao.findForList("UserMapper.queryAuthData",pageData);
+        }
+
+
+ //       List<PageData> authList = (List<PageData>) baseDao.findForList("UserMapper.queryAuthData",pageData);
+        List<PageData> authList = (List<PageData>) baseDao.findForList("UserMapper.queryAuthDatas",codeList);
         if (!CollectionUtils.isEmpty(authList)){
             pageData.put("companyId",authList.get(0).getString("companyId"));
             pageData.put("organizationList",authList);

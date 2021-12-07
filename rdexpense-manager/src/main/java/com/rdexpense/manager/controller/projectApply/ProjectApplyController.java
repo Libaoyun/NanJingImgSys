@@ -136,7 +136,7 @@ public class ProjectApplyController extends BaseController {
         // 编辑时，状态只能为已保存
         PageData recordData = (PageData) dao.findForObject("ProjectApplyMapper.queryApplyDetail", pd);
         String requestStatus = recordData.getString("processStatus");
-        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0])) {
+        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0]) && !requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[3])) {
             throw new MyException(ConstantMsgUtil.ERR_UPDATE_FAIL.desc());
         }
 
