@@ -13,6 +13,7 @@ import * as authorizationApi from './modules/systemSetting/authorization';
 import * as contractApi from './modules/implementationManagement/contract';
 import * as disclosureApi from './modules/implementationManagement/disclosure';
 import * as reportApi from './modules/implementationManagement/report';
+import * as flowManageApi from './modules/systemSetting/flowManage';
 import * as setProjectApplyApi from './modules/setProject/setProjectApply';
 import * as checkFinalApi from './modules/checkManagement/checkFinal'
 
@@ -31,6 +32,7 @@ let api = Object.assign(
     contractApi,
     disclosureApi,
     reportApi,
+    flowManageApi,
     setProjectApplyApi,
     checkFinalApi,
 );

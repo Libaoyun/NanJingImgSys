@@ -31,8 +31,8 @@
                 <el-form-item label="研究内容" prop="researchContents">
                     <el-input v-model.trim="searchParams.researchContents" placeholder="请输入研究内容提要"></el-input>
                 </el-form-item>
-                <el-form-item label="编制人" prop="createUser">
-                    <el-input v-model.trim="searchParams.createUser" placeholder="请输入编制人"></el-input>
+                <el-form-item label="编制人" prop="creatorUserName">
+                    <el-input v-model.trim="searchParams.creatorUserName" placeholder="请输入编制人"></el-input>
                 </el-form-item>
                 <el-form-item label="创建日期" prop="createTime">
                     <el-date-picker
