@@ -53,6 +53,9 @@ export default class extends tableMixin {
             { required: true, message: '请输入项目名称', trigger: 'change' },
             { max:30, message: '项目名称不超过30个字符', trigger: 'change' } 
         ],
+        remark:[
+            { max:1000, message: '项目描述不超过1000个字符', trigger: 'change' } 
+        ]
     }
     // 设置空数据
     getBaseInfo(){
