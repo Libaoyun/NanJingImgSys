@@ -5,7 +5,7 @@
     :close-on-click-modal="false"
     custom-class="global-dialog-default"
     @close="closeDialog"
-    width="400px"
+    width="600px"
   >
     <div class="content">
       <el-form
@@ -22,14 +22,14 @@
         <el-form-item label="枚举值:" prop="dicEnumName">
           <el-input  v-model="dictionary.dicEnumName" placeholder="请输入枚举值"></el-input>
         </el-form-item>
-        <el-form-item label="是否启用:" prop="isValid">
-          <el-select v-model="dictionary.isValid" placeholder="请选择">
-              <el-option label="启用" :value="1"></el-option>
-              <el-option label="禁用" :value="0"></el-option>
-          </el-select>
+        <el-form-item label="备注:" prop="remark">
+          <el-input  v-model="dictionary.remark" placeholder="请输入备注" type="textarea"></el-input>
         </el-form-item>
-        <el-form-item label="描述:" prop="remark">
-          <el-input  v-model="dictionary.remark" placeholder="请输入描述" type="textarea"></el-input>
+        <el-form-item label="状态:" prop="isValid">
+          <el-radio-group v-model="dictionary.isValid">
+              <el-radio :label="1">启用</el-radio>
+              <el-radio :label="0">禁用</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
     </div>
@@ -60,7 +60,7 @@ export default class addMenu extends dictionaryMixin {
     dicEnumId: [{ required: true, message: '请输入字典编码', trigger: 'change' }],
     dicEnumName: [{ required: true, message: '请输入枚举值', trigger: 'change' }],
     isValid:[{ required: true, message: '请选择状态', trigger: 'change' }],
-    remark:[{ required: true, message: '请输入描述', trigger: 'change' }]
+    remark:[{ required: true, message: '请输入备注', trigger: 'change' }],
   }
 
   
@@ -107,17 +107,7 @@ export default class addMenu extends dictionaryMixin {
 <style lang="scss" scoped>
 ::v-deep {
   .global-dialog-default {
-    position: relative;
-    height: 350px;
-
-    .dialog-footer {
-      position: absolute;
-      right: 10px;
-      top: 80%;
-    }
-    .el-select.el-select--mini{
-      width: 100%;
-    }
+    height: auto;
   }
 }
 </style>
