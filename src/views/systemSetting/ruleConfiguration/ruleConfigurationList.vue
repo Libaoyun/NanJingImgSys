@@ -2,8 +2,8 @@
     <div class="wrapper">
         <el-form class="firstRule" :model="realNameRule" ref="realNameRule" :rules="rules" :inline="true" :show-message="false" :hide-required-asterisk="true">
             <el-switch class="switchStyle" active-text="ON" inactive-text="OFF" active-value="1" inactive-value="0" v-model="realNameRule.ruleList[0].status" @change="update()"></el-switch>
-            <el-form-item label="1.单次材料申领金额不得超过" prop="childAge">
-                <el-input v-model.number="realNameRule.ruleList[0].ruleValue" @change="update()"></el-input>
+            <el-form-item label="1.单次材料申领金额不得超过" prop="ruleValue1">
+                <el-input-number size="small" v-model.number="realNameRule.ruleList[0].ruleValue" @change="update()" :controls="false"></el-input-number>
                 <span class="tips">万元。</span>
             </el-form-item>
         </el-form>
@@ -11,23 +11,23 @@
             <el-switch class="switchStyle" active-text="ON" inactive-text="OFF" active-value="1" inactive-value="0" v-model="realNameRule.ruleList[1].status" @change="changeType"></el-switch>
             <div style="padding-left:40px">
                 <div>2.项目经费预算各项比例：</div>
-                <el-form-item label="材料费用不得高于" prop="childAge">
+                <el-form-item label="材料费用不得高于" prop="ruleValue2">
                     <span v-html="'\u00a0\u00a0\u00a0\u00a0'"></span>
-                    <el-input v-model.number="realNameRule.ruleList[1].ruleValue" @change="update()"></el-input>
+                    <el-input-number size="small" v-model.number="realNameRule.ruleList[1].ruleValue" @change="update()" :controls="false"></el-input-number>
                     <span class="tips">%</span>
                 </el-form-item>
-                <el-form-item label="机械使用费不得低于" prop="childAge">
-                    <el-input v-model.number="realNameRule.ruleList[2].ruleValue" @change="update()"></el-input>
+                <el-form-item label="机械使用费不得低于" prop="ruleValue3">
+                    <el-input-number size="small" v-model.number="realNameRule.ruleList[2].ruleValue" @change="update()" :controls="false"></el-input-number>
                     <span class="tips">%</span>
                 </el-form-item>
-                <el-form-item label="人工费用不得低于" prop="childAge">
+                <el-form-item label="人工费用不得低于" prop="ruleValue4">
                     <span v-html="'\u00a0\u00a0\u00a0\u00a0'"></span>
-                    <el-input v-model.number="realNameRule.ruleList[3].ruleValue" @change="update()"></el-input>
+                    <el-input-number size="small" v-model.number="realNameRule.ruleList[3].ruleValue" @change="update()" :controls="false"></el-input-number>
                     <span class="tips">%</span>
                 </el-form-item>
-                <el-form-item label="其他费用不得高于" prop="childAge">
+                <el-form-item label="其他费用不得高于" prop="ruleValue5">
                     <span v-html="'\u00a0\u00a0\u00a0\u00a0'"></span>
-                    <el-input v-model.number="realNameRule.ruleList[4].ruleValue" @change="update()"></el-input>
+                    <el-input-number size="small" v-model.number="realNameRule.ruleList[4].ruleValue" @change="update()" :controls="false"></el-input-number>
                     <span class="tips">%</span>
                 </el-form-item>
             </div>
