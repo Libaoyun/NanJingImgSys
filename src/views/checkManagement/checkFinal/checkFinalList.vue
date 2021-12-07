@@ -24,6 +24,7 @@
     <el-table
       ref="tableData"
       :data="tableData"
+      row-key="id"
       :height="tableHeight"
       :border="tableConfig.border"
       v-loading="listLoading"
@@ -32,7 +33,7 @@
       @selection-change="tableSelectionChange"
       class="global-table-default"
       style="width: 100%;">
-      <el-table-column type="selection" width="55" align="center" ></el-table-column>
+      <el-table-column type="selection" width="55" :reserve-selection="true" align="center" ></el-table-column>
       <el-table-column label="序号" type="index" width="55" align="center">
         <template slot-scope="scope">
           <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
@@ -206,6 +207,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
             message: '删除成功!'
           });
           this.resetPageNum();
+          this.$refs.tableData.clearSelection();
           this.getCheckFinalList();
         }).catch(()=>{
             this.loadingBtn = 0;
@@ -289,6 +291,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       // 清除表格筛选条件
       this.$refs.tableData.clearFilter();
       this.filterParams = {};
+      // 清除多选表格选中
+      this.$refs.tableData.clearSelection();
       this.getCheckFinalList();
     }
   }
