@@ -447,8 +447,8 @@
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
             <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
-            <loading-btn class="rejectOrigin" size="mini" @click="rejectOrigin(2)" :loading="loadingBtn">退回发起人</loading-btn>
-            <loading-btn size="mini" @click="rejectPre(3)" :loading="loadingBtn">退回上节点</loading-btn>
+            <loading-btn class="rejectOrigin" size="mini" @click="reject(3)" :loading="loadingBtn">退回发起人</loading-btn>
+            <loading-btn size="mini" @click="reject(2)" :loading="loadingBtn">退回上节点</loading-btn>
         </div>
     </div>
 </template>
@@ -717,33 +717,8 @@ export default class extends tableMixin {
             })
         })
     }
-    // 退回发起人
-    rejectOrigin(loadingBtn){
-        // 审批意见校验通过
-        this.$refs.approval.isCheckComplete().then((remark)=>{
-            this.loadingBtn = loadingBtn;
-            var params = {
-                creatorOrgId : this.$store.getters.currentOrganization.organizationId,
-                creatorOrgName : this.$store.getters.currentOrganization.organizationName,
-                menuCode : this.MENU_CODE_LIST.setProjectApplyList,
-                approveComment:remark,
-                approveType:3,//1:同意 2:回退上一个节点 3：回退到发起人
-                waitId:this.waitId
-            }
-            this.$API.apiApprovalSetProjectApply(params).then(res=>{
-                this.$message({
-                    type:'success',
-                    message:'审批成功'
-                })
-                this.backBtn();
-                this.loadingBtn = 0;
-            }).catch(err=>{
-                this.loadingBtn = 0;
-            })
-        })
-    }
     // 退回上节点
-    rejectOrigin(loadingBtn){
+    reject(loadingBtn){
         // 审批意见校验通过
         this.$refs.approval.isCheckComplete().then((remark)=>{
             this.loadingBtn = loadingBtn;
@@ -752,7 +727,7 @@ export default class extends tableMixin {
                 creatorOrgName : this.$store.getters.currentOrganization.organizationName,
                 menuCode : this.MENU_CODE_LIST.setProjectApplyList,
                 approveComment:remark,
-                approveType:2,//1:同意 2:回退上一个节点 3：回退到发起人
+                approveType:loadingBtn,//1:同意 2:回退上一个节点 3：回退到发起人
                 waitId:this.waitId
             }
             this.$API.apiApprovalSetProjectApply(params).then(res=>{
