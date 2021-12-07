@@ -97,6 +97,12 @@ public class ItemClosureCheckDetailDto extends BaseEntity implements Serializabl
     @ApiModelProperty(value = "申请评审单位意见(长度：1024)")
     private String checkRemark;
 
+    @ApiModelProperty(value = "审批实例ID")
+    private String processInstId;
+
+    @ApiModelProperty(value = "所属单位名称(长度：256)")
+    private String unitName;
+
     @ApiModelProperty(value = "研发人员列表")
     private List<ResearchUserDto> userInfoList;
 

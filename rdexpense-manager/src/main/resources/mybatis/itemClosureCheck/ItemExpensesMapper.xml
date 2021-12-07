@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemExpensesMapper">
+
+    <sql id="Base_Column">
+        id
+        serial_number as serialNumber,
+        create_user_id as createUserId ,
+        create_user as createUser ,
+        created_date as createdDate ,
+        creator_org_id as creatorOrgId ,
+        creator_org_name as creatorOrgName ,
+        create_time as createTime ,
+        update_time as updateTime ,
+        update_user as updateUser ,
+        update_user_id as updateUserId ,
+        project_name as projectName ,
+        apply_user_id as applyUserId ,
+        apply_user_name as applyUserName ,
+        belonging_month as belongingMonth ,
+        first_subject_code as firstSubjectCode ,
+        first_subject as firstSubject ,
+        two_subject_code as twoSubjectCode ,
+        two_subject as twoSubject ,
+        pay_noted as payNoted ,
+        budget_amount as budgetAmount ,
+        accumulated_expenditure as accumulatedExpenditure ,
+        budget_balance as budgetBalance ,
+        approve_user_id as approveUserId ,
+        approve_user_name as approveUserName ,
+        approve_time as approveTime ,
+        process_inst_id as processInstId ,
+        process_status as processStatus ,
+        next_approve_user_id as nextApproveUserId ,
+        next_approve_user_name as nextApproveUserName ,
+        business_id as businessId ,
+        project_apply_main_id as projectApplyMainId ,
+        remark,
+        amount,
+        balance_amount as balanceAmount
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        r.id
+        r.serial_number as serialNumber,
+        r.create_user_id as createUserId ,
+        r.create_user as createUser ,
+        r.created_date as createdDate ,
+        r.creator_org_id as creatorOrgId ,
+        r.creator_org_name as creatorOrgName ,
+        r.create_time as createTime ,
+        r.update_time as updateTime ,
+        r.update_user as updateUser ,
+        r.update_user_id as updateUserId ,
+        r.project_name as projectName ,
+        r.apply_user_id as applyUserId ,
+        r.apply_user_name as applyUserName ,
+        r.belonging_month as belongingMonth ,
+        r.first_subject_code as firstSubjectCode ,
+        r.first_subject as firstSubject ,
+        r.two_subject_code as twoSubjectCode ,
+        r.two_subject as twoSubject ,
+        r.pay_noted as payNoted ,
+        r.budget_amount as budgetAmount ,
+        r.accumulated_expenditure as accumulatedExpenditure ,
+        r.budget_balance as budgetBalance ,
+        r.approve_user_id as approveUserId ,
+        r.approve_user_name as approveUserName ,
+        r.approve_time as approveTime ,
+        r.process_inst_id as processInstId ,
+        r.process_status as processStatus ,
+        r.next_approve_user_id as nextApproveUserId ,
+        r.next_approve_user_name as nextApproveUserName ,
+        r.business_id as businessId ,
+        r.project_apply_main_id as projectApplyMainId ,
+        r.remark,
+        r.amount,
+        r.balance_amount as balanceAmount
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="queryList" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column_Dic"/>
+        from item_expenses r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            (r.process_status != #{processStatus} or r.create_user_id=#{createUserId})
+            and r.creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName !=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and r.create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+            <if test="firstSubject!=null and firstSubject!=''">
+                and r.first_subject LIKE concat('%',#{firstSubject},'%')
+            </if>
+            <if test="twoSubject!=null and twoSubject!=''">
+                and r.two_subject LIKE concat('%',#{twoSubject},'%')
+            </if>
+            <if test="payNoted!=null and payNoted!=''">
+                and r.pay_noted LIKE concat('%',#{payNoted},'%')
+            </if>
+<!--            <if test="createdDate!=null and createdDate!=''">-->
+<!--                and r.created_date LIKE concat('%',#{createdDate},'%')-->
+<!--            </if>-->
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC;
+    </select>
+
+
+    <delete id="deleteItemExpenses" parameterType="java.util.List">
+        delete from
+        item_expenses
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="queryDetail" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column"/>
+        from item_expenses
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryDetailExportExcel" resultType="pd" parameterType="java.util.List">
+        select
+        <include refid="Base_Column"/>
+        from item_expenses
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into item_expenses(
+            serial_number,business_id,creator_org_id,creator_org_name,create_user_id,create_user,created_date,
+            create_time,project_name,apply_user_id,apply_user_name,belonging_month,first_subject_code,
+            first_subject,two_subject_code,two_subject,pay_noted,budget_amount,accumulated_expenditure,
+            budget_balance,process_status,project_apply_main_id,remark,
+            amount,balance_amount
+        )
+        values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName},#{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
+                getDate(),#{projectName},#{applyUserId},#{applyUserName},#{belongingMonth},#{firstSubjectCode},
+                #{firstSubject},#{twoSubjectCode},#{twoSubject},#{payNoted},#{budgetAmount},#{accumulatedExpenditure},
+                #{budgetBalance},#{processStatus},#{projectApplyMainId},#{remark},#{amount},#{balanceAmount}
+                )
+    </insert>
+
+    <update id="updateMain" parameterType="pd">
+        update item_expenses
+        set update_time= getdate(),
+            update_user = #{createUser},
+            update_user_id = #{createUserId},
+            project_name = #{projectName},
+            apply_user_id = #{applyUserId},
+            apply_user_name = #{applyUserName},
+            belonging_month = #{belongingMonth},
+            first_subject_code = #{firstSubjectCode},
+            first_subject = #{firstSubject},
+            two_subject_code = #{twoSubjectCode},
+            two_subject = #{twoSubject},
+            pay_noted = #{payNoted},
+            budget_amount = #{budgetAmount},
+            accumulated_expenditure = #{accumulatedExpenditure},
+            budget_balance = #{budgetBalance},
+            remark = #{remark},
+            amount = #{amount},
+            balanceAmount = #{balanceAmount},
+            project_apply_main_id = #{projectApplyMainId}
+        where business_id = #{businessId}
+    </update>
+
+
+    <update id="updateMainProcessStatus" parameterType="pd">
+        update item_expenses
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <update id="updateMainApproveProcessStatus" parameterType="pd">
+        update item_expenses
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{approveUserName},
+            update_user_id       = #{approveUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+
+</mapper>

@@ -56,9 +56,9 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
         pd.put("processStatusList", pageDataList);
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
         pd.put("selsctCreateUser", pd.getString("selsctCreateUser"));
-        List<PageData> userInfoList = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureCheckList", pd);
+        List<PageData> itemExpensesList = (List<PageData>) baseDao.findForList("ItemExpensesMapper.queryList", pd);
 
-        return userInfoList;
+        return itemExpensesList;
     }
 
     /**
@@ -67,9 +67,11 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
      */
     @Override
     public void deleteItemExpenses(PageData pd) {
-        List<String> idList = JSONArray.parseArray(pd.getString("idList"), String.class);
+        List<String> businessIdList = JSONArray.parseArray(pd.getString("businessIdList"), String.class);
         //删除主表
-        baseDao.batchDelete("ItemClosureCheckMapper.deleteItemClosure", idList);
+        baseDao.batchDelete("ItemExpensesMapper.deleteItemExpenses", businessIdList);
+        //先删除附件表
+        fileService.deleteAttachment(pd);
     }
 
     /**
@@ -80,7 +82,7 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
     @Override
     public PageData getItemExpensesDetail(PageData pd) {
         //1、查询主表
-        PageData request = (PageData) baseDao.findForObject("ItemClosureCheckMapper.queryItemClosureCheckDetail", pd);
+        PageData request = (PageData) baseDao.findForObject("ItemExpensesMapper.queryDetail", pd);
 
         // 查询附件表
         fileService.queryFileByBusinessId(request);
@@ -96,25 +98,32 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
     public void saveOrUpdate(PageData pd) {
         //如果ID为空，则为保存
         if (pd.getString("id").isEmpty()){
-            String businessId = "ICCK" + UUID.randomUUID().toString();//生成业务主键ID
-            String serialNumber = SequenceUtil.generateSerialNo("ICCK");//生成流水号
-
-            pd.put("businessId", businessId);
-            pd.put("serialNumber", serialNumber);
-            pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+            //判断是直接保存，还是提交时保存
+            //直接保存
+            if (pd.getString("flag").isEmpty()){
+                pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[0]);
+                String serialNumber = SequenceUtil.generateSerialNo("FYZC");//生成流水号
+                String businessId = "FYZC" + UUID.randomUUID().toString();//生成业务主键ID
+                pd.put("serialNumber", serialNumber);
+                pd.put("businessId", businessId);
+            }
 
             //1、插入主表
-            baseDao.insert("ItemClosureCheckMapper.insertMain", pd);
+            baseDao.insert("ItemExpensesMapper.insertMain", pd);
+
+            // 插入到附件表
+            fileService.insert(pd);
 
         } else {
             //编辑
             //1、更新主表
-            baseDao.update("ItemClosureCheckMapper.updateMain", pd);
+            baseDao.update("ItemExpensesMapper.updateMain", pd);
 
+            //先删除附件表
+            fileService.deleteAttachment(pd);
+            //再插入附件表
+            fileService.insert(pd);
         }
-
-        // 插入到附件表
-        fileService.insert(pd);
     }
 
     /**
@@ -133,7 +142,7 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
 
         //更改主表状态
         pd.put("processStatus", ConstantValUtil.APPROVAL_STATUS[1]);
-        baseDao.update("ItemClosureCheckMapper.updateMainProcessStatus", pd);
+        baseDao.update("ItemExpensesMapper.updateMainProcessStatus", pd);
     }
 
     /**
@@ -159,7 +168,7 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
         }
 
         //编辑主表的审批状态、审批人等信息
-        baseDao.update("ItemClosureCheckMapper.updateMainProcessStatus", pd);
+        baseDao.update("ItemExpensesMapper.updateMainProcessStatus", pd);
     }
 
     /**
@@ -169,13 +178,13 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
      */
     @Override
     public HSSFWorkbook exportExcel(PageData pageData) {
-        String title = "研发项目结题验收";
-        String[] head = {"序号", "单据编号", "成果名称", "当前审批人", "申请评审验收单位", "结题申报人", "申请评审日期", "项目负责人", "岗位", "联系电话", "起始年度",
-                "结束年度", "成果内容简介", "编制人", "创建日期", "更新日期"};
+        String title = "研发项目费用支出";
+        String[] head = {"序号", "单据编号", "项目名称", "项目负责人", "所属月份", "一级科目", "二级科目", "支出依据", "预算总额", "已累计支出", "预算结余",
+                "本次金额(元)", "结余金额(元)", "申报意见", "编制人", "创建日期"};
         String idStr = pageData.getString("businessIdList");
         List<String> listId = JSONObject.parseArray(idStr, String.class);
         //根据idList查询主表
-        List<PageData> checkInfoList = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureCheckDetailExportExcel", listId);
+        List<PageData> checkInfoList = (List<PageData>) baseDao.findForList("ItemExpensesMapper.queryDetailExportExcel", listId);
 
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet(title + 1);
@@ -213,7 +222,7 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("jobTitle"));
+                cell.setCellValue(pd.getString("projectName"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -221,39 +230,43 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("creatorOrg"));
+                cell.setCellValue(pd.getString("belongingMonth"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("createUser"));
+                cell.setCellValue(pd.getString("firstSubject"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("createdDate"));
+                cell.setCellValue(pd.getString("twoSubject"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("applyUserName"));
+                cell.setCellValue(pd.getString("payNoted"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("postName"));
+                cell.setCellValue(pd.getString("budgetAmount"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("telephone"));
+                cell.setCellValue(pd.getString("accumulatedExpenditure"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("startYear"));
+                cell.setCellValue(pd.getString("budgetBalance"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("endYear"));
+                cell.setCellValue(pd.getString("amount"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("projectAbstract"));
+                cell.setCellValue(pd.getString("balanceAmount"));
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(pd.getString("remark"));
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
@@ -264,13 +277,6 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
                 String createTime = pd.getString("createTime");
                 cell.setCellValue(createTime.substring(0, createTime.lastIndexOf(".")));
                 cell.setCellStyle(styleCell);
-
-
-                cell = row.createCell(j++);
-                String time1 = pd.getString("updateTime");
-                cell.setCellValue(time1.substring(0, time1.lastIndexOf(".")));
-                cell.setCellStyle(styleCell);
-
             }
         }
 
@@ -303,44 +309,28 @@ public class ItemExpensesServiceImpl implements ItemExpensesService {
         String[] argArr1 = {
                 "编制单位", data.getString("creatorOrg"), "创建人", data.getString("createUser"),
                 "创建时间", data.getString("createdDate"), "单据编号", data.getString("serialNumber"),
-                "成果名称",data.getString("jobTitle"),"项目负责人",data.getString("applyUserName"),
-                "负责人岗位",data.getString("postName"),"联系电话",data.getString("telephone"),
-                "起始年度",data.getString("startYear"),"结束年度",data.getString("endYear"),
-                "结题申报人",data.getString("creatorUser"),"申请评审日期",data.getString("createdDate"),
-                "成果内容简介",data.getString("projectAbstract"), "经济技术文件目录及提供单位",data.getString("directoryAndUnit")};
+                "项目名称",data.getString("projectName"),"项目负责人",data.getString("applyUserName"),
+                "所属月份",data.getString("belongingMonth"),"一级科目",data.getString("firstSubject"),
+                "二级科目",data.getString("twoSubject"), "预算总额",data.getString("budgetAmount"),
+                "已累计支出",data.getString("accumulatedExpenditure"), "预算结余",data.getString("budgetBalance"),
+                "本次金额(元)",data.getString("amount"), "结余金额(元)",data.getString("balanceAmount"),
+                "","","","",
+                "支出依据",data.getString("payNoted"),"申报意见",data.getString("remark")
+                };
         HashMap<Integer,Integer> mergeMap=new HashMap<>();
-        mergeMap.put(25,7);
-        mergeMap.put(27, 7);
+        mergeMap.put(34,7);
+        mergeMap.put(26, 7);
         PdfPTable baseTableHaveMerge = PDFUtil.createBaseTableHaveMerge(width1, argArr1, mergeMap);
 
-        //人员信息
-        String[] argArr2 = {"序号", "姓名", "身份证", "年龄", "性别", "学历", "所属部门", "所属职务", "所学专业", "从事专业", "所在单位", "研究任务及分工",
-                "全时率", "联系电话", "参与研究开始日期", "参与研究结束日期", "编制人"};
-        int width2[] = {100, 200, 250, 150, 150, 150, 200, 200, 200, 200,200, 200, 200, 200, 200,200, 200};//每栏的宽度
-        //明细数据写入
-        List<PageData> list = (List<PageData>) baseDao.findForList("ItemClosureCheckMapper.queryItemClosureUserInfoList", data);
-
-        String[] argDetail = null;
-        List<String> detailList = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            PageData pageData = (PageData) list.get(i);
-            argDetail = new String[]{String.valueOf(i + 1), pageData.getString("userName"), pageData.getString("idCard"),
-                    pageData.getString("age"), pageData.getString("gender"), pageData.getString("education"),
-                    pageData.getString("belongDepartment"), pageData.getString("belongPost"), pageData.getString("majorStudied"),
-                    pageData.getString("majorWorked"), pageData.getString("belongUnit"), pageData.getString("taskDivision"),
-                    pageData.getString("workRate"), pageData.getString("telephone"), pageData.getString("startDate"),
-                    pageData.getString("endDate"), pageData.getString("creatorUser")};
-            String jsonString2 = JSON.toJSONString(argDetail);
-            detailList.add(jsonString2);
-        }
-        PdfPTable detailTable = PDFUtil.createDetailTableNotMerge("研发项目人员信息", width2, argArr2, detailList, null, null);
-
+        PdfPTable pdfPTable = new PdfPTable(5);
+        int width3[] = {200, 200, 300, 200, 200};// 每栏的宽度
+        pdfPTable.setWidths(width3);
 
         //设置审批记录
-        flowService.getApproveTable2(data,detailTable);
+        flowService.getApproveTable2(data,pdfPTable);
 
         //将表2合到表1中
-        PDFUtil.mergeTable(baseTableHaveMerge,detailTable);
+        PDFUtil.mergeTable(baseTableHaveMerge,pdfPTable);
         //添加表格
         document.add(baseTableHaveMerge);
     }

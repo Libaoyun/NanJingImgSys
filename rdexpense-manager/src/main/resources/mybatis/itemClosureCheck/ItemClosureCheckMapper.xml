@@ -21,6 +21,7 @@
         post_code as postCode,
         post_name as postName,
         telephone as telephone,
+        unit_name as unitName,
         start_year as startYear,
         end_year  as endYear,
         check_date as checkDate,
@@ -57,6 +58,7 @@
         r.post_name as postName,
         r.telephone as telephone,
         r.start_year as startYear,
+        r.unit_name as unitName,
         r.end_year  as endYear,
         r.check_date as checkDate,
         r.task_source as taskSource,
@@ -286,14 +288,14 @@
              create_user,created_date,create_time,update_time,job_title,apply_user_id,
              apply_user_name,post_code,post_name,telephone,start_year,end_year,task_source,
              project_abstract,directory_and_unit,check_remark,approve_user_id,approve_user_name,
-             process_status,project_apply_main_id
+             process_status,project_apply_main_id,unit_name
         )
         values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName} ,
                 #{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
                 getDate(),getDate(),#{jobTitle},#{applyUserId},#{applyUserName},#{postCode},#{postName},#{telephone},
                 #{startYear,jdbcType=DATE},#{endYear,jdbcType=DATE},#{taskSource},#{projectAbstract},
                 #{directoryAndUnit},#{checkRemark},#{approveUserId},#{approveUserName},#{processStatus},
-                #{projectApplyMainId})
+                #{projectApplyMainId},#{unitName})
     </insert>
 
     <update id="updateMain" parameterType="pd">
@@ -307,6 +309,7 @@
             post_code = #{postCode},
             post_name = #{postName},
             telephone = #{telephone},
+            unit_name = #{unitName},
             start_year = #{startYear,jdbcType=DATE},
             end_year = #{endYear,jdbcType=DATE},
             task_source = #{taskSource},
@@ -360,13 +363,14 @@
             approve_user_id = #{approveUserId},
             approve_user_name = #{approveUserName},
             approve_time = getdate(),
+            process_inst_id = #{processInstId},
             process_status = #{processStatus},
             next_approve_user_id = #{nextApproveUserId},
             next_approve_user_name = #{nextApproveUserName},
             update_user          = #{approveUserName},
             update_user_id       = #{approveUserId},
             update_time          = getdate()
-        where process_inst_id = #{processInstId}
+        where business_id = #{businessId}
     </update>
 
 

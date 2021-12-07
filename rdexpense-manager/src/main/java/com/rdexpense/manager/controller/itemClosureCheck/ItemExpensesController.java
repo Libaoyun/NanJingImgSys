@@ -66,9 +66,9 @@ public class ItemExpensesController extends BaseController {
     @Autowired
     private LogUtil logUtil;
 
-    @PostMapping("/queryItemExpensesList")
+    @PostMapping("/queryList")
     @ApiOperation(value = "查询费用支出列表", notes = "查询费用支出列表")
-    public ResponseEntity<PageInfo<ItemExpensesListDto>> queryItemExpensesList(ItemExpensesListDto itemExpensesListDto) {
+    public ResponseEntity<PageInfo<ItemExpensesListDto>> queryList(ItemExpensesListDto itemExpensesListDto) {
         PageData pd = this.getParams();
         try {
             PageHelper.startPage(pd.getInt("pageNum"), pd.getInt("pageSize"));
@@ -84,13 +84,13 @@ public class ItemExpensesController extends BaseController {
 
     @ApiOperation(value = "删除研发项目费用支出申请")
     @PostMapping("/delete")
-    public ResponseEntity deleteApply(IdListDto idListDto) {
+    public ResponseEntity deleteApply(BusinessIdListDto businessIdListDto) {
         PageData pd = this.getParams();
 
         //校验取出参数
-        String idList = pd.getString("idList");
-        if (StringUtils.isBlank(idList)) {
-            throw new MyException("主键ID不能为空");
+        String businessIdList = pd.getString("businessIdList");
+        if (StringUtils.isBlank(businessIdList)) {
+            throw new MyException("业务主键businessId不能为空");
         }
         CheckParameter.checkDefaultParams(pd);
 
@@ -155,9 +155,13 @@ public class ItemExpensesController extends BaseController {
             //先保存或编辑校验
             submitCheckParam(pd);
         } else {
+            PageData pageData = itemExpensesService.getItemExpensesDetail(pd);
+            pageData.put("menuCode",pd.getString("menuCode"));
+            //启动工作流时会进行校验
+            pd.put("serialNumber",pageData.getString("serialNumber"));
             //列表提交校验
-            submitCheckParam(pd);
-            CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID",64);
+            submitCheckParam(pageData);
+            CheckParameter.stringLengthAndEmpty(pageData.getString("businessId"), "业务主键businessId",64);
         }
 
         ResponseEntity result = null;
@@ -177,7 +181,7 @@ public class ItemExpensesController extends BaseController {
 
     @ApiOperation(value = "审批(同意/回退)")
     @PostMapping(value = "/approve")
-    public ResponseEntity approveRecord(FlowApproveDto flowApproveDto){
+    public ResponseEntity approve(FlowApproveDto flowApproveDto){
         PageData pd = this.getParams();
         checkApprove(pd);
         ResponseEntity result = null;

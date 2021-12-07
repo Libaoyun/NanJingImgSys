@@ -33,7 +33,7 @@ public class ItemExpensesListDto extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "申请人ID")
     private String createUserId;
 
-    @ApiModelProperty(value = "申请人")
+    @ApiModelProperty(value = "申请人(搜索查询时，使用selectCreateUser字段传参)")
     private String createUser;
 
     @ApiModelProperty(value = "研发项目支出一级科目编码")

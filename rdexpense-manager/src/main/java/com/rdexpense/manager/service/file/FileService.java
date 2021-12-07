@@ -50,4 +50,10 @@ public interface FileService {
      */
     PageData insertApproveFile(PageData pd);
 
+    /**
+     * 删除附件
+     * @param pd
+     */
+    void deleteAttachment(PageData pd);
+
 }

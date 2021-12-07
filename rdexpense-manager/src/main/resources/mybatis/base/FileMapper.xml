@@ -225,4 +225,12 @@
         </foreach>
     </select>
 
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
 </mapper>

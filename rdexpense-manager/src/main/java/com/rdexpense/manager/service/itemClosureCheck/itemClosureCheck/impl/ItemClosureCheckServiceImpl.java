@@ -135,6 +135,9 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
                 baseDao.batchInsert("ItemClosureCheckMapper.batchInsertResearchUser", researchUserList);
             }
 
+            // 插入到附件表
+            fileService.insert(pd);
+
         } else {
             //编辑
             //1、更新主表
@@ -153,10 +156,12 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
 
                 baseDao.batchInsert("ItemClosureCheckMapper.batchInsertResearchUser", researchUserList);
             }
-        }
 
-        // 插入到附件表
-        fileService.insert(pd);
+            //先删除附件表
+            fileService.deleteAttachment(pd);
+            //再插入附件表
+            fileService.insert(pd);
+        }
     }
 
 
@@ -218,7 +223,6 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
             flowService.backOriginalNode(pd);
         }
 
-        System.out.println("============"+pd.toString());
         //编辑主表的审批状态、审批人等信息
         baseDao.update("ItemClosureCheckMapper.updateMainApproveProcessStatus", pd);
     }
@@ -235,6 +239,9 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
         baseDao.batchDelete("ItemClosureCheckMapper.deleteItemClosure", idList);
         //删除研发项目结项验收研发人员信息表
         baseDao.batchDelete("ItemClosureCheckMapper.deleteItemClosureUserInfo", idList);
+
+        //先删除附件表
+        fileService.deleteAttachment(pd);
     }
 
     /**
@@ -396,7 +403,7 @@ public class ItemClosureCheckServiceImpl implements ItemClosureCheckService {
         //设置基本信息
         int width1[] = {140, 400, 140, 300, 140, 160, 150, 250};//每栏的宽度
         String[] argArr1 = {
-                "编制单位", data.getString("creatorOrg"), "创建人", data.getString("createUser"),
+                "编制单位", data.getString("creatorOrgName"), "创建人", data.getString("createUser"),
                 "创建时间", data.getString("createdDate"), "单据编号", data.getString("serialNumber"),
                 "成果名称",data.getString("jobTitle"),"项目负责人",data.getString("applyUserName"),
                 "负责人岗位",data.getString("postName"),"联系电话",data.getString("telephone"),

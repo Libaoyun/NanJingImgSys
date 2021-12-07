@@ -92,6 +92,12 @@ public class ItemClosureCheckListDto extends BaseEntity implements Serializable 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
 
+    @ApiModelProperty(value = "审批实例ID")
+    private String processInstId;
+
+    @ApiModelProperty(value = "所属单位名称(长度：256)")
+    private String unitName;
+
     @ApiModelProperty(value = "流程状态集合，传编码")
     private List<String> statusList;
 
