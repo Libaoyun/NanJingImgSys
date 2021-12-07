@@ -13,6 +13,7 @@ import * as authorizationApi from './modules/systemSetting/authorization';
 import * as contractApi from './modules/implementationManagement/contract';
 import * as disclosureApi from './modules/implementationManagement/disclosure';
 import * as reportApi from './modules/implementationManagement/report';
+import * as checkFinalApi from './modules/checkManagement/checkFinal'
 
 let api = Object.assign(
     appApi,
@@ -28,7 +29,8 @@ let api = Object.assign(
     authorizationApi,
     contractApi,
     disclosureApi,
-    reportApi
+    reportApi,
+    checkFinalApi,
 );
 
 Vue.prototype.$API = api
