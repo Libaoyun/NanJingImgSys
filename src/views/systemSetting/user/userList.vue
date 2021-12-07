@@ -27,6 +27,7 @@
         <el-table
             ref="tableData"
             :data="tableData"
+            :row-key="getRowKeys"
             :height="tableHeight"
             :border="tableConfig.border"
             v-loading="listLoading"
@@ -35,7 +36,7 @@
             @selection-change="tableSelectionChange"
             class="global-table-default"
             style="width: 100%;">
-            <el-table-column type="selection" width="55" align="center" ></el-table-column>
+            <el-table-column type="selection" width="55" align="center" :reserve-selection="true"></el-table-column>
             <el-table-column fixed label="序号" type="index" width="55" align="center">
                 <template slot-scope="scope">
                 <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
@@ -120,6 +121,13 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
 
         this.getUserList();
     }
+    activated() {
+        if(Object.keys(this.$route.params).length > 0){
+           if(this.$route.params.refresh){
+               this.refreshBtn()
+           }
+        }
+    }
     //复选框选中的id值
     get idList(){
         var list = [];
@@ -128,6 +136,9 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
         })
         return list;
     };
+    getRowKeys(row) {
+        return row.id
+    }
     // 查询外部用户列表
     getUserList(){
         var params = {};
@@ -291,6 +302,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
             // 清除表格筛选条件
             this.$refs.tableData.clearFilter();
             this.filterParams = {};
+            // 清除多选表格选中
+            this.$refs.tableData.clearSelection();
             this.getUserList();
         }
     }
