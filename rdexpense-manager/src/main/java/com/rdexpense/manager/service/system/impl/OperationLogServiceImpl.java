@@ -226,7 +226,7 @@ public class OperationLogServiceImpl implements OperationLogService {
     public ResponseEntity exportExcel(PageData pageData) {
         // excel常量
         String title = "操作日志";
-        String[] head = {"序号", "用户名", "操作类型", "操作内容", "IP","操作时间"};
+        String[] head = {"序号", "用户名","所属组织","所属部门","所属职务", "IP","操作时间", "操作类型", "操作内容"};
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet(title + 1);
         HSSFCellStyle styleHeader = ExcelUtil.setHeader(wb, sheet);// 表头
@@ -268,25 +268,17 @@ public class OperationLogServiceImpl implements OperationLogService {
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("operateType")); //操作类型
+                cell.setCellValue(pd.getString("userOrgName")); //所属单位
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getString("operateContent")); //操作内容
-                cell.setCellStyle(styleCell);
-
-
-/*                cell = row.createCell(j++);
-                cell.setCellValue(pd.getUserOrgName()); //所属单位
+                cell.setCellValue(pd.getString("userDepartName")); //所属部门
                 cell.setCellStyle(styleCell);
 
                 cell = row.createCell(j++);
-                cell.setCellValue(pd.getUserDepartName()); //所属部门
+                cell.setCellValue(pd.getString("userPositionName")); //所属岗位
                 cell.setCellStyle(styleCell);
 
-                cell = row.createCell(j++);
-                cell.setCellValue(pd.getUserPositionName()); //所属岗位
-                cell.setCellStyle(styleCell);*/
 
                 cell = row.createCell(j++);
                 cell.setCellValue(pd.getString("loginIp")); //IP
@@ -297,6 +289,17 @@ public class OperationLogServiceImpl implements OperationLogService {
                 String time = pd.getString("createTime");
                 cell.setCellValue(time.substring(0,time.lastIndexOf("."))); //操作时间
                 cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(pd.getString("operateType")); //操作类型
+                cell.setCellStyle(styleCell);
+
+                cell = row.createCell(j++);
+                cell.setCellValue(pd.getString("operateContent")); //操作内容
+                cell.setCellStyle(styleCell);
+
+
+
 
             }
         }

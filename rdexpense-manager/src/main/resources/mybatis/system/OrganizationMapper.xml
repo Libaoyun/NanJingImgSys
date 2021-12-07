@@ -24,11 +24,11 @@
         <include refid="Base_Column"/>
         from sys_organization_info
         <where>
-            <if test="fileName!=null and fileName!=''">
-                and file_name LIKE concat('%',#{fileName},'%')
+            <if test="orgName!=null and orgName!=''">
+                and org_name LIKE concat('%',#{orgName},'%')
             </if>
-            <if test="fileFormat!=null and fileFormat!=''">
-                and file_format LIKE concat('%',#{fileFormat},'%')
+            <if test="orgNumber!=null and orgNumber!=''">
+                and org_number LIKE concat('%',#{orgNumber},'%')
             </if>
             <if test="status!=null and status!=''">
                 and status = #{status}
@@ -36,8 +36,8 @@
             <if test="remark!=null and remark!=''">
                 and remark LIKE concat('%',#{remark},'%')
             </if>
-            <if test="createUser!=null and createUser!=''">
-                and create_user LIKE concat('%',#{createUser},'%')
+            <if test="createUserName!=null and createUserName!=''">
+                and create_user LIKE concat('%',#{createUserName},'%')
             </if>
             <if test="updateUser!=null and updateUser!=''">
                 and update_user LIKE concat('%',#{updateUser},'%')
@@ -66,7 +66,7 @@
             remark        =#{remark},
             update_user    = #{createUser},
             update_user_id = #{createUserId},
-            update_time    = getdate()
+            update_time    = getDate()
         where id = #{id,jdbcType=BIGINT}
     </update>
 

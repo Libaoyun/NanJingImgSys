@@ -49,7 +49,7 @@ public class SerialNumberUtil {
         //补四位,缺失的位置用0补位
         String  importantKey=String.valueOf(increment);
         if(importantKey.length()<3) {
-            importantKey = "000".substring(0,3-importantKey.length())+importantKey;
+            importantKey = "0000".substring(0,4-importantKey.length())+importantKey;
         }
         return importantKey;
     }

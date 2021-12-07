@@ -143,8 +143,11 @@ public class FileServiceImpl implements FileService {
 
 
         PageData result = new PageData();
-        result.put("fileId",idBufferStr.substring(0,idBufferStr.length() - 1));
-        result.put("fileName",nameBufferStr.substring(0,nameBufferStr.length() - 1));
+        if(StringUtils.isNotBlank(idBufferStr) && StringUtils.isNotBlank(nameBufferStr)){
+            result.put("fileId",idBufferStr.substring(0,idBufferStr.length() - 1));
+            result.put("fileName",nameBufferStr.substring(0,nameBufferStr.length() - 1));
+        }
+
 
 
 

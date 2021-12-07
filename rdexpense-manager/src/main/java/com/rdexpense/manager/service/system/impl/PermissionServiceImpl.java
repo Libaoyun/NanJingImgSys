@@ -330,24 +330,6 @@ public class PermissionServiceImpl implements PermissionService {
     public List<PageData> queryUser(PageData pd) {
 
         List<PageData> list = (List<PageData>) baseDao.findForList("AuthorityUserMapper.queryUser", pd);
-//        if (!CollectionUtils.isEmpty(list)) {
-//            //查询部门职务表
-//            List<PageData> postList = (List<PageData>) baseDao.findForList("UserMapper.queryAllPostData", list);
-//            if (!CollectionUtils.isEmpty(postList)) {
-//                for (PageData data : list) {
-//                    String userCode = data.getString("userCode");
-//                    for (PageData postData : postList) {
-//                        if (userCode.equals(postData.getString("userCode"))) {
-//                            data.put("departmentName", postData.getString("departmentName"));
-//                            data.put("postName", postData.getString("postName"));
-//                            data.put("departmentCode", postData.getString("departmentCode"));
-//                            data.put("postCode", postData.getString("postCode"));
-//                        }
-//                    }
-//
-//                }
-//            }
-//        }
 
         return list;
 

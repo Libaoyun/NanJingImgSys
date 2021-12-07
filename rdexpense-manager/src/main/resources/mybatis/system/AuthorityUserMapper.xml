@@ -160,27 +160,31 @@
 
 	<select id="queryUser" resultType="pd">
 		select
-		<include refid="Base_Column"/>
-		from sys_user_info
+		 u.user_code as userCode,u.user_name as userName,
+		u.department_name as departmentName,u.department_code as departmentCode,
+		u.post_name as postName,u.post_code as postCode
+
+		from sys_user_info u
+		left join sys_user_department_info d on u.user_code = d.user_code
 		<where>
 			<if test="orgCode != null and orgCode != '' and orgType != null and orgType != '' and orgType == 1">
-				and department_code LIKE concat('%',#{orgCode},'%')
+				and d.department_code = #{orgCode}
 			</if>
 			<if test="orgCode != null and orgCode != '' and orgType != null and orgType != '' and orgType == 2">
-				and post_code LIKE concat('%',#{orgCode},'%')
+				and d.post_code = #{orgCode}
 			</if>
 
 			<if test="userCode!=null and userCode!=''">
-				and user_code LIKE concat('%',#{userCode},'%')
+				and u.user_code LIKE concat('%',#{userCode},'%')
 			</if>
 			<if test="userName!=null and userName!=''">
-				and user_name LIKE concat('%',#{userName},'%')
+				and u.user_name LIKE concat('%',#{userName},'%')
 			</if>
 			<if test="organizationId!=null and organizationId!=''">
-				and user_code not in (select user_id from uq_authority_user where scope_code = #{organizationId} and user_flag = 0)
+				and u.user_code not in (select user_id from uq_authority_user where scope_code = #{organizationId} and user_flag = 0)
 			</if>
 		</where>
-		ORDER BY update_time DESC;
+		ORDER BY u.update_time DESC;
 	</select>
 
 	<select id="getUserById" resultType="pd">

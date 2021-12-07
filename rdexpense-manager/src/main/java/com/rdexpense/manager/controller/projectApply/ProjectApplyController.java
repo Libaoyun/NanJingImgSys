@@ -132,6 +132,14 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("businessId"), "业务主键ID", 256);
+
+        // 编辑时，状态只能为已保存
+        PageData recordData = (PageData) dao.findForObject("ProjectApplyMapper.queryApplyDetail", pd);
+        String requestStatus = recordData.getString("processStatus");
+        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0]) && !requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[3])) {
+            throw new MyException(ConstantMsgUtil.ERR_UPDATE_FAIL.desc());
+        }
+
         CheckParameter.checkDefaultParams(pd);
         String operationType = pd.getString("operationType");
         if(operationType.equals("2")){
@@ -212,7 +220,7 @@ public class ProjectApplyController extends BaseController {
         // 编辑时，状态只能为已保存
         PageData recordData = projectApplyService.getApplyDetail(pd);
         String requestStatus = recordData.getString("processStatus");
-        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0])) {
+        if (!requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[0]) && !requestStatus.equals(ConstantValUtil.APPROVAL_STATUS[3])) {
             throw new MyException(ConstantMsgUtil.ERR_SUBMIT_FAIL.desc());
         }
 
@@ -466,7 +474,7 @@ public class ProjectApplyController extends BaseController {
                 // 压缩流
                 ZipOutputStream zos = new ZipOutputStream(bos);
                 //生成excel
-                projectApplyService.exportExcelZip(businessIdList, zos, bos,number);
+                projectApplyService.exportZip(1,businessIdList, zos, bos,FILE_PREFIX);
                 zos.flush();
                 zos.close();
                 //写入返回response
@@ -496,23 +504,41 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.checkBusinessIdList(pd);
         ResponseEntity result = null;
+
+        HttpServletResponse response = this.getResponse();
         try {
-            //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pd);
-            logger.info("业务主数据 === " + request);
-            //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pd);
-            logger.info("明细表数据 === " + detailList);
-            //明细子表数据
-            if(detailList.size()==0){
-                detailList.add(new PageData());
+
+            String businessIdStr = pd.getString("businessIdList");
+            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
+            String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+            String number = SerialNumberUtil.generateSerialNo("projectApplyPdf");
+
+
+            if(businessIdList.size() == 1){
+                projectApplyService.exportWordPdf(2,businessIdList.get(0),response,FILE_PREFIX);
+            }else {
+                //文件名
+                String fileName = FILE_PREFIX+date+"_"+number+".zip";
+                //输出流
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                // 压缩流
+                ZipOutputStream zos = new ZipOutputStream(bos);
+
+                projectApplyService.exportZip(2,businessIdList, zos, bos,FILE_PREFIX);
+                zos.flush();
+                zos.close();
+                //写入返回response
+                response.reset();
+                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
+                OutputStream out = new BufferedOutputStream(response.getOutputStream());
+                out.write(bos.toByteArray());
+                out.flush();
+                out.close();
             }
-            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
-            logger.info("明细子表数据 === " + detailChildList);
-            //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pd);
-            logger.info("合同数据 ====" + shieldData);
-     //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+
+
+            result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
@@ -530,23 +556,39 @@ public class ProjectApplyController extends BaseController {
         PageData pd = this.getParams();
         ResponseEntity result = null;
         CheckParameter.checkBusinessIdList(pd);
+
+        HttpServletResponse response = this.getResponse();
         try {
-            //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pd);
-            logger.info("业务主数据 === " + request);
-            //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pd);
-            logger.info("明细表数据 === " + detailList);
-            //明细子表数据
-            if(detailList.size()==0){
-                detailList.add(new PageData());
+            String businessIdStr = pd.getString("businessIdList");
+            List<String> businessIdList = JSONObject.parseArray(businessIdStr, String.class);
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
+            String date = df.format(new Date());// new Date()为获取当前系统时间，也可使用当前时间戳
+            String number = SerialNumberUtil.generateSerialNo("projectApplyWord");
+
+
+            if(businessIdList.size() == 1){
+                projectApplyService.exportWordPdf(1,businessIdList.get(0),response,FILE_PREFIX);
+
+            }else {
+                //文件名
+                String fileName = FILE_PREFIX+date+"_"+number+".zip";
+                //输出流
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                // 压缩流
+                ZipOutputStream zos = new ZipOutputStream(bos);
+
+                projectApplyService.exportZip(3,businessIdList, zos, bos,FILE_PREFIX);
+                zos.flush();
+                zos.close();
+                //写入返回response
+                response.reset();
+                response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.encode(fileName, "utf-8"));
+                OutputStream out = new BufferedOutputStream(response.getOutputStream());
+                out.write(bos.toByteArray());
+                out.flush();
+                out.close();
             }
-            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
-            logger.info("明细子表数据 === " + detailChildList);
-            //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pd);
-            logger.info("合同数据 ====" + shieldData);
-            //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+            result = ResponseEntity.success(null, INFO_EXPORT_SUCCESS.desc());
             return result;
         } catch (Exception e) {
             result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
@@ -560,29 +602,16 @@ public class ProjectApplyController extends BaseController {
     @ApiOperation(value = "预览合同")
     @PostMapping(value = "/preview")
     public ResponseEntity preview(ProjectApplyAddDto projectApplyAddDto) {
-        PageData pageData = this.getParams();
-        ResponseEntity result = null;
+        PageData pd = this.getParams();
+        HttpServletResponse response = this.getResponse();
         try {
             //业务主数据
-            PageData request = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryMaintenanceRegister", pageData);
-            logger.info("业务主数据 === " + request);
-            //设备维保明细
-            List<PageData> detailList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.selectMaintenanceDetail", pageData);
-            logger.info("明细表数据 === " + detailList);
-            //明细子表数据
-            if(detailList.size()==0){
-                detailList.add(new PageData());
-            }
-            List<PageData> detailChildList = (List<PageData>) dao.findForList("EqMaintenanceRegisterMapper.queryChildDetailById", detailList);
-            logger.info("明细子表数据 === " + detailChildList);
-            //查询合同数据
-            PageData shieldData = (PageData) dao.findForObject("EqMaintenanceRegisterMapper.queryContractAndDic", pageData);
-            logger.info("合同数据 ====" + shieldData);
-            //       result = shieldContractExport(request, shieldData, detailList, detailChildList);
+            projectApplyService.preview(pd,response);
+
+            ResponseEntity result = ResponseEntity.success(null, INFO_PREVIEW_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
-            throw new MyException(ERR_EXPORT_FAIL.desc(), e);
+            throw new MyException(ERR_PREVIEW_FAIL.desc(), e);
         }
     }
 
@@ -602,8 +631,8 @@ public class ProjectApplyController extends BaseController {
 
     private void checkParam(PageData pd,int flag) {
 
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserId"), "编制人ID", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("creatorUser"), "编制人", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserId"), "编制人ID", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("creatorUserName"), "编制人", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("createdDate"), "编制日期", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectName"), "项目名称", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("unitName"), "单位名称", 256);
@@ -620,9 +649,9 @@ public class ProjectApplyController extends BaseController {
         CheckParameter.stringLengthAndEmpty(pd.getString("startYear"), "起始年度", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("endYear"), "结束年度", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("zipCode"), "邮编", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("projectTypeCode"), "项目类型编码", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("projectTypeCode"), "项目类型编码", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("projectType"), "项目类型", 256);
-        CheckParameter.stringLengthAndEmpty(pd.getString("professionalCategoryCode"), "专业类别编码", 256);
+ //       CheckParameter.stringLengthAndEmpty(pd.getString("professionalCategoryCode"), "专业类别编码", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("professionalCategory"), "专业类别", 256);
         CheckParameter.stringLengthAndEmpty(pd.getString("identify"), "是否鉴定", 256);
         CheckParameter.stringLengthAndEmpty1(pd.getString("researchContents"), "研究内容题要", 200);
@@ -730,7 +759,20 @@ public class ProjectApplyController extends BaseController {
             budgetList = JSONObject.parseArray(pd.getString("budgetList"), PageData.class);
         }
 
-        checkBudget(budgetList);
+        if(!CollectionUtils.isEmpty(budgetList)){
+            for(PageData budget : budgetList){
+                if(StringUtils.isNotBlank(budget.getString("sourceAccount"))){
+                    CheckParameter.checkDecimal(budget.getString("sourceBudget"), "来源预算数",20,2);
+                }
+
+                CheckParameter.stringLengthAndEmpty(budget.getString("expenseAccount"), "支出科目", 256);
+                CheckParameter.checkDecimal(budget.getString("expenseBudget"), "支出预算数",20,2);
+
+            }
+        }else{
+            throw new MyException("经费预算不能为空");
+
+        }
 
 
         //校验经费预算（每月填报）
@@ -741,7 +783,20 @@ public class ProjectApplyController extends BaseController {
             monthList = JSONObject.parseArray(pd.getString("monthList"), PageData.class);
         }
 
-        checkBudget(monthList);
+        if(!CollectionUtils.isEmpty(monthList)){
+            for(PageData budget : monthList){
+                if(StringUtils.isNotBlank(budget.getString("sourceaccount"))){
+                    CheckParameter.checkDecimal(budget.getString("sourcebudget"), "来源预算数",20,2);
+                }
+
+                CheckParameter.stringLengthAndEmpty(budget.getString("expenseaccount"), "支出科目", 256);
+                CheckParameter.checkDecimal(budget.getString("expensebudget"), "支出预算数",20,2);
+
+            }
+        }else{
+            throw new MyException("经费预算不能为空");
+
+        }
 
 
         //校验拨款计划
@@ -755,7 +810,7 @@ public class ProjectApplyController extends BaseController {
         if(!CollectionUtils.isEmpty(appropriationList)){
             for(PageData appropriationPlan : appropriationList){
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("years"), "年度", 256);
-                CheckParameter.checkDecimal(appropriationPlan.getString("计划(万元)"), "人员费",20,2);
+                CheckParameter.checkDecimal(appropriationPlan.getString("planAmount"), "计划(万元)",20,2);
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("creatorUserId"), "编制人ID", 256);
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("creatorUser"), "编制人", 256);
                 CheckParameter.stringLengthAndEmpty(appropriationPlan.getString("createTime"), "编制时间", 256);
@@ -768,23 +823,6 @@ public class ProjectApplyController extends BaseController {
 
     }
 
-
-    private void checkBudget(List<PageData> list){
-        if(!CollectionUtils.isEmpty(list)){
-            for(PageData budget : list){
-                if(StringUtils.isNotBlank(budget.getString("sourceAccount"))){
-                    CheckParameter.checkDecimal(budget.getString("sourceBudget"), "来源预算数",20,2);
-                }
-
-                CheckParameter.stringLengthAndEmpty(budget.getString("expenseAccount"), "支出科目", 256);
-                CheckParameter.checkDecimal(budget.getString("expenseBudget"), "支出预算数",20,2);
-
-            }
-        }else{
-            throw new MyException("经费预算不能为空");
-
-        }
-    }
 
 
     private String submitCheck(PageData pd,int flag){
@@ -859,7 +897,12 @@ public class ProjectApplyController extends BaseController {
         }
 
 
+
         StringBuffer buffer = new StringBuffer();
+        String confirmSubmit = pd.getString("confirmSubmit");
+        if(StringUtils.isNotBlank(confirmSubmit) && confirmSubmit.equals("1")){
+            return buffer.toString();
+        }
 
         //判断研发费用预算是否超值
         if(!CollectionUtils.isEmpty(budgetList)){
@@ -887,7 +930,7 @@ public class ProjectApplyController extends BaseController {
 
             //查询规则配置的阈值
             //2:材料费,3:机械设备使用费,4:人工费,5:其他费用
-            List<PageData> ruleList = (List<PageData>) dao.findForList("",pd);
+            List<PageData> ruleList = (List<PageData>) dao.findForList("ProjectApplyMapper.queryRuleList",pd);
             BigDecimal materialRate = new BigDecimal(75);//材料
             BigDecimal equipmentRate = new BigDecimal(15);//设备
             BigDecimal artificialRate= new BigDecimal(10);//人工

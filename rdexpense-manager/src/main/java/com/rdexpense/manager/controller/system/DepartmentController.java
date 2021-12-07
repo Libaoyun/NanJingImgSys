@@ -82,8 +82,8 @@ public class DepartmentController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.checkDefaultParams(pd);
         CheckParameter.stringLengthAndEmpty(pd.getString("parentId"), "父节点ID",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("orgName"), "部门名称",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "部门编码",128);
+        CheckParameter.stringLengthAndEmpty(pd.getString("orgName"), "部门名称",64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "部门编码",64);
 
         ResponseEntity result = null;
         try {
@@ -106,8 +106,8 @@ public class DepartmentController extends BaseController {
         PageData pd = this.getParams();
         CheckParameter.checkDefaultParams(pd);
         CheckParameter.stringLengthAndEmpty(pd.getString("orgId"), "部门ID",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("orgName"), "部门名称",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "部门编码",128);
+        CheckParameter.stringLengthAndEmpty(pd.getString("orgName"), "部门名称",64);
+        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "部门编码",64);
 
         ResponseEntity result = null;
         try {

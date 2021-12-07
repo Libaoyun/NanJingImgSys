@@ -71,7 +71,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public void addOrganization(PageData pd) {
 
         //新增项目表
-        String orgNumber = "XMGL-" + UUID.randomUUID().toString();
+        String orgNumber =  UUID.randomUUID().toString();
         pd.put("orgNumber",orgNumber);
 
         baseDao.insert("OrganizationMapper.insertOrganization", pd);
@@ -250,13 +250,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         //创建一个表格,10为一行有几栏
 
-        PdfPTable table1 = new PdfPTable(8);
+        PdfPTable table1 = new PdfPTable(4);
         table1.setSpacingBefore(10f);
         table1.setWidthPercentage(100);
-        int[] width1 = {150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+        int[] width1 = {150, 300, 150, 300};//每栏的宽度
         table1.setWidths(width1); //设置宽度
 
-        String[] argArr1 = {"项目名称", pd.getString("orgName"), "项目编号", pd.getString("orgNumber"), "项目描述", pd.getString("remark"),  "是否启用", pd.getString("status").equals("0")?"否":"是"};
+        String[] argArr1 = {"项目名称", pd.getString("orgName"), "项目编号", pd.getString("orgNumber")};
         for (String arg : argArr1) {
             PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
             cell.setMinimumHeight(20);
@@ -265,19 +265,13 @@ public class OrganizationServiceImpl implements OrganizationService {
             table1.addCell(cell);
         }
 
-
-        PdfPTable table2 = new PdfPTable(8);
+        PdfPTable table2 = new PdfPTable(4);
         table2.setSpacingBefore(10f);
         table2.setWidthPercentage(100);
-        int[] width2 = {150, 300, 150, 300, 150, 300, 150, 300};//每栏的宽度
+        int[] width2 = {150, 300, 150, 300};//每栏的宽度
         table2.setWidths(width2); //设置宽度
 
-        String createTime = pd.getString("createTime");
-        createTime = createTime.substring(0,createTime.lastIndexOf("."));
-        String updateTime = pd.getString("updateTime");
-        updateTime = updateTime.substring(0,updateTime.lastIndexOf("."));
-
-        String[] argArr2 = {"创建人", pd.getString("createUser"), "创建时间", createTime, "更新人", pd.getString("updateUser"), "更新时间", updateTime};
+        String[] argArr2 = { "项目描述", pd.getString("remark"),  "是否启用", pd.getString("status").equals("0")?"否":"是"};
         for (String arg : argArr2) {
             PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
             cell.setMinimumHeight(20);
@@ -287,9 +281,45 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
 
+        PdfPTable table3 = new PdfPTable(4);
+        table3.setSpacingBefore(10f);
+        table3.setWidthPercentage(100);
+        int[] width3 = {150, 300, 150, 300};//每栏的宽度
+        table3.setWidths(width3); //设置宽度
+
+        String createTime = pd.getString("createTime");
+        createTime = createTime.substring(0,createTime.lastIndexOf("."));
+        String updateTime = pd.getString("updateTime");
+        updateTime = updateTime.substring(0,updateTime.lastIndexOf("."));
+
+        String[] argArr3= {"创建人", pd.getString("createUser"), "创建时间", createTime};
+        for (String arg : argArr3) {
+            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+            cell.setMinimumHeight(20);
+            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table3.addCell(cell);
+        }
+
+        PdfPTable table4 = new PdfPTable(4);
+        table4.setSpacingBefore(10f);
+        table4.setWidthPercentage(100);
+        int[] width4 = {150, 300, 150, 300};//每栏的宽度
+        table4.setWidths(width4); //设置宽度
+
+
+        String[] argArr4 = { "更新人", pd.getString("updateUser"), "更新时间", updateTime};
+        for (String arg : argArr4) {
+            PdfPCell cell = new PdfPCell(new Paragraph(arg, textfont));
+            cell.setMinimumHeight(20);
+            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table4.addCell(cell);
+        }
+
 
         //将表格二，表格三合入表格一中
-        PDFUtil.mergeTable(table1,table2);
+        PDFUtil.mergeTable(table1,table2,table3,table4);
 
         // 添加表格
         document.add(table1);

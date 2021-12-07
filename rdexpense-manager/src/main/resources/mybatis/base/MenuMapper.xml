@@ -59,7 +59,7 @@
 
     <update id="updateMenu" parameterType="pd">
         update uq_function_menu
-        set title = #{title},path = #{path},icon = #{icon},name = #{name},hidden = #{hidden},is_approve = #{isApprove},
+        set menu_code = #{menuCode} ,title = #{title},path = #{path},icon = #{icon},name = #{name},hidden = #{hidden},is_approve = #{isApprove},
             component = #{component},relate_flow = #{relateFlow},no_drop_down = #{noDropDown},keep_alive = #{keepAlive}
         where 1=1 and id = #{id}
     </update>

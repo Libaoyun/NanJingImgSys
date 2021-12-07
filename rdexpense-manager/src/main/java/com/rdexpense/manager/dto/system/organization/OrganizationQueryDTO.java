@@ -34,7 +34,7 @@ public class OrganizationQueryDTO implements Serializable {
     private String updateTime;
 
     @ApiModelProperty(value = "创建人")
-    private String createUser;
+    private String createUserName;
 
     @ApiModelProperty(value = "修改人")
     private String updateUser;
