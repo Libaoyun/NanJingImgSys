@@ -397,6 +397,7 @@ public class FlowServiceImpl implements FlowService {
         }
         pd.put("processInstId",waitData.getString("processInstId"));
         pd.put("serialNumber",waitData.getString("serialNumber"));
+        pd.put("businessId",waitData.getString("businessId"));
         //2、查询流程活动表获取当前单据正在使用的流程
         PageData flowData = (PageData) baseDao.findForObject("FlowMapper.queryByProcessInstId", waitData);
         if (flowData == null) {
@@ -611,6 +612,7 @@ public class FlowServiceImpl implements FlowService {
         }
         pd.put("processInstId",waitData.getString("processInstId"));
         pd.put("serialNumber",waitData.getString("serialNumber"));
+        pd.put("businessId",waitData.getString("businessId"));
         //2、查询流程活动表获取当前单据正在使用的流程
         PageData flowData = (PageData) baseDao.findForObject("FlowMapper.queryByProcessInstId", waitData);
         if (flowData == null) {
@@ -820,6 +822,7 @@ public class FlowServiceImpl implements FlowService {
         }
         pd.put("processInstId",waitData.getString("processInstId"));
         pd.put("serialNumber",waitData.getString("serialNumber"));
+        pd.put("businessId",waitData.getString("businessId"));
         //2、查询流程活动表获取当前单据正在使用的流程
         PageData flowData = (PageData) baseDao.findForObject("FlowMapper.queryByProcessInstId", waitData);
         if (flowData == null) {
@@ -1158,11 +1161,11 @@ public class FlowServiceImpl implements FlowService {
         }
 
         if(StringUtils.isNotBlank(userName)){
-            result.put("userName",userName.substring(0,userName.lastIndexOf(",")-1));
+            result.put("userName",userName.substring(0,userName.lastIndexOf(",")));
         }
 
         if(StringUtils.isNotBlank(userCode)){
-            result.put("userCode",userCode.substring(0,userCode.lastIndexOf(",")-1));
+            result.put("userCode",userCode.substring(0,userCode.lastIndexOf(",")));
         }
 
         return result;

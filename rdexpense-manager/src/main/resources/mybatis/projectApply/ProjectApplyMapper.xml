@@ -58,8 +58,8 @@
             <if test="researchContents!=null and researchContents!=''">
                 and r.research_contents LIKE concat('%',#{researchContents},'%')
             </if>
-            <if test="creatorUser!=null and creatorUser!=''">
-                and r.creator_user LIKE concat ('%',#{creatorUser},'%')
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and r.creator_user LIKE concat ('%',#{creatorUserName},'%')
             </if>
 
             <if test="createTime!=null and createTime!=''">
@@ -209,22 +209,24 @@
 
     <insert id="batchInsertBudget1" parameterType="java.util.List">
         INSERT INTO project_apply_funds_budget
-        (  business_id,source_account,source_budget,expense_account,expense_budget
+        (  business_id,source_account,source_budget,expense_account,expense_account_code,expense_budget
         )
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.businessId},#{item.sourceaccount},#{item.sourcebudget, jdbcType=DECIMAL},#{item.expenseaccount},#{item.expensebudget, jdbcType=DECIMAL}
+            (#{item.businessId},#{item.sourceaccount},#{item.sourcebudget, jdbcType=DECIMAL},
+            #{item.expenseaccount},#{item.expenseaccountcode},#{item.expensebudget, jdbcType=DECIMAL}
             )
         </foreach>
     </insert>
 
     <insert id="batchInsertBudgetMonth1" parameterType="java.util.List">
         INSERT INTO project_apply_budget_month
-        (  business_id,source_account,source_budget,expense_account,expense_budget
+        (  business_id,source_account,source_budget,expense_account,expense_account_code,expense_budget
         )
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.businessId},#{item.sourceaccount},#{item.sourcebudget, jdbcType=DECIMAL},#{item.expenseaccount},#{item.expensebudget, jdbcType=DECIMAL}
+            (#{item.businessId},#{item.sourceaccount},#{item.sourcebudget, jdbcType=DECIMAL},
+            #{item.expenseaccount},#{item.expenseaccountcode},#{item.expensebudget, jdbcType=DECIMAL}
             )
         </foreach>
     </insert>

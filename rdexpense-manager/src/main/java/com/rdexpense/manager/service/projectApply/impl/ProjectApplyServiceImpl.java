@@ -156,11 +156,35 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             dao.batchInsert("ProjectApplyMapper.batchInsertResearchUser", researchUserList);
         }
 
+        //查询出盾构机类型字典表
+        List<String> dicList = new ArrayList<>();
+        dicList.add("1023");
+
+        List<PageData> dicTypeList = (List<PageData>) dao.findForList("DictioinaryTypeMapper.selectListByParentId", dicList);
+        Map<String, String> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(dicTypeList)) {
+            for (PageData dic : dicTypeList) {
+                map.put(dic.getString("dicTypeName"), dic.getString("dicTypeId"));
+            }
+        }
+
+
+
         //6、插入经费预算
         String budgetListStr = pd.getString("budgetList");
         List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
         if (!CollectionUtils.isEmpty(budgetList)) {
             for (PageData detailData : budgetList) {
+                String expenseaccount = detailData.getString("expenseaccount");
+                String expenseaccountcode = null;
+                if (map != null) {
+                    expenseaccountcode = map.get(expenseaccount);
+                }
+                if (StringUtils.isBlank(expenseaccountcode)) {
+                    throw new MyException(expenseaccount + "填写错误，请调整重新上传");
+                }
+                detailData.put("expenseaccountcode", expenseaccountcode);
+
                 detailData.put("businessId", businessId);
 
             }
@@ -181,6 +205,15 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             }
 
             for (PageData detailData : monthList) {
+                String expenseaccount = detailData.getString("expenseaccount");
+                String expenseaccountcode = null;
+                if (map != null) {
+                    expenseaccountcode = map.get(expenseaccount);
+                }
+                if (StringUtils.isBlank(expenseaccountcode)) {
+                    throw new MyException(expenseaccount + "填写错误，请调整重新上传");
+                }
+                detailData.put("expenseaccountcode", expenseaccountcode);
                 detailData.put("businessId", businessId);
             }
 
@@ -273,12 +306,35 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             dao.batchInsert("ProjectApplyMapper.batchInsertResearchUser", researchUserList);
         }
 
+        //查询出盾构机类型字典表
+        List<String> dicList = new ArrayList<>();
+        dicList.add("1023");
+
+        List<PageData> dicTypeList = (List<PageData>) dao.findForList("DictioinaryTypeMapper.selectListByParentId", dicList);
+        Map<String, String> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(dicTypeList)) {
+            for (PageData dic : dicTypeList) {
+                map.put(dic.getString("dicTypeName"), dic.getString("dicTypeId"));
+            }
+        }
+
+
         //6、插入经费预算
         String budgetListStr = pd.getString("budgetList");
         dao.batchDelete("ProjectApplyMapper.deleteBudget", removeList);
         List<PageData> budgetList = JSONObject.parseArray(budgetListStr, PageData.class);
         if (!CollectionUtils.isEmpty(budgetList)) {
             for (PageData detailData : budgetList) {
+                String expenseaccount = detailData.getString("expenseaccount");
+                String expenseaccountcode = null;
+                if (map != null) {
+                    expenseaccountcode = map.get(expenseaccount);
+                }
+                if (StringUtils.isBlank(expenseaccountcode)) {
+                    throw new MyException(expenseaccount + "填写错误，请调整重新上传");
+                }
+                detailData.put("expenseaccountcode", expenseaccountcode);
+
                 detailData.put("businessId", businessId);
 
             }
@@ -302,6 +358,15 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
             }
 
             for (PageData detailData : monthList) {
+                String expenseaccount = detailData.getString("expenseaccount");
+                String expenseaccountcode = null;
+                if (map != null) {
+                    expenseaccountcode = map.get(expenseaccount);
+                }
+                if (StringUtils.isBlank(expenseaccountcode)) {
+                    throw new MyException(expenseaccount + "填写错误，请调整重新上传");
+                }
+                detailData.put("expenseaccountcode", expenseaccountcode);
                 detailData.put("businessId", businessId);
             }
 
@@ -1323,6 +1388,7 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
         }
 
         packageBudget(sheet,list,pd);
+
         return list;
     }
 
@@ -1348,56 +1414,70 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
 
     private List<PageData> packageBudget(XSSFSheet sheet,List<PageData> list,PageData pd){
+
+        //查询出盾构机类型字典表
+        List<String> dicList = new ArrayList<>();
+        dicList.add("1023");
+
+        List<PageData> dicTypeList = (List<PageData>) dao.findForList("DictioinaryTypeMapper.selectListByParentId", dicList);
+        Map<String, String> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(dicTypeList)) {
+            for (PageData dic : dicTypeList) {
+                map.put(dic.getString("dicTypeName"), dic.getString("dicTypeId"));
+            }
+        }
+
+
         //解析第1行 支出预算合计
-        setBudgetValue(sheet,4,0,1,2,3,list,pd);
+        setBudgetValue(sheet,4,0,1,2,3,list,pd,map);
 
         //解析第1个单元格 一、人员费
-        setBudgetValue(sheet,5,0,1,2,3,list,pd);
+        setBudgetValue(sheet,5,0,1,2,3,list,pd,map);
 
         //解析第2个单元格 二、设备费
-        setBudgetValue(sheet,6,0,1,2,3,list,pd);
+        setBudgetValue(sheet,6,0,1,2,3,list,pd,map);
 
         //解析第3个单元格 三、材料费
-        setBudgetValue(sheet,7,0,1,2,3,list,pd);
+        setBudgetValue(sheet,7,0,1,2,3,list,pd,map);
 
         //解析第4个单元格  四、燃料及动力费
-        setBudgetValue(sheet,8,0,1,2,3,list,pd);
+        setBudgetValue(sheet,8,0,1,2,3,list,pd,map);
 
         //解析第5个单元格 五、测试及化验费
-        setBudgetValue(sheet,9,0,1,2,3,list,pd);
+        setBudgetValue(sheet,9,0,1,2,3,list,pd,map);
 
         //解析第6个单元格 六、差旅费
-        setBudgetValue(sheet,10,0,1,2,3,list,pd);
+        setBudgetValue(sheet,10,0,1,2,3,list,pd,map);
 
         //解析第7个单元格 七、会议费
-        setBudgetValue(sheet,11,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,11,-1,-1,2,3,list,pd,map);
 
         //解析第8个单元格 八、课题管理费
-        setBudgetValue(sheet,12,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,12,-1,-1,2,3,list,pd,map);
 
         //解析第9个单元格 九、其他费用
-        setBudgetValue(sheet,13,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,13,-1,-1,2,3,list,pd,map);
 
         //解析第10个单元格 9.1、国际合作交流费
-        setBudgetValue(sheet,14,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,14,-1,-1,2,3,list,pd,map);
 
         //解析第11个单元格 9.2、出版/文献/信息传播
-        setBudgetValue(sheet,15,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,15,-1,-1,2,3,list,pd,map);
 
         //解析第12个单元格 9.3、知识产权事务
-        setBudgetValue(sheet,16,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,16,-1,-1,2,3,list,pd,map);
 
         //解析第13个单元格 9.4、专家费
-        setBudgetValue(sheet,17,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,17,-1,-1,2,3,list,pd,map);
 
         //解析第14个单元格 9.5其他
-        setBudgetValue(sheet,18,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,18,-1,-1,2,3,list,pd,map);
 
         //解析第15个单元格 十、新产品设计费
-        setBudgetValue(sheet,19,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,19,-1,-1,2,3,list,pd,map);
 
         //解析第16个单元格 十一、委托研发费用
-        setBudgetValue(sheet,20,-1,-1,2,3,list,pd);
+        setBudgetValue(sheet,20,-1,-1,2,3,list,pd,map);
 
         return list;
     }
@@ -1528,7 +1608,8 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
 
 
-    private List<PageData> setBudgetValue(XSSFSheet sheet,int rowNum,int row1,int row2,int row3,int row4,List<PageData> list,PageData pd){
+    private List<PageData> setBudgetValue(XSSFSheet sheet,int rowNum,int row1,int row2,int row3,int row4,
+                                          List<PageData> list,PageData pd,Map<String, String> map){
         PageData data = new PageData();
         data.put("businessId", pd.getString("businessId"));
 
@@ -1561,6 +1642,19 @@ public class ProjectApplyServiceImpl implements ProjectApplyService {
 
         data.put("sourceaccount",sourceaccount);
         data.put("expenseaccount",expenseaccount);
+
+
+
+
+        String expenseaccountcode = null;
+        if (map != null) {
+            expenseaccountcode = map.get(expenseaccount);
+        }
+        if (StringUtils.isBlank(expenseaccountcode)) {
+            throw new MyException(expenseaccount + "填写错误，请调整重新上传");
+        }
+        data.put("expenseaccountcode", expenseaccountcode);
+
 
         list.add(data);
 

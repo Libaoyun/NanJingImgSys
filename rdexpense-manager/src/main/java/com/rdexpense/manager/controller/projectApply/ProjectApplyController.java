@@ -311,13 +311,13 @@ public class ProjectApplyController extends BaseController {
 
     @ApiOperation(value = "导入主信息")
     @PostMapping("/uploadMain")
-    public ResponseEntity<ProjectApplyDetailDto> uploadMain(UploadTemplateFileDto dto) throws Exception{
+    public ResponseEntity<ProjectApplyMainDto> uploadMain(UploadTemplateFileDto dto) throws Exception{
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
             PageData pageData = projectApplyService.uploadMain(dto.getFile(),pd);
 
-            result = PropertyUtil.pushData(pageData, ProjectApplyDetailDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            result = PropertyUtil.pushData(pageData, ProjectApplyMainDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入立项申请主信息失败,request=[{}]", pd);
@@ -328,12 +328,12 @@ public class ProjectApplyController extends BaseController {
 
     @ApiOperation(value = "导入立项调研信息")
     @PostMapping("/uploadSurvey")
-    public ResponseEntity<ProjectApplyDetailDto> uploadSurvey(UploadTemplateFileDto dto) throws Exception{
+    public ResponseEntity<ProjectApplySurveyDto> uploadSurvey(UploadTemplateFileDto dto) throws Exception{
         PageData pd = FileParamsUtil.checkParams(dto);
         ResponseEntity result = null;
         try {
             PageData pageData = projectApplyService.uploadSurvey(dto.getFile(),pd);
-            result = PropertyUtil.pushData(pageData, ProjectApplyDetailDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
+            result = PropertyUtil.pushData(pageData, ProjectApplySurveyDto.class, ConstantMsgUtil.INFO_UPLOAD_SUCCESS.desc());
             return result;
         } catch (MyException e) {
             logger.error("导入立项调研信息失败,request=[{}]", pd);
