@@ -17,10 +17,10 @@
                     <el-input  v-model="fileInfo.remark" placeholder="请输入备注" type="textarea"></el-input>
                 </el-form-item>
                 <el-form-item label="是否启用:" prop="status">
-                    <el-select v-model="fileInfo.status" placeholder="请选择">
-                        <el-option label="启用" value="1"></el-option>
-                        <el-option label="禁用" value="0"></el-option>
-                    </el-select>
+                    <el-radio-group v-model="fileInfo.status">
+                        <el-radio label="1">启用</el-radio>
+                        <el-radio label="0">禁用</el-radio>
+                    </el-radio-group>
                 </el-form-item>
             </el-form>
         </div>
