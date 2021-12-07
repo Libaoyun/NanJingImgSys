@@ -54,7 +54,7 @@
             <el-table-column prop="updateUser" label="更新人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="updateTime" label="更新时间" width="180" align="center" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
-                    {{ scope.row.createTime | formatDate }}
+                    {{ scope.row.updateTime | formatDate }}
                 </template>
             </el-table-column>
         </el-table>
