@@ -1,10 +1,12 @@
 package com.rdexpense.manager.dto.projectApply;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author rdexpense
@@ -61,10 +63,12 @@ public class ResearchUserDto implements Serializable {
     private String telephone;
 
     @ApiModelProperty(value = "参与研究开始日期")
-    private String startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date startDate;
 
     @ApiModelProperty(value = "参与研究结束日期")
-    private String endDate;
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date endDate;
 
     @ApiModelProperty(value = "编制人ID")
     private String creatorUserId;
@@ -73,5 +77,6 @@ public class ResearchUserDto implements Serializable {
     private String creatorUser;
 
     @ApiModelProperty(value = "编制时间")
-    private String createTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime;
 }

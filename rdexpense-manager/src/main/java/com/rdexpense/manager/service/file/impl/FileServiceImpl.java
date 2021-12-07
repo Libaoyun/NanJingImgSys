@@ -103,6 +103,9 @@ public class FileServiceImpl implements FileService {
             AwsUtil.queryOneUrl(attachmentList, ConstantValUtil.BUCKET_PRIVATE);
             pd.put("attachmentList", attachmentList);
 
+        } else {
+            List<PageData> List = new ArrayList<>();
+            pd.put("attachmentList", List);
         }
 
         return pd;
