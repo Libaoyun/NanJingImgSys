@@ -20,7 +20,7 @@
                 <el-table-column prop="title" label="授权菜单" width="300">
                     
                 </el-table-column>
-                <el-table-column prop="new" label="新建" align="center">
+                <el-table-column prop="edit" label="编辑" align="center">
                     <template slot-scope="scope">
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[0]) && scope.row.parentCode"
@@ -35,7 +35,7 @@
                         ></el-checkbox>
                     </template>
                 </el-table-column>
-                <el-table-column prop="edit" label="编辑" align="center">
+                <el-table-column prop="new" label="删除" align="center">
                     <template slot-scope="scope">
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[1]) && scope.row.parentCode"
@@ -50,7 +50,7 @@
                         ></el-checkbox>
                     </template>
                 </el-table-column>
-                <el-table-column prop="detail" label="详情" align="center">
+                <el-table-column prop="approval" label="审批" align="center">
                     <template slot-scope="scope">
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[2]) && scope.row.parentCode"
@@ -65,7 +65,7 @@
                         ></el-checkbox>
                     </template>
                 </el-table-column>
-                <el-table-column prop="approval" label="审批" align="center">
+                <el-table-column prop="detail" label="查看" align="center">
                     <template slot-scope="scope">
                         <el-checkbox 
                             v-if="scope.row.comButton.includes(menuButtons[3]) && scope.row.parentCode"
@@ -105,7 +105,7 @@ export default class extends tableMixin {
     loadingBtn = 0;
     loadingTree = false
     tableData = []
-    menuButtons = ['a10001','a10002','a10003','a10004']
+    menuButtons = ['a10002','a10001','a10004','a10003']
     menuButtonParams = []
     created(){
         this.getRouterMenuTree()
