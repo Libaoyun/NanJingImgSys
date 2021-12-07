@@ -12,4 +12,5 @@ export const menuCodeList = {
     disclosureList: 20002,
     reportList: 20003,
     contractList: 20001,
+    setProjectApplyList: 30000,
 }

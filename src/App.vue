@@ -14,6 +14,5 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: rgba(0, 0, 0, 0.65);
-  height: 1000px;
 }
 </style>

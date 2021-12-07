@@ -238,7 +238,7 @@ export default class extends tableMixin {
 @import '@/assets/scss/element-variables.scss';
 .organization{
     display: flex;
-    height: calc(100vh - 140px);
+    height: calc(100vh - 130px);
     background-color: #fff;
     h4{
         display: flex;

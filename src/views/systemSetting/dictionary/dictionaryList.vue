@@ -306,7 +306,7 @@ export default class extends tableMixin {
   }
 .dictionary{
     display: flex;
-    min-height: calc(100vh - 80px);
+    height: calc(100vh - 130px);
     background-color: #fff;
     h4{
         margin-top: 0;
@@ -315,6 +315,7 @@ export default class extends tableMixin {
 .left{
     flex: 0 0 300px;
     padding: 15px;
+    height: 100%;
     border-right: 1px #EBEEF5 solid;
     .el-input{
         width: 100%;
@@ -328,6 +329,14 @@ export default class extends tableMixin {
             .el-input__icon{
                 line-height: 30px;
             }
+        }
+    }
+    &::v-deep{
+        .el-tree{
+            height: calc(100% - 82px);
+            overflow: auto;
+            margin: 0 -15px;
+            padding: 0 15px;
         }
     }
 }

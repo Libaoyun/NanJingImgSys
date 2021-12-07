@@ -159,7 +159,7 @@ export default class ruleConfiguration{
 <style lang="scss" scoped>
 .wrapper{
     position: relative;
-    height: calc(100vh - 140px);
+    height: calc(100vh - 130px);
     background-color: #fff;
     padding: 15px;
     &::v-deep{
