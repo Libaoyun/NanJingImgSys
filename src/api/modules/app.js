@@ -78,3 +78,21 @@ export function apiGetDoneList (data) {
       data
   })
 }
+
+// 获取审批记录
+export function apiGetApprovalRecordList (data) {
+  return fetch({
+      url: '/rdexpense/flow/queryFlowApproveInfo',
+      method: 'post',
+      data
+  })
+}
+
+// 获取流程图
+export function apiGetSerialFlow (data) {
+  return fetch({
+      url: '/rdexpense/flow/getSerialFlow',
+      method: 'post',
+      data
+  })
+}

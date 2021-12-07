@@ -211,6 +211,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
               message: '删除成功!'
             });
             this.resetPageNum();
+            this.$refs.tableData.clearSelection();
             this.getUserList();
           }).catch(()=>{
               this.loadingBtn = 0;

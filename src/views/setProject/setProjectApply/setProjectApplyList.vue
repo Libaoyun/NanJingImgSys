@@ -175,7 +175,12 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     // 详情
     detailBtn(data) {
         this.$router.push({ name: 'setProjectApplyDetail',params:{
-            businessId:data.businessId
+            businessId:data.businessId,
+            ids:{
+                waitId:data.waitId,
+                processInstId:data.processInstId,
+                serialNumber:data.serialNumber
+            },
         }})
     }
     // 删除
@@ -206,6 +211,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
               message: '删除成功!'
             });
             this.resetPageNum();
+            this.$refs.tableData.clearSelection();
             this.getSetProjectApplyList();
           }).catch(()=>{
               this.loadingBtn = 0;
@@ -292,6 +298,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                                         type: 'success',
                                         message: '提交成功!'
                                     });
+                                    // 清除多选表格选中
+                                    this.$refs.tableData.clearSelection();
                                     this.getSetProjectApplyList();
                                 }).catch(()=>{
                                     this.loadingBtn = 0
@@ -305,6 +313,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                                 type: 'success',
                                 message: '提交成功!'
                             });
+                            // 清除多选表格选中
+                            this.$refs.tableData.clearSelection();
                             this.getSetProjectApplyList();
                         }
                     }).catch(()=>{

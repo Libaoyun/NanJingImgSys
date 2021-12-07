@@ -113,7 +113,7 @@ export default class extends tableMixin {
                         message: '编辑成功!'
                     });
                     this.$store.commit('DELETE_TAB', this.$route.path);
-                    this.$router.push({ name: 'projectList'})
+                    this.$router.push({ name: 'projectList',params:{refresh:true}})
                 }).catch(()=>{
                 this.loadingBtn = 0;
                 })

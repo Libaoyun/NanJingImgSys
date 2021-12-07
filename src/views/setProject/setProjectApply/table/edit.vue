@@ -463,7 +463,7 @@
                         <el-table-column v-for="item in yms" :key="item.years" :label="item.years+'年'" align="center">
                             <el-table-column v-for="c in item.months" :key="'month'+item.years+c" :prop="c" :label="c+'月'" align="center" width="80">
                                 <template slot-scope="scope">
-                                    <el-form-item v-if="scope.$index!=0" :prop="'monthList.'+scope.$index+'.month'+item.years+c" :rules="everyMonthRules['month'+item.years+c]">
+                                    <el-form-item :prop="'monthList.'+scope.$index+'.month'+item.years+c" :rules="everyMonthRules['month'+item.years+c]">
                                         <el-input-number class="yearBudget" :controls="false" :precision="2" v-model="scope.row['month'+item.years+c]"></el-input-number>
                                     </el-form-item>
                                 </template>

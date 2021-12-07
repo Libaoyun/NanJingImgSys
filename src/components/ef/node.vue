@@ -18,14 +18,13 @@
             {{node.name}}
         </div>
         <!-- 节点状态图标 -->
-        <!-- <div class="ef-node-right-ico">
-            <i class="el-icon-circle-check el-node-state-success" v-show="node.state === 'success'"></i>
-            <i class="el-icon-circle-close el-node-state-error" v-show="node.state === 'error'"></i>
-            <i class="el-icon-warning-outline el-node-state-warning" v-show="node.state === 'warning'"></i>
-            <i class="el-icon-loading el-node-state-running" v-show="node.state === 'running'"></i>
-        </div> -->
+        <div class="ef-node-right-ico" v-if="readonly">
+            <i class="el-icon-circle-check el-node-state-success" v-show="node.handleStatus == '1'"></i>
+            <i class="el-icon-video-play el-node-state-running" v-show="node.handleStatus == '2'"></i>
+            <i class="el-icon-remove-outline el-node-state-undo" v-show="node.handleStatus == '3' || !node.handleStatus"></i>
+        </div>
         <!-- 节点可拖拽连线 -->
-        <div class="ef-node-right-canLine" :class="{'flow-node-drag':!node.viewOnly}">
+        <div class="ef-node-right-canLine" :class="{'flow-node-drag':!node.viewOnly}" v-else>
             <i class="iconfont icon-map-connect" :class="{'flow-node-drag':!node.viewOnly}"></i>
         </div>
     </div>
@@ -35,7 +34,8 @@
     export default {
         props: {
             node: Object,
-            activeElement: Object
+            activeElement: Object,
+            readonly: Boolean
         },
         data() {
             return {}

@@ -56,7 +56,7 @@
                     <span>{{baseInfo.projectType}}</span>
                 </el-form-item>
                 <el-form-item label="是否鉴定:" prop="identify">
-                    <span>{{baseInfo.identify}}</span>
+                    <span>{{['否','是'][baseInfo.identify]}}</span>
                 </el-form-item>
                 <el-form-item label="研究内容题要:" prop="researchContents" class="large">
                     <span style="word-break:break-all">{{baseInfo.researchContents}}</span>
@@ -563,7 +563,7 @@
                         <el-table-column v-for="item in yms" :key="item.years" :label="item.years+'年'" align="center">
                             <el-table-column v-for="c in item.months" :key="'month'+item.years+c" :prop="c" :label="c+'月'" align="center" width="80">
                                 <template slot-scope="scope">
-                                    <el-form-item v-if="scope.$index!=0">
+                                    <el-form-item>
                                         <span>{{scope.row['month'+item.years+c]}}</span>
                                     </el-form-item>
                                 </template>
@@ -591,7 +591,7 @@
                             <el-form-item :prop="'appropriationPlan.'+scope.$index+'.years'">
                                 <span>{{scope.row.years}}</span>
                             </el-form-item>
-                    </template>
+                        </template>
                     </el-table-column>
                     <el-table-column prop="planAmount" label="计划 (万元)" width="300" align="center">
                         <template slot-scope="scope">
@@ -617,7 +617,7 @@
                 </el-table>
             </el-form>
         </card-global>
-        <approval-global ref="approval"></approval-global>
+        <approval-global ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
             <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
@@ -645,6 +645,8 @@ export default class extends tableMixin {
     isSourceBudgetChange = false
     isExpenseBudgetChange = false
     loadingBtn = 0
+    processInstId = null
+    serialNumber = null
     // 设置空数据
     getBaseInfo(){
        return {
@@ -790,19 +792,22 @@ export default class extends tableMixin {
     activated() {
         if(Object.keys(this.$route.params).length > 0){
             if(this.$route.params.businessId){
+
                this.initData(this.$route.params.businessId)
            }
            if(this.$route.params.routerName){
                this.routerName = this.$route.params.routerName
-               this.waitId = this.$route.params.waitId
            }else{
                this.routerName = 'setProjectApplyList'
            }
+           Object.assign(this,this.$route.params.ids)
         }
     }
     // 初始化编辑数据
     initData(businessId) {
         this.yms = []
+        this.processInstId = null
+        this.serialNumber = null
         this.isSourceBudgetChange = false
         this.isExpenseBudgetChange = false
         const formRefs = ['doForm','infoForm','progressForm','partUnitForm','researchersForm','researchUserChangeForm','budgetForm','everyMonthForm','allocationForm']

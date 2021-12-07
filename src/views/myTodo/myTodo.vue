@@ -146,7 +146,11 @@ export default class extends tableMixin {
         this.$router.push({name: data.approveName, params: {
                 routerName: 'myTodo',
                 businessId: data.businessId,
-                waitId: data.waitId
+                ids:{
+                    waitId:data.waitId,
+                    processInstId:data.processInstId,
+                    serialNumber:data.serialNumber
+                },
             }
         })
     }
@@ -154,7 +158,11 @@ export default class extends tableMixin {
         this.$router.push({name: data.detailName, params: {
                 routerName: 'myTodo',
                 businessId: data.businessId,
-                waitId: data.waitId
+                ids:{
+                    waitId:data.waitId,
+                    processInstId:data.processInstId,
+                    serialNumber:data.serialNumber
+                },
             }
         })
     }

@@ -56,7 +56,7 @@
                     <span>{{baseInfo.projectType}}</span>
                 </el-form-item>
                 <el-form-item label="是否鉴定:" prop="identify">
-                    <span>{{baseInfo.identify}}</span>
+                    <span>{{['否','是'][baseInfo.identify]}}</span>
                 </el-form-item>
                 <el-form-item label="研究内容题要:" prop="researchContents" class="large">
                     <span style="word-break:break-all">{{baseInfo.researchContents}}</span>
@@ -559,11 +559,11 @@
                             </template>
                         </el-table-column>
                     </el-table-column>
-                    <el-table-column label="年度预算 (按月填报)" align="center">
+                    <el-table-column label="年度预算 (按月填报)" align="center" v-if="yms.length>0">
                         <el-table-column v-for="item in yms" :key="item.years" :label="item.years+'年'" align="center">
                             <el-table-column v-for="c in item.months" :key="'month'+item.years+c" :prop="c" :label="c+'月'" align="center" width="80">
                                 <template slot-scope="scope">
-                                    <el-form-item v-if="scope.$index!=0">
+                                    <el-form-item>
                                         <span>{{scope.row['month'+item.years+c]}}</span>
                                     </el-form-item>
                                 </template>
@@ -617,6 +617,7 @@
                 </el-table>
             </el-form>
         </card-global>
+        <approval-global type="detail" ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="serialNumber"></approval-global>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
         </div>
@@ -640,6 +641,8 @@ export default class extends tableMixin {
     yms = []
     isSourceBudgetChange = false
     isExpenseBudgetChange = false
+    processInstId = null
+    serialNumber = null
     // 设置空数据
     getBaseInfo(){
        return {
@@ -787,6 +790,12 @@ export default class extends tableMixin {
             if(this.$route.params.businessId){
                this.initData(this.$route.params.businessId)
            }
+           if(this.$route.params.routerName){
+               this.routerName = this.$route.params.routerName
+           }else{
+               this.routerName = 'setProjectApplyList'
+           }
+           Object.assign(this,this.$route.params.ids)
         }
     }
     // 初始化编辑数据
@@ -845,7 +854,7 @@ export default class extends tableMixin {
         // 返回清空当前页面数据
         // this.initData()
         this.$store.commit('DELETE_TAB', this.$route.path);
-        this.$router.push({ name: 'setProjectApplyList',params:{refresh:isRefresh}})
+        this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
     }
     // 返回按钮
     backBtn(){
