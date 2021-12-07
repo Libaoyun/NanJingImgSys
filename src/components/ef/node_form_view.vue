@@ -18,7 +18,7 @@
                         <span>{{node.handleStatus==1?'已完成':(node.handleStatus==2?'运行中':'未启动')}}</span>
                     </el-form-item>
                     <el-form-item label="备注：" class="large">
-                        <span>{{node.remark}}</span>
+                        <span>{{node.remark || '无'}}</span>
                     </el-form-item>
                 </el-form>
                 <el-table
