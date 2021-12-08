@@ -32,13 +32,13 @@
           label-width="120px"
         >
           <el-form-item label="部门编码:" prop="departmentCode">
-              <el-input maxlength="30" v-model="alertStateX_bm.departmentCode" placeholder="请输入部门编码"></el-input>
+              <el-input maxlength="64" v-model="alertStateX_bm.departmentCode" placeholder="请输入部门编码"></el-input>
             </el-form-item>
             <el-form-item label="部门名称:" prop="orgName">
-              <el-input v-model="alertStateX_bm.orgName" placeholder="请输入部门名称"></el-input>
+              <el-input maxlength="64" v-model="alertStateX_bm.orgName" placeholder="请输入部门名称"></el-input>
             </el-form-item>
             <el-form-item label="部门简称:" prop="departmentSimpleName">
-              <el-input maxlength="30" v-model="alertStateX_bm.departmentSimpleName" placeholder="请输入部门简称"></el-input>
+              <el-input maxlength="64" v-model="alertStateX_bm.departmentSimpleName" placeholder="请输入部门简称"></el-input>
             </el-form-item>
             <el-form-item label="联系电话:" prop="inTelephone">
               <el-input v-model="alertStateX_bm.inTelephone" placeholder="请输入联系电话"></el-input>
@@ -84,10 +84,10 @@
           label-width="120px"
         >
           <el-form-item label="职务编码:" prop="postCode">
-            <el-input maxlength="30" v-model="alertStateX_zw.postCode" placeholder="请输入职务编码"></el-input>
+            <el-input maxlength="64" v-model="alertStateX_zw.postCode" placeholder="请输入职务编码"></el-input>
           </el-form-item>
           <el-form-item label="职务名称:" prop="orgName">
-            <el-input maxlength="30" v-model="alertStateX_zw.orgName" placeholder="请输入职务名称"></el-input>
+            <el-input maxlength="64" v-model="alertStateX_zw.orgName" placeholder="请输入职务名称"></el-input>
           </el-form-item>
           <!-- <el-form-item label="职务等级:" prop="postLevelCode">
             <el-select v-model="alertStateX_zw.postLevelCode" placeholder="请选择职务等级">

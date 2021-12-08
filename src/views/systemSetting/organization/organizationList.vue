@@ -252,7 +252,7 @@ export default class extends tableMixin {
         }
     }
     .custom-tree-node {
-        width: 100%;
+        width: 90%;
         flex: 1;
         display: flex;
         align-items: center;
