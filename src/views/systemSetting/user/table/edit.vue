@@ -129,7 +129,7 @@
             </el-form>
         </card-global>
         <!-- 附件版块 -->
-        <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList"></upload-attachment>
+        <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList" :menuCode="MENU_CODE_LIST.userList"></upload-attachment>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
             <loading-btn size="mini" type="primary" @click="saveBtn" :loading="loadingBtn">保存</loading-btn>

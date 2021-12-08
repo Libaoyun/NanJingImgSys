@@ -103,3 +103,12 @@ export function apiGetSerialFlow (data) {
   })
 }
 
+// 批量下载附件
+export function apiDownloadAttachment (data) {
+  return fetch({
+      url: '/rdexpense/file/download',
+      method: 'post',
+      data
+  })
+}
+

@@ -114,7 +114,7 @@
             </el-form>
         </card-global>
         <!-- 附件版块 -->
-        <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList" :onlyView="true"></upload-attachment>
+        <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList" :menuCode="MENU_CODE_LIST.userList" :onlyView="true"></upload-attachment>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
         </div>

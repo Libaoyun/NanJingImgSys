@@ -21,13 +21,20 @@
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">点击或拖拽进行文件上传</div>
             </el-upload>
+            <div class="dowloadAll">
+                <el-button size="mini" type="primary" :disabled="!hasSelected" :loading="downLoading" @click="downloadAllSelected">批量下载</el-button>
+                <span v-if="hasSelected">选中{{selected.length}}条</span>
+            </div>
             <el-table
+                ref="tableData"
                 :data="fileList"
                 :max-height="tableConfig.maxHeight"
                 :border="tableConfig.border"
                 class="global-table-default"
                 style="width: 100%;padding-top:5px"
+                @selection-change="tableSelectionChange"
             >
+                <el-table-column type="selection" width="55" align="center"></el-table-column>
                 <el-table-column label="序号" type="index" width="50" align="center">
                     <template slot-scope="scope">
                         <span>{{(listQuery.page - 1) * listQuery.limit + scope.$index + 1}}</span>
@@ -81,6 +88,7 @@
 <script>
 import { Component, Vue, Prop, Emit } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
+const FileSaver = require('file-saver')
 
 @Component({
     name: 'uploadAttachment',
@@ -95,10 +103,18 @@ export default class UploadAttachment extends tableMixin {
         },
     }) fileList;
     @Prop({default:false}) onlyView
+    @Prop() menuCode
     // 文件个数
     fileLimit = 10;
     // 文件大小限制
     fileMaxSize = 10 * 1024 * 1024;
+    // 批量下载
+    downLoading = false
+    selected = []
+
+    get hasSelected() {
+      return this.selected.length > 0;
+    }
 
       // 文件个数上传限制
     handleExceed() {
@@ -172,7 +188,24 @@ export default class UploadAttachment extends tableMixin {
         a.target = '_blank';
         a.click();
     }
-      deleteDetail(scope) {
+
+    // 批量下载
+    downloadAllSelected() {
+        this.downLoading = true;
+        const details = this.selected.map(it=>{
+            return {file_name:it.fileName,file_path:it.filePath}
+        })
+        const data = {
+            details,
+            menuCode:this.menuCode
+        }
+        this.EXPORT_FILE([],'zip',{url:'/rdexpense/file/download',data},true).finally(()=>{
+            this.downLoading = false;
+            this.$refs.tableData.clearSelection();
+        });
+    }
+
+    deleteDetail(scope) {
         if (scope.row.businessId) {
             this.$API.apiDeleteFile({businessId: scope.row.businessId, id: scope.row.id}).then((res) => {
                 this.fileList.splice(scope.$index, 1);
@@ -200,6 +233,11 @@ export default class UploadAttachment extends tableMixin {
             });
         });
         return fileList;
+    }
+
+    // 表格：复选框变化时触发,删除编辑
+    tableSelectionChange(value){
+        this.selected = value
     }
 
 }
@@ -239,5 +277,14 @@ export default class UploadAttachment extends tableMixin {
 }
 .deleteBtn{
     color: $--color-danger; 
+}
+.dowloadAll {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    span {
+        font-size: 14px;
+        margin-left: 10px;
+    }
 }
 </style>
