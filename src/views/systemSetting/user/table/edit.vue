@@ -18,7 +18,7 @@
                         <el-date-picker v-model="baseInfo.birthDate" value-format="yyyy-MM-dd" type="date" placeholder="请选择日期"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="身高:" prop="height">
-                        <el-input  v-model="baseInfo.height" placeholder="请输入身高"></el-input>
+                        <el-input maxlength="30" v-model="baseInfo.height" placeholder="请输入身高"></el-input>
                     </el-form-item>
                     <el-form-item label="学历:" prop="educationCode">
                         <el-select v-model="baseInfo.educationCode" placeholder="请选择学历" @change="baseInfo.education = GET_DICTIONARY_TEXT(educationList,baseInfo.educationCode)">
