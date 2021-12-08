@@ -76,7 +76,7 @@ export default class rule extends Vue {
         researchContents: [
             { required: true, message: '请输入研究内容题要', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -84,7 +84,7 @@ export default class rule extends Vue {
         reviewComments: [
             { required: true, message: '请输入申报单位审查意见', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -92,7 +92,7 @@ export default class rule extends Vue {
         currentSituation: [
             { required: true, message: '请输入国内外现状', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -100,7 +100,7 @@ export default class rule extends Vue {
         purposeSignificance: [
             { required: true, message: '请输入研发目的和意义', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -108,7 +108,7 @@ export default class rule extends Vue {
         contentMethod: [
             { required: true, message: '请输入主要研究内容及研究方法', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -116,7 +116,7 @@ export default class rule extends Vue {
         targetResults: [
             { required: true, message: '请输入要达到的目标、成果形式及主要技术指标', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -124,7 +124,7 @@ export default class rule extends Vue {
         basicConditions: [
             { required: true, message: '请输入现有研发条件和工作基础', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -132,7 +132,7 @@ export default class rule extends Vue {
         innovationPoints: [
             { required: true, message: '请输入研发项目创新点', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }
@@ -140,7 +140,7 @@ export default class rule extends Vue {
         feasibilityAnalysis: [
             { required: true, message: '请输入成果转化的可行性分析', trigger: 'change' },
             {
-                pattern:/^[\s\S]{200,9999999}$/,
+                min: 200,
                 message: "内容不得少于200字",
                 trigger: "blur"
             }

@@ -247,6 +247,13 @@ export default class extends tableMixin {
     this.getReportList();
     //添加一个api方法
   }
+  activated() {
+      if(Object.keys(this.$route.params).length > 0){
+          if(this.$route.params.refresh){
+              this.refreshBtn()
+          }
+      }
+  }
 
   //复选框选中的id值
   get idList() {
