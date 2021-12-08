@@ -59,6 +59,14 @@ export function apiGetDictionariesList(data) {
     data,
   })
 }
+// 根据类型父结点PID，查询字典类型数据
+export function apiGetDictionaryTypeByPid(params) {
+  return fetch({
+    url: '/rdexpense/dataDictionary/queryDictionaryTypeByPid',
+    method: 'get',
+    params,
+  })
+}
 // 获取代办列表
 export function apiGetTodoList (data) {
   return fetch({
@@ -94,3 +102,4 @@ export function apiGetSerialFlow (data) {
       data
   })
 }
+

@@ -197,7 +197,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
           creatorOrgId:this.$store.getters.currentOrganization.organizationId,
           creatorOrgName:this.$store.getters.currentOrganization.organizationName,
           menuCode:this.MENU_CODE_LIST.checkFinalList,
-          idList:this.idList
+          businessIdList:this.idList
         }
         this.loadingBtn = loadingBtnIndex
         this.$API.apiCheckFinalDelete(params).then(res=>{

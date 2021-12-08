@@ -75,4 +75,16 @@ export default class dictionaryMixin extends Vue {
             this.professionalCategroyList = res;
         })
     }
+    // 获取一级科目
+    getFirstSubjectList(){
+        this.GET_DICTIONARY_TYPE_BY_PID(1022).then(res=>{
+            this.firstSubjectList = res;
+        })
+    }
+    // 获取二级科目
+    getSecondarySubjectList(id) {
+        this.GET_DICTIONARY_LIST(id).then(res=>{
+            this.secondarySubjectList = res;
+        })
+    }
 }

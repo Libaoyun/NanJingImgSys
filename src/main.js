@@ -25,6 +25,7 @@ import {exportFile} from '@/utils/export.js';
 import {
     getDictionariesList,
     getDictionariesText,
+    getDictionaryTypeByPid,
 } from '@/utils/getDictionariesList.js';
 
 Vue.prototype.MENU_CODE_LIST = menuCodeList;
@@ -32,6 +33,7 @@ Vue.prototype.JUDGE_BTN = judgeBtn;
 Vue.prototype.EXPORT_FILE = exportFile;
 Vue.prototype.GET_DICTIONARY_LIST = getDictionariesList;
 Vue.prototype.GET_DICTIONARY_TEXT = getDictionariesText;
+Vue.prototype.GET_DICTIONARY_TYPE_BY_PID = getDictionaryTypeByPid;
 
 let storageOptions = {
     namespace: 'pro__', // key prefix

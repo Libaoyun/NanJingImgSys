@@ -1,5 +1,5 @@
 
-import { apiGetDictionariesList } from '@/api/modules/app';
+import { apiGetDictionariesList, apiGetDictionaryTypeByPid } from '@/api/modules/app';
 /**
  * 
  * @param {*} dicTypeIds 字典编码
@@ -41,4 +41,26 @@ export function getDictionariesText(list,value){
         })
     }
     return result;
+}
+
+export function getDictionaryTypeByPid(dicTypeParentId){
+    return new Promise((resolve,reject)=>{
+        var statusFilterList = [];
+        if(!dicTypeParentId){
+            resolve(statusFilterList);
+        }
+        apiGetDictionaryTypeByPid({dicTypeParentId}).then(res=>{
+            if(res.data){
+                res.data.forEach((item)=>{
+                    statusFilterList.push({
+                        label: item.dicTypeName,
+                        value: item.dicTypeId,
+                        text: item.dicTypeName
+                    })
+                })
+                resolve(statusFilterList);
+            }
+            reject('接口查询失败');
+        })
+    })
 }
