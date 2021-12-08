@@ -4,6 +4,7 @@ import uploadApprovalGlobal from './uploadApprovalGlobal.vue'
 import approvalGlobal from './approvalGlobal.vue'
 import loadingBtn from './loadingBtn.vue'
 import footerGlobal from './footerGlobal.vue'
+import uploadAttachment from './uploadAttachment.vue'
 
 export const CardGlobal = {
     install:function(Vue){
@@ -38,5 +39,11 @@ export const LoadingBtn = {
 export const FooterGlobal = {
     install:function(Vue){
         Vue.component('FooterGlobal', footerGlobal)
+    }
+}
+
+export const UploadAttachment = {
+    install:function(Vue){
+        Vue.component('UploadAttachment', uploadAttachment)
     }
 }

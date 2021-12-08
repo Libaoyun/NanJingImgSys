@@ -18,6 +18,7 @@ import {
     ApprovalGlobal,
     LoadingBtn,
     FooterGlobal,
+    UploadAttachment,
 } from '@/components/index';
 import {menuCodeList} from '@/utils/menuCodeList.js';
 import {judgeBtn} from '@/utils/judgeBtn.js';
@@ -57,6 +58,7 @@ Vue.use(UploadApprovalGlobal);
 Vue.use(ApprovalGlobal);
 Vue.use(LoadingBtn);
 Vue.use(FooterGlobal);
+Vue.use(UploadAttachment);
 Vue.directive('checkPermission', checkPermission);
 
 new Vue({

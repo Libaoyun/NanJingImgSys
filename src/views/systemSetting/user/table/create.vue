@@ -129,7 +129,7 @@
             </el-form>
         </card-global>
         <!-- 附件版块 -->
-        <upload-approval-global type="create" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
+        <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList"></upload-attachment>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
             <loading-btn size="mini" type="primary" @click="saveBtn" :loading="loadingBtn">保存</loading-btn>
@@ -323,7 +323,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
                 cancelButtonText: '取消',
                 type: 'warning'
                 }).then(() => {
-                    this.baseInfo.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
+                    this.baseInfo.attachmentList = this.$refs.uploadAttachment.getFileList();
                     this.loadingBtn = 1;
                     this.$API.apiCreateUser(params).then(res=>{
                         this.loadingBtn = 0;

@@ -108,7 +108,7 @@ export default class extends tableMixin {
 
     restData() {
         console.log('222')
-        this.$refs.approvalForm.resetFields()
+        this.$refs.approvalForm?.resetFields()
     }
     
 }
