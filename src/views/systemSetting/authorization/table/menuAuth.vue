@@ -177,12 +177,12 @@ export default class extends tableMixin {
     }
     changeParent(e,row,menuCode) {
         if(e) {
-            let filterChild = row.children.filter(item=>item.comButton)
+            let filterChild = row.children.filter(item=>item.comButton.includes(menuCode))
             filterChild.forEach(item=>{
                 item.selected[menuCode] = true
             })
         }else {
-            let filterChild = row.children.filter(item=>item.comButton)
+            let filterChild = row.children.filter(item=>item.comButton.includes(menuCode))
             filterChild.forEach(item=>{
                 item.selected[menuCode] = false
             })
