@@ -286,6 +286,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
         $alert.alertDepartmentTree().then((res)=>{
             this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'departmentName',res.orgName)
             this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'departmentCode',res.orgId)
+            this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'postName','')
+            this.$set(this.baseInfo.detailForm.departmentList[scope.$index],'postCode','')
         })
     }
     // 选择职务
