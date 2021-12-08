@@ -618,89 +618,89 @@ export default class extends Mixins(tableMixin,dictionaryMixin,rule) {
                 budgetList:[
                     {
                         sourceAccount:'来源预算合计',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'支出预算合计',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'一、股份公司计划拨款',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'一、人员费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'二、国家拨款',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'二、设备费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'三、省市拨款',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'三、材料费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'四、单位自筹款',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'四、燃料及动力费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'五、银行贷款',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'五、测试及化验费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'六、其他来源款',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'六、差旅费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'七、会议费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'八、课题管理费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'九、其他费用',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'1、国际合作交流费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'2、出版/文献/信息传播',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'3、知识产权事务',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'4、专家费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'5、其他',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'十、新产品设计费',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     },{
                         sourceAccount:'',
-                        sourceBudget:'',
+                        sourceBudget:undefined,
                         expenseAccount:'十一、委托研发费用',
-                        expenseBudget:''
+                        expenseBudget:undefined
                     }
                 ],
                 monthList:[],
