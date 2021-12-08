@@ -514,94 +514,94 @@ export default class extends tableMixin {
                 attendUnit:[],
                 researchUser:[],
                 researchUserChange:[],
-                // budgetList:[
-                //     {
-                //         sourceaccount:'来源预算合计',
-                //         sourcebudget:'',
-                //         expenseaccount:'支出预算合计',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'一、股份公司计划拨款',
-                //         sourcebudget:'',
-                //         expenseaccount:'一、人员费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'二、国家拨款',
-                //         sourcebudget:'',
-                //         expenseaccount:'二、设备费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'三、省市拨款',
-                //         sourcebudget:'',
-                //         expenseaccount:'三、材料费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'四、单位自筹款',
-                //         sourcebudget:'',
-                //         expenseaccount:'四、燃料及动力费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'五、银行贷款',
-                //         sourcebudget:'',
-                //         expenseaccount:'五、测试及化验费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'六、其他来源款',
-                //         sourcebudget:'',
-                //         expenseaccount:'六、差旅费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'七、会议费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'八、课题管理费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'九、其他费用',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'1、国际合作交流费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'2、出版/文献/信息传播',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'3、知识产权事务',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'4、专家费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'5、其他',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'十、新产品设计费',
-                //         expensebudget:''
-                //     },{
-                //         sourceaccount:'',
-                //         sourcebudget:'',
-                //         expenseaccount:'十一、委托研发费用',
-                //         expensebudget:''
-                //     }
-                // ],
+                budgetList:[
+                    {
+                        sourceAccount:'来源预算合计',
+                        sourceBudget:'',
+                        expenseAccount:'支出预算合计',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'一、股份公司计划拨款',
+                        sourceBudget:'',
+                        expenseAccount:'一、人员费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'二、国家拨款',
+                        sourceBudget:'',
+                        expenseAccount:'二、设备费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'三、省市拨款',
+                        sourceBudget:'',
+                        expenseAccount:'三、材料费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'四、单位自筹款',
+                        sourceBudget:'',
+                        expenseAccount:'四、燃料及动力费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'五、银行贷款',
+                        sourceBudget:'',
+                        expenseAccount:'五、测试及化验费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'六、其他来源款',
+                        sourceBudget:'',
+                        expenseAccount:'六、差旅费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'七、会议费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'八、课题管理费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'九、其他费用',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'1、国际合作交流费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'2、出版/文献/信息传播',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'3、知识产权事务',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'4、专家费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'5、其他',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'十、新产品设计费',
+                        expenseBudget:''
+                    },{
+                        sourceAccount:'',
+                        sourceBudget:'',
+                        expenseAccount:'十一、委托研发费用',
+                        expenseBudget:''
+                    }
+                ],
                 budgetList:[],
                 monthList:[],
                 appropriationPlan:[]
