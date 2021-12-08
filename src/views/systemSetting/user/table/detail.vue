@@ -3,14 +3,11 @@
         <card-global>
             <div>
                 <el-form ref="doForm" :inline="true" :model="baseInfo" size="mini" label-position="right" label-width="80px">
-                    <el-form-item label="编号:" prop="userCode">
+                    <el-form-item label="用户编号:" prop="userCode">
                         <span class="static-value">{{baseInfo.userCode}}</span>
                     </el-form-item>
-                    <el-form-item label="姓名:" prop="userName">
+                    <el-form-item label="用户名称:" prop="userName">
                         <span class="static-value">{{baseInfo.userName}}</span>
-                    </el-form-item>
-                    <el-form-item label="英文名:" prop="englishUserName">
-                        <span class="static-value">{{baseInfo.englishUserName}}</span>
                     </el-form-item>
                     <el-form-item label="性别:" prop="gender">
                         <span class="static-value">{{baseInfo.gender}}</span>
@@ -24,7 +21,7 @@
                     <el-form-item label="学历:" prop="education">
                         <span class="static-value">{{baseInfo.education}}</span>
                     </el-form-item>
-                    <el-form-item label="婚姻状况:" prop="maritalStatus">
+                    <el-form-item label="是否已婚:" prop="maritalStatus">
                         <span class="static-value">{{['否','是'][baseInfo.maritalStatus]}}</span>
                     </el-form-item>
                     <el-form-item label="血型:" prop="bloodType">
@@ -69,22 +66,19 @@
         </div>
         <card-global cardTitle='其他信息' style="margin-top:15px">
             <el-form ref="otherForm" :inline="true" :model="baseInfo" size="mini" label-position="right" label-width="80px">
-                <el-form-item label="移动电话:" prop="mobilePhone">
+                <el-form-item label="手机号码:" prop="mobilePhone">
                     <span class="static-value">{{baseInfo.mobilePhone}}</span>
-                </el-form-item>
-                <el-form-item label="办公电话:" prop="officeTelephone">
-                    <span class="static-value">{{baseInfo.officeTelephone}}</span>
                 </el-form-item>
                 <el-form-item label="电子邮箱:" prop="email">
                     <span class="static-value">{{baseInfo.email}}</span>
                 </el-form-item>
-                <el-form-item label="传真:" prop="fax">
+                <el-form-item label="其他:" prop="fax">
                     <span class="static-value">{{baseInfo.fax}}</span>
                 </el-form-item>
-                <el-form-item label="用户状态:" prop="employeeStatus">
+                <el-form-item label="员工状态:" prop="employeeStatus">
                     <span class="static-value">{{baseInfo.employeeStatus}}</span>
                 </el-form-item>
-                <el-form-item label="用户类型:" prop="employeeType">
+                <el-form-item label="员工类型:" prop="employeeType">
                     <span class="static-value">{{baseInfo.employeeType}}</span>
                 </el-form-item>
                 <el-form-item label="参工日期:" prop="participationDate">
