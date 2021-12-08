@@ -9,6 +9,7 @@ export default class rule extends Vue {
     taxPattern = /^\d{0,2}$/;
     phonePattern = /^\d{11}$/; //联系电话只校验数字&长度
     emailPattern = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;//邮箱校验
+    idCardPattern = /^[1-9]\d{5}(18|19|20|(3\d))\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;//身份证校验
 
     created() {}
     //基本信息表单验证
@@ -167,7 +168,8 @@ export default class rule extends Vue {
             { required: true, message: '', trigger: 'change' }
         ],
         idCard: [
-            { required: true, message: '', trigger: 'change' }
+            { required: true, message: '', trigger: 'change' },
+            { pattern: this.idCardPattern, message:'', trigger: 'blur' }
         ],
         age: [
             { required: true, message: '', trigger: 'change' }
@@ -200,7 +202,12 @@ export default class rule extends Vue {
             { required: true, message: '', trigger: 'change' }
         ],
         telephone: [
-            { required: true, message: '', trigger: 'change' }
+            { required: true, message: '', trigger: 'change' },
+            {
+                pattern: this.phonePattern,
+                message: "",
+                trigger: "blur"
+            }
         ],
         startDate: [
             { required: true, message: '', trigger: 'change' }
