@@ -154,6 +154,7 @@ export default class extends tableMixin {
       startYear: '', // 起始年度
       endYear: '', // 结束年度
       createdDate: '', // 申请评审日期
+      projectApplyMainId: '',
       // 结题验收说明
       checkInfo: {
         achievementInfo: '', // 成果内容简介

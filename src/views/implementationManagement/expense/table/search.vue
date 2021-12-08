@@ -16,11 +16,11 @@
                 <el-form-item label="项目名称" prop="projectName">
                     <el-input v-model.trim="searchParams.projectName" placeholder="请输入项目名称" clearable></el-input>
                 </el-form-item>
-                <el-form-item label="申请人" prop="applyUser">
-                    <el-input v-model.trim="searchParams.approveUserName" placeholder="请输入申请人" clearable></el-input>
+                <el-form-item label="申请人" prop="createUser">
+                    <el-input v-model.trim="searchParams.createUser" placeholder="请输入申请人" clearable></el-input>
                 </el-form-item>
-                <el-form-item label="支出依据" prop="createUser">
-                    <el-input v-model.trim="searchParams.createUser" placeholder="请输入申报人" clearable></el-input>
+                <el-form-item label="支出依据" prop="payNoted">
+                    <el-input v-model.trim="searchParams.payNoted" placeholder="请输入支出依据" clearable></el-input>
                 </el-form-item>
             </el-form>
             <div style="text-align:right;margin-top:10px">

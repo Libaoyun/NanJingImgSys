@@ -24,6 +24,7 @@
     <el-table
       ref="tableData"
       :data="tableData"
+      row-key="id"
       :height="tableHeight"
       :border="tableConfig.border"
       v-loading="listLoading"
@@ -33,7 +34,7 @@
       class="global-table-default"
       style="width: 100%;">
       <el-table-column type="selection" width="55" align="center" ></el-table-column>
-      <el-table-column label="序号" type="index" width="55" align="center">
+      <el-table-column label="序号" type="index" width="55" :reserve-selection="true" align="center">
         <template slot-scope="scope">
           <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
         </template>
@@ -46,13 +47,13 @@
       <el-table-column prop="projectName" label="项目名称" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="processName" label="单据状态" column-key="statusList" :filters="approvalStatusList" width="100" align="center" :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column prop="month" label="所属月份" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="creatorOrg" label="申请人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="createUser" label="研发项目支出一级科目" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="createUser" label="研发项目支出二级科目" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="applyUserName" label="支出依据" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="postName" label="本次申请列销金额（元）" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="telephone" label="本次申请后结余金额（元）" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="belongingMonth" label="所属月份" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="createUser" label="申请人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="firstSubject" label="研发项目支出一级科目" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="secondarySubject" label="研发项目支出二级科目" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="payNoted" label="支出依据" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="budgetAmount" label="本次申请列销金额（元）" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="budgetBalance" label="本次申请后结余金额（元）" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
     </el-table>
     <div class="pagination-wrapper">
       <el-pagination
@@ -121,7 +122,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     params.creatorOrgId = this.$store.getters.currentOrganization.organizationId;
     params = Object.assign(params,this.searchParams,this.filterParams);
     this.listLoading = true
-    this.$API.apiGetCheckFinalList(params).then(res=>{
+    this.$API.apiGetExpenseList(params).then(res=>{
       this.listLoading = false
       if(res.data){
         this.tableData = res.data.list;
@@ -141,21 +142,21 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   }
   // 编辑
   editBtn(){
-    if(this.selected.length !== 1){
-      this.$message({
-          type: 'info',
-          message: '请选择一条记录!'
-      })
-      return
+    if(this.JUDGE_BTN(this.selected, 'delete')){
+      this.$router.push({ name: 'expenseEdit',params:{
+        businessId:this.selected[0].businessId
+      }})
     }
-    this.$router.push({ name: 'expenseEdit',params:{
-      businessId:this.selected[0].businessId
-    }})
   }
   // 详情
   detailBtn(data) {
     this.$router.push({ name: 'expenseDetail',params:{
-      businessId:data.businessId
+      businessId:data.businessId,
+      ids:{
+        waitId:data.waitId,
+        processInstId:data.processInstId,
+        serialNumber:data.serialNumber
+      },
     }})
   }
   // 删除
@@ -170,16 +171,17 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
           creatorOrgId:this.$store.getters.currentOrganization.organizationId,
           creatorOrgName:this.$store.getters.currentOrganization.organizationName,
           menuCode:this.MENU_CODE_LIST.expenseList,
-          idList:this.idList
+          businessIdList:this.idList
         }
         this.loadingBtn = loadingBtnIndex
-        this.$API.apiCheckFinalDelete(params).then(res=>{
+        this.$API.apiExpenseDelete(params).then(res=>{
           this.loadingBtn = 0
           this.$message({
             type: 'success',
             message: '删除成功!'
           });
           this.resetPageNum();
+          this.$refs.tableData.clearSelection();
           this.getExpenseList();
         }).catch(()=>{
             this.loadingBtn = 0;
@@ -205,7 +207,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
           creatorOrgName: this.$store.getters.currentOrganization.organizationName,
           flag: 1
         }
-        this.$API.apiCheckFinalSubmit(params).then(res=>{
+        this.$API.apiExpenseSubmit(params).then(res=>{
           this.loadingBtn = 0
           this.$message({
             type: 'success',
@@ -232,7 +234,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       businessIdList:this.idList,
       menuCode:this.MENU_CODE_LIST.expenseList
     };
-    this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/itemClosureCheck/exportExcel',data});
+    this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/itemExpenses/exportExcel',data});
   }
   // 导出pdf
   exportPdfBtn(){
@@ -242,7 +244,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       businessIdList:this.idList,
       menuCode:this.MENU_CODE_LIST.expenseList
     }
-    this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/itemClosureCheck/exportPdf',data});
+    this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/itemExpenses/exportPdf',data});
   }
   // 打印
   printBtn(){
@@ -252,7 +254,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       businessIdList:this.idList,
       menuCode:this.MENU_CODE_LIST.expenseList
     }
-    this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/itemClosureCheck/exportPdf',data});
+    this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/itemExpenses/exportPdf',data});
   }
   // 刷新
   refreshBtn(){
@@ -263,6 +265,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       // 清除表格筛选条件
       this.$refs.tableData.clearFilter();
       this.filterParams = {};
+      // 清除多选表格选中
+      this.$refs.tableData.clearSelection();
       this.getExpenseList();
     }
   }

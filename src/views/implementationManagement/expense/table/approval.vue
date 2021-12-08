@@ -27,8 +27,8 @@
           <el-form-item label="项目负责人" prop="applyUserName">
             {{baseInfo.applyUserName}}
           </el-form-item>
-          <el-form-item label="所属月份" prop="postName">
-            {{baseInfo.month}}
+          <el-form-item label="所属月份" prop="belongingMonth">
+            {{baseInfo.belongingMonth}}
           </el-form-item>
         </el-form>
       </div>
@@ -51,10 +51,10 @@
           {{baseInfo.expenseItems.secondarySubject}}
         </el-form-item>
         <div class="col2">
-          <el-form-item label="支出依据" prop="expenditureBasis">
+          <el-form-item label="支出依据" prop="payNoted">
             <el-input
               type="textarea"
-              v-model="baseInfo.expenseItems.expenditureBasis"
+              v-model="baseInfo.expenseItems.payNoted"
               maxlength="500"
               disabled
               show-word-limit
@@ -74,17 +74,17 @@
         label-width="100px"
         label-suffix=":"
       >
-        <el-form-item label="预算总额" prop="amount">
-          {{baseInfo.expenseBudget.amount}}
+        <el-form-item label="预算总额" prop="budgetAmount">
+          {{baseInfo.expenseBudget.budgetAmount}}
         </el-form-item>
-        <el-form-item label="已累计支出" prop="accuExpenditure">
-          {{baseInfo.expenseBudget.accuExpenditure}}
+        <el-form-item label="已累计支出" prop="accumulatedExpenditure">
+          {{baseInfo.expenseBudget.accumulatedExpenditure}}
         </el-form-item>
         <el-form-item label="预算结余" prop="budgetBalance">
           {{baseInfo.expenseBudget.budgetBalance}}
         </el-form-item>
-        <el-form-item label="本次金额(元)" prop="money">
-          {{baseInfo.expenseBudget.money}}
+        <el-form-item label="本次金额(元)" prop="amount">
+          {{baseInfo.expenseBudget.amount}}
         </el-form-item>
         <el-form-item label="结余金额(元)" prop="balanceAmount">
           {{baseInfo.expenseBudget.balanceAmount}}
@@ -92,9 +92,9 @@
       </el-form>
     </card-global>
 
-     <card-global cardTitle="研发项目课题组申报意见">
+    <card-global cardTitle="研发项目课题组申报意见">
       <el-form
-        ref="opinion"
+        ref="remark"
         :inline="true"
         :model="baseInfo"
         size="small"
@@ -103,10 +103,10 @@
         label-suffix=":"
       >
         <div class="col2">
-          <el-form-item label="申报意见" prop="opinion">
+          <el-form-item label="申报意见" prop="remark">
             <el-input
               type="textarea"
-              v-model="baseInfo.opinion"
+              v-model="baseInfo.remark"
               placeholder="请输入研发项目课题组申报意见"
               maxlength="500"
               disabled
@@ -117,27 +117,13 @@
       </el-form>
     </card-global>
 
-    
-    <!-- 附件上传 -->
-    <upload-approval-global type="approval" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
     <!--审批-->
-    <approval-global ref="approval"></approval-global>
+    <approval-global type="approval" ref="approvalGlobal"></approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
-      <loading-btn
-        size="mini"
-        type="primary"
-        @click="reject(2)"
-        :loading="loadingBtn"
-        >回退</loading-btn
-      >
-      <loading-btn
-        size="mini"
-        type="primary"
-        @click="resolve(1)"
-        :loading="loadingBtn"
-        >同意</loading-btn
-      >
+      <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
+      <loading-btn class="rejectOrigin" size="mini" @click="reject(3)" :loading="loadingBtn">退回发起人</loading-btn>
+      <loading-btn size="mini" @click="reject(2)" :loading="loadingBtn">退回上节点</loading-btn>
     </div>
   </div>
 </template>
@@ -153,30 +139,31 @@ import dictionaryMixin from '@/mixins/dictionaryMixin'
 export default class extends Mixins(tableMixin,dictionaryMixin) {
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
-
+  processInstId = null
+  serialNumber = null
   // 设置空数据
   getBaseInfo() {
     return {
-      serialNumber: this.$store.getters.currentOrganization?.organizationId, // 单据编号
       createUser: this.$store.getters.userInfo?.userName, // 创建人
       createUserId: this.$store.getters.userInfo?.userCode, // 结题申报人ID
       createTime: new Date(), // 创建时间
       projectName: '', // 项目名称
       applyUserName: '', // 项目负责人
       month: '', // 所属月份
-      opinion: '', // 研发项目课题组申报意见
+      remark: '', // 研发项目课题组申报意见
+      projectApplyMainId: '',
       // 支出事项
       expenseItems: {
         firstSubject: '', // 一级科目
         secondarySubject: '', // 二级科目
-        expenditureBasis: '', // 支出依据
+        payNoted: '', // 支出依据
       },
       // 支出预算
       expenseBudget: {
-        amount: '',// 预算总额
-        accuExpenditure: '',// 已累计支出
+        budgetAmount: '',// 预算总额
+        accumulatedExpenditure: '',// 已累计支出
         budgetBalance: '',//预算结余
-        money: '',// 本次金额
+        amount: '',// 本次金额
         balanceAmount: '',// 结余金额
       },
       
@@ -186,108 +173,100 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   }
   
   activated() {
-    if (Object.keys(this.$route.params).length > 0) {
-      if (this.$route.params.businessId) {
-        this.initData();
-        this.getRecordDetail(this.$route.params.businessId);
-        this.$refs.approval.restData();
+    if(Object.keys(this.$route.params).length > 0){
+      if(this.$route.params.businessId){
+        this.waitId = this.$route.params.waitId
+        this.initData(this.$route.params.businessId)
+      }
+      if(this.$route.params.routerName){
+        this.routerName = this.$route.params.routerName
+      }else{
+        this.routerName = 'expenseList'
       }
     }
   }
 
   // 初始化新建数据
-  initData() {
-    this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo());
-  }
-  getRecordDetail(businessId) {
-    // this.$API.apiCheckFinalDetail({businessId}).then((res) => {
-    //   this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
-    //   this.baseInfo.expenseItems.projectAbstract = res.data.projectAbstract
-    //   this.baseInfo.expenseItems.directoryAndUnit = res.data.directoryAndUnit
-    //   !res.data.attachmentList && (this.baseInfo.attachmentList = [])
-    // })
-    this.baseInfo = {
-      serialNumber: 111, // 单据编号
-      createUser: '222', // 创建人
-      createUserId: 333, // 结题申报人ID
-      createTime: new Date(), // 创建时间
-      projectName: '项目名称', // 项目名称
-      applyUserName: '项目负责人', // 项目负责人
-      month: '12', // 所属月份
-      opinion: '研发项目课题组申报意见', // 研发项目课题组申报意见
+  initData(businessId) {
+    this.processInstId = null
+    this.serialNumber = null
+    this.$refs.baseForm?.resetFields();
+    this.$refs.expenseItemsForm?.resetFields();
+    this.$refs.expenseBudgetForm?.resetFields();
+
+    this.$API.apiExpenseDetail({businessId}).then((res) => {
+      this.baseInfo = Object.assign(this.baseInfo, this.getBaseInfo(), res.data)
       // 支出事项
-      expenseItems: {
-        firstSubject: '一级科目', // 一级科目
-        secondarySubject: '二级科目', // 二级科目
-        expenditureBasis: '支出依据', // 支出依据
-      },
+      this.baseInfo.expenseItems.firstSubject = res.data.firstSubject
+      this.baseInfo.expenseItems.secondarySubject = res.data.secondarySubject
+      this.baseInfo.expenseItems.payNoted = res.data.payNoted
       // 支出预算
-      expenseBudget: {
-        amount: '12.22',// 预算总额
-        accuExpenditure: '22.22',// 已累计支出
-        budgetBalance: '33.33',//预算结余
-        money: '44.44',// 本次金额
-        balanceAmount: '55.55',// 结余金额
-      },
-      
-      // 附件
-      attachmentList: [],
-    }
+      this.baseInfo.expenseBudget.budgetAmount = res.data.budgetAmount
+      this.baseInfo.expenseBudget.accumulatedExpenditure = res.data.accumulatedExpenditure
+      this.baseInfo.expenseBudget.budgetBalance = res.data.budgetBalance
+      this.baseInfo.expenseBudget.amount = res.data.amount
+      this.baseInfo.expenseBudget.balanceAmount = res.data.balanceAmount
+      // 查看审批流程
+      this.$refs.approvalGlobal.getApprovalRecordList(this.baseInfo.processInstId,this.baseInfo.serialNumber)
+    })
   }
-  // 审批回退 (拒绝)
-  reject(loadingBtn) {
-    // 审批意见校验拒绝
-    this.$refs.approval.isCheckComplete().then(remark => {
-      this.loadingBtn = loadingBtn;
-      var params = {
-        menuCode: this.MENU_CODE_LIST.expenseList,
-        noted: remark,
-        processInstId: this.baseInfo.processInstId
-      };
-      // this.$API
-      //   .apiRejectMaterialRegister(params)
-      //   .then(res => {
-      //     this.$message({
-      //       type: "success",
-      //       message: "审批成功"
-      //     });
-      //     this.backBtn();
-      //     this.loadingBtn = 0;
-      //   })
-      //   .catch(err => {
-      //     this.loadingBtn = 0;
-      //   });
-    });
-  }
-  // 审批同意
-  resolve(loadingBtn) {
+  resolve(loadingBtn){
     // 审批意见校验通过
-    this.$refs.approval.isCheckComplete().then(remark => {
+    this.$refs.approvalGlobal.isCheckComplete().then((remark)=>{
       this.loadingBtn = loadingBtn;
       var params = {
-        menuCode: this.MENU_CODE_LIST.expenseList,
-        noted: remark,
-        processInstId: this.baseInfo.processInstId
-      };
-      // this.$API
-      //   .apiApproveMaterialRegister(params)
-      //   .then(res => {
-      //     this.$message({
-      //       type: "success",
-      //       message: "审批成功"
-      //     });
-      //     this.backBtn();
-      //     this.loadingBtn = 0;
-      //   })
-      //   .catch(err => {
-      //     this.loadingBtn = 0;
-      //   });
-    });
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.expenseList,
+        approveComment:remark,
+        approveType:1,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiExpenseApproval(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
+  }
+  // 退回上节点
+  reject(loadingBtn){
+    // 审批意见校验通过
+    this.$refs.approvalGlobal.isCheckComplete().then((remark)=>{
+      this.loadingBtn = loadingBtn;
+      var params = {
+        creatorOrgId : this.$store.getters.currentOrganization.organizationId,
+        creatorOrgName : this.$store.getters.currentOrganization.organizationName,
+        menuCode : this.MENU_CODE_LIST.expenseList,
+        approveComment:remark,
+        approveType:loadingBtn,//1:同意 2:回退上一个节点 3：回退到发起人
+        waitId:this.waitId
+      }
+      this.$API.apiExpenseApproval(params).then(res=>{
+        this.$message({
+            type:'success',
+            message:'审批成功'
+        })
+        this.backBtn();
+        this.loadingBtn = 0;
+      }).catch(err=>{
+        this.loadingBtn = 0;
+      })
+    })
   }
   // 返回按钮
   backBtn() {
-    this.$store.commit("DELETE_TAB", this.$route.path);
-    this.$router.push({ name: "expenseList" });
+    this.resetData()
+  }
+  // 清空数据
+  resetData(isRefresh) {
+    this.$store.commit('DELETE_TAB', this.$route.path);
+    this.$router.push({ name: this.routerName,params:{refresh:isRefresh}})
   }
 }
 </script>
