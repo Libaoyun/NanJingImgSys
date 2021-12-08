@@ -124,7 +124,7 @@
       </el-table>
     </card-global>
     <!--审批-->
-    <approval-global type="approval" ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
+    <approval-global type="approval" ref="approvalGlobal"></approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
       <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
@@ -144,8 +144,6 @@ import tableMixin from "@/mixins/tableMixin";
 export default class extends tableMixin {
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
-  processInstId = null
-  serialNumber = null
   // 设置空数据
   getBaseInfo() {
     return {
@@ -173,6 +171,7 @@ export default class extends tableMixin {
   activated() {
     if(Object.keys(this.$route.params).length > 0){
       if(this.$route.params.businessId){
+        this.waitId = this.$route.params.waitId
         this.initData(this.$route.params.businessId)
       }
       if(this.$route.params.routerName){
@@ -180,14 +179,11 @@ export default class extends tableMixin {
       }else{
         this.routerName = 'checkFinalList'
       }
-      Object.assign(this,this.$route.params.ids)
     }
   }
 
   // 初始化新建数据
   initData(businessId) {
-    this.processInstId = null
-    this.serialNumber = null
     this.$refs.baseForm?.resetFields();
     this.$refs.checkForm?.resetFields();
     this.$API.apiCheckFinalDetail({businessId}).then((res) => {
@@ -195,12 +191,14 @@ export default class extends tableMixin {
       this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
       this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
       !res.data.attachmentList && (this.baseInfo.attachmentList = [])
+      // 查看审批流程
+      this.$refs.approvalGlobal.getApprovalRecordList(this.baseInfo.processInstId,this.baseInfo.serialNumber)
     })
   }
   
   resolve(loadingBtn){
     // 审批意见校验通过
-    this.$refs.approval.isCheckComplete().then((remark)=>{
+    this.$refs.approvalGlobal.isCheckComplete().then((remark)=>{
       this.loadingBtn = loadingBtn;
       var params = {
         creatorOrgId : this.$store.getters.currentOrganization.organizationId,
@@ -225,7 +223,7 @@ export default class extends tableMixin {
   // 退回上节点
   reject(loadingBtn){
     // 审批意见校验通过
-    this.$refs.approval.isCheckComplete().then((remark)=>{
+    this.$refs.approvalGlobal.isCheckComplete().then((remark)=>{
       this.loadingBtn = loadingBtn;
       var params = {
         creatorOrgId : this.$store.getters.currentOrganization.organizationId,

@@ -51,8 +51,9 @@ import PanelView from './ef/panel-view'
 export default class extends tableMixin {
     @Prop({default:'approval'}) type
     @Prop({default:false}) hasAttach
-    @Prop() processInstId
-    @Prop() serialNumber
+
+    serialNumber = null
+    processInstId = null
 
     activeName = this.hasAttach ? 'first' : 'second'
     approvalRecordList = []
@@ -67,26 +68,25 @@ export default class extends tableMixin {
     }
 
     mounted() {
-        this.getApprovalRecordList()
     }
     activated() {
         this.activeName = this.hasAttach ? 'first' : 'second'
         this.approvalRecordList = []
         this.$refs['approvalForm']?.resetFields()
-        this.getApprovalRecordList()
     }
 
-    getApprovalRecordList() {
-        if(!this.processInstId) return
-        const params = {
-            processInstId:this.processInstId
-        }
-        this.$API.apiGetApprovalRecordList(params).then(res=>{
+    getApprovalRecordList(processInstId,serialNumber) {
+        this.serialNumber = serialNumber
+        this.processInstId = processInstId
+        this.approvalRecordList = []
+        if(!processInstId) return;
+        this.$API.apiGetApprovalRecordList({processInstId}).then(res=>{
             this.approvalRecordList = res.data
         })
     }
     changeActive(e) {
         if(this.activeName === 'third') {
+            if(!this.serialNumber) return;
             this.$refs.flowPanel.initData()
         }
     }

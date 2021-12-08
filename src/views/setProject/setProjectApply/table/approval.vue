@@ -443,7 +443,7 @@
                 </el-table>
             </el-form>
         </card-global>
-        <approval-global ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
+        <approval-global ref="approvalGlobal"></approval-global>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
             <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>
@@ -471,8 +471,6 @@ export default class extends tableMixin {
     isSourceBudgetChange = false
     isExpenseBudgetChange = false
     loadingBtn = 0
-    processInstId = null
-    serialNumber = null
     // 设置空数据
     getBaseInfo(){
        return {
@@ -531,7 +529,7 @@ export default class extends tableMixin {
     activated() {
         if(Object.keys(this.$route.params).length > 0){
             if(this.$route.params.businessId){
-
+                this.waitId = this.$route.params.waitId
                this.initData(this.$route.params.businessId)
            }
            if(this.$route.params.routerName){
@@ -539,14 +537,11 @@ export default class extends tableMixin {
            }else{
                this.routerName = 'setProjectApplyList'
            }
-           Object.assign(this,this.$route.params.ids)
         }
     }
     // 初始化编辑数据
     initData(businessId) {
         this.yms = []
-        this.processInstId = null
-        this.serialNumber = null
         this.isSourceBudgetChange = false
         this.isExpenseBudgetChange = false
         const formRefs = ['doForm','infoForm','progressForm','partUnitForm','researchersForm','researchUserChangeForm','budgetForm','everyMonthForm','allocationForm']
@@ -567,6 +562,8 @@ export default class extends tableMixin {
             }
             this.isSourceBudgetChange = this.baseInfo.detailForm.budgetList.some(item=>item.sourceBudgetChange || item.sourceBudgetChange=='0')
             this.isExpenseBudgetChange = this.baseInfo.detailForm.budgetList.some(item=>item.expenseBudgetChange || item.expenseBudgetChange=='0')
+            // 查看审批流程
+            this.$refs.approvalGlobal.getApprovalRecordList(this.baseInfo.processInstId,this.baseInfo.serialNumber)
         })
     }
     initTableHeader(obj) {
@@ -608,7 +605,7 @@ export default class extends tableMixin {
     }
     resolve(loadingBtn){
         // 审批意见校验通过
-        this.$refs.approval.isCheckComplete().then((remark)=>{
+        this.$refs.approvalGlobal.isCheckComplete().then((remark)=>{
             this.loadingBtn = loadingBtn;
             var params = {
                 creatorOrgId : this.$store.getters.currentOrganization.organizationId,
@@ -633,7 +630,7 @@ export default class extends tableMixin {
     // 退回上节点
     reject(loadingBtn){
         // 审批意见校验通过
-        this.$refs.approval.isCheckComplete().then((remark)=>{
+        this.$refs.approvalGlobal.isCheckComplete().then((remark)=>{
             this.loadingBtn = loadingBtn;
             var params = {
                 creatorOrgId : this.$store.getters.currentOrganization.organizationId,

@@ -124,7 +124,7 @@
       </el-table>
     </card-global>
     <!-- 附件上传 -->
-    <approval-global type="detail" ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="processInstId"></approval-global>
+    <approval-global type="detail" ref="approvalGlobal"></approval-global>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
     </div>
@@ -141,8 +141,6 @@ import tableMixin from "@/mixins/tableMixin";
 export default class extends tableMixin {
   loadingBtn = 0;
   baseInfo = this.getBaseInfo();
-  processInstId = null
-  serialNumber = null
   // 设置空数据
   getBaseInfo() {
     return {
@@ -177,7 +175,6 @@ export default class extends tableMixin {
       }else{
         this.routerName = 'checkFinalList'
       }
-      Object.assign(this,this.$route.params.ids)
     }
   }
 
@@ -190,6 +187,8 @@ export default class extends tableMixin {
       this.baseInfo.checkInfo.projectAbstract = res.data.projectAbstract
       this.baseInfo.checkInfo.directoryAndUnit = res.data.directoryAndUnit
       !res.data.attachmentList && (this.baseInfo.attachmentList = [])
+      // 查看审批流程
+      this.$refs.approvalGlobal.getApprovalRecordList(this.baseInfo.processInstId,this.baseInfo.serialNumber)
     })
   }
   // 返回按钮

@@ -443,7 +443,7 @@
                 </el-table>
             </el-form>
         </card-global>
-        <approval-global type="detail" ref="approval" :processInstId="processInstId" :serialNumber="serialNumber" v-if="serialNumber"></approval-global>
+        <approval-global type="detail" ref="approvalGlobal"></approval-global>
         <div class="global-fixBottom-actionBtn">
             <el-button size="mini" @click="backBtn">返回</el-button>
         </div>
@@ -467,8 +467,6 @@ export default class extends tableMixin {
     yms = []
     isSourceBudgetChange = false
     isExpenseBudgetChange = false
-    processInstId = null
-    serialNumber = null
     // 设置空数据
     getBaseInfo(){
        return {
@@ -533,7 +531,6 @@ export default class extends tableMixin {
            }else{
                this.routerName = 'setProjectApplyList'
            }
-           Object.assign(this,this.$route.params.ids)
         }
     }
     // 初始化编辑数据
@@ -559,6 +556,8 @@ export default class extends tableMixin {
             }
             this.isSourceBudgetChange = this.baseInfo.detailForm.budgetList.some(item=>item.sourceBudgetChange || item.sourceBudgetChange=="0")
             this.isExpenseBudgetChange = this.baseInfo.detailForm.budgetList.some(item=>item.expenseBudgetChange || item.expenseBudgetChange=="0")
+            // 查看审批流程
+            this.$refs.approvalGlobal.getApprovalRecordList(this.baseInfo.processInstId,this.baseInfo.serialNumber)
         })
     }
     initTableHeader(obj) {
