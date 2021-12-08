@@ -409,7 +409,7 @@
                             </template>
                         </el-table-column>
                     </el-table-column>
-                    <el-table-column label="年度预算 (按月填报)" align="center" v-if="yms.length>0">
+                    <el-table-column label="年度预算 (按月填报)" align="center" v-if="yms.length > 0">
                         <el-table-column v-for="item in yms" :key="item.years" :label="item.years+'年'" align="center">
                             <el-table-column v-for="c in item.months" :key="'month'+item.years+c" :prop="c" :label="c+'月'" align="center" width="80">
                                 <template slot-scope="scope">
