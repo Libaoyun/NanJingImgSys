@@ -495,7 +495,7 @@
                     <el-table-column prop="years" label="年度" width="100" align="center">
                         <template slot-scope="scope">
                             <el-form-item :prop="'appropriationPlan.'+scope.$index+'.years'" :rules="allocationRules['years']">
-                                <el-input v-model="scope.row.years"></el-input>
+                                <el-date-picker v-model="scope.row.years" type="year" format="yyyy"></el-date-picker>
                             </el-form-item>
                     </template>
                     </el-table-column>
