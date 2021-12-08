@@ -176,6 +176,7 @@ export default class extends tableMixin {
         })
     }
     changeParent(e,row,menuCode) {
+        row.isIndeterminate[menuCode] = false
         if(e) {
             let filterChild = row.children.filter(item=>item.comButton.includes(menuCode))
             filterChild.forEach(item=>{
