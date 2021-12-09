@@ -79,8 +79,7 @@
             <el-input
               type="textarea"
               v-model="baseInfo.expenseItems.payNoted"
-              maxlength="500"
-              show-word-limit
+              maxlength="200" rows="5" resize="none"
             ></el-input>
           </el-form-item>
         </div>
@@ -159,8 +158,7 @@
               type="textarea"
               v-model="baseInfo.remark"
               placeholder="请输入研发项目课题组申报意见"
-              maxlength="500"
-              show-word-limit
+              maxlength="200" rows="5" resize="none"
             ></el-input>
           </el-form-item>
         </div>
@@ -168,8 +166,8 @@
     </card-global>
 
     
-    <!-- 附件上传 -->
-    <upload-approval-global type="edit" ref="uploadApprovalGlobal" :fileList="baseInfo.attachmentList"></upload-approval-global>
+    <!-- 附件版块 -->
+    <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList" :menuCode="MENU_CODE_LIST.expenseList"></upload-attachment>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
       <loading-btn
@@ -341,7 +339,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     data.balanceAmount = data.expenseBudget.balanceAmount 
     delete data.expenseBudget
 
-    data.attachmentList = this.$refs.uploadApprovalGlobal.getFileList();
+    data.attachmentList = this.$refs.uploadAttachment.getFileList();
     return data
   }
   // 保存按钮
