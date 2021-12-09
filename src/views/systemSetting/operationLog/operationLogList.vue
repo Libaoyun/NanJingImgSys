@@ -109,24 +109,26 @@ export default class extends tableMixin {
     // 刷新
     refreshBtn(){
         if(!this.listLoading){
-            this.listQuery.page = 1;
             // 清除侧边栏搜索条件
             this.searchParams = {};
             // 清除表格筛选条件
             this.$refs.tableData.clearFilter();
             this.filterParams = {};
-            // 清除多选表格选中
-            this.$refs.tableData.clearSelection();
-            this.getOperationLog();
+            this.clearSelection();
         }
+    }
+    // 清除多选表格选中
+    clearSelection() {
+        this.listQuery.page = 1;
+        this.$refs.tableData.clearSelection();
+        this.getOperationLog();
     }
     // 搜索
     openSearch(){
         this.searchDialog = true
     }
     searchSubmit(){
-        this.listQuery.page = 1
-        this.getOperationLog();
+        this.clearSelection();
     }
     // 表格：复选框变化时触发,删除编辑
     tableSelectionChange(value){
@@ -134,9 +136,8 @@ export default class extends tableMixin {
     }
     // 表格分页：每页显示条数变化触发
     handleSizeChange(value) {
-        this.listQuery.page = 1;
         this.listQuery.limit = value;
-        this.getOperationLog();
+        this.clearSelection();
     }
     // 表格分页：当前页变化触发
     handleCurrentChange(value) {

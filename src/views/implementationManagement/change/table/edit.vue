@@ -521,7 +521,7 @@ export default class extends tableMixin {
     ],
     phone: [
       {required:true,message:'请输入联系电话',trigger:'change'},
-      {pattern: /^\d{11}$/, message: "请输入正确联系电话",trigger: "blur"},
+      {pattern: /^1[3456789]\d{9}$/, message: "请输入正确联系电话",trigger: "blur"},
     ],
     startDate: [
       { required: true, message: "参与研发开始日期", trigger: "change" },

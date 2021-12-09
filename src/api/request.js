@@ -41,7 +41,7 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-      let reloginErrorList = [20012, 1000025, 1000000, 20012, 2000001, 20073]
+      let reloginErrorList = [20060,20012]
       if(reloginErrorList.includes(res.code)){
         allowTips && store.dispatch('Logout',{reLogin:true})
         allowTips = false
