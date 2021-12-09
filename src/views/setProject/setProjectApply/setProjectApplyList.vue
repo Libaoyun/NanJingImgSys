@@ -48,17 +48,41 @@
                 </template>
             </el-table-column>
             <el-table-column prop="projectName" label="项目名称" width="180" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="processName" label="申请状态" column-key="statusList" :filters="approvalStatusList" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column 
+                prop="processName" 
+                label="申请状态" 
+                column-key="statusList" 
+                :filters="approvalStatusList"
+                width="100" 
+                align="center" 
+                :show-overflow-tooltip="true">
+            </el-table-column>
             <el-table-column prop="approveUserName" label="当前审批人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="applyUserName" label="申请人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="postName" label="岗位" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="unitName" label="所属单位名称" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="projectType" label="项目类型" width="120" column-key="projectTypeCode" :filters="projectTypeList" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column 
+                prop="projectType" 
+                label="项目类型" 
+                width="120" 
+                column-key="projectTypeCode" 
+                :filters="projectTypeList" 
+                align="center" 
+                :show-overflow-tooltip="true">
+            </el-table-column>
             <el-table-column prop="researchContents" label="研究内容提要" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="applyAmount" label="申请经费 (万元)" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="startYear" label="起始年度" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="endYear" label="结束年度" width="140" align="center" :show-overflow-tooltip="true"></el-table-column>
-            <el-table-column prop="professionalCategory" width="140" label="专业类别" column-key="professionalCategoryCode" :filters="professionalCategroyList" align="center" :show-overflow-tooltip="true"></el-table-column>
+            <el-table-column 
+                prop="professionalCategory" 
+                width="140" 
+                label="专业类别" 
+                column-key="professionalCategoryCode" 
+                :filters="professionalCategroyList" 
+                align="center" 
+                :show-overflow-tooltip="true">
+            </el-table-column>
             <el-table-column prop="createUser" label="编制人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="createTime" label="创建日期" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
             <el-table-column prop="updateTime" label="更新日期" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
@@ -333,7 +357,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     }
     // 表格：表头筛选条件变化时触发
     filterChange(value){
-        this.filterParams = value;
+        this.filterParams = Object.assign(this.filterParams,value);
         this.listQuery.page = 1;
         this.getSetProjectApplyList();
     }

@@ -306,7 +306,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   }
   // 表格：表头筛选条件变化时触发
   filterChange(value){
-    this.filterParams = value;
+    this.filterParams = Object.assign(this.filterParams,value);
     this.listQuery.page = 1;
     this.getCheckFinalList();
   }
