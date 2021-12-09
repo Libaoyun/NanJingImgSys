@@ -49,8 +49,8 @@
       </el-table-column>
       <el-table-column prop="belongingMonth" label="所属月份" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="createUser" label="申请人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="firstSubject" label="研发项目支出一级科目" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="secondarySubject" label="研发项目支出二级科目" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="firstSubject" label="研发项目支出一级科目" column-key="firstSubjectCode" :filters="firstSubjectList" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="secondarySubject" label="研发项目支出二级科目" column-key="secondarySubjectCode" :filters="secondarySubjectList2" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="payNoted" label="支出依据" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="budgetAmount" label="本次申请列销金额（元）" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="budgetBalance" label="本次申请后结余金额（元）" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { Component, Mixins, Vue, mixins } from 'vue-property-decorator'
+import { Component, Mixins, Vue, mixins, Watch } from 'vue-property-decorator'
 import tableMixin from '@/mixins/tableMixin'
 import dictionaryMixin from '@/mixins/dictionaryMixin'
 import search from './table/search'
@@ -91,9 +91,21 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   searchDialog = false
   loadingBtn = 0
   searchParams = {}
+  secondarySubjectList2 = []
+  @Watch('firstSubjectList')
+  filter(arr){
+    const pids = arr.map(it=>it.value)
+    pids.map(pid=>{
+      this.GET_DICTIONARY_LIST(pid).then(res=>{
+        this.secondarySubjectList2.push(...res)
+      })
+    })
+  }
 
   created() {
     this.getApprovalStatusList()
+    // 获取一级科目
+    this.getFirstSubjectList()
   }
   mounted () {
     this.getExpenseList()

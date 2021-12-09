@@ -55,8 +55,9 @@ module.exports = {
       '/rdexpense': {
         // target: 'http://192.168.41.180:8888',
         // target: 'http://192.168.41.202:1001',
-        target: 'http://192.168.40.236:1001', //鲁
+        // target: 'http://192.168.40.236:1001', //鲁
         // target: 'http://localhost:1001',
+        target: 'http://192.168.40.165:1001',
         ws: true,
         changeOrigin: true,
       },

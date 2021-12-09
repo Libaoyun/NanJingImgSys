@@ -13,6 +13,8 @@ export default class dictionaryMixin extends Vue {
     approvalResultList = []
     projectTypeList = []
     professionalCategroyList = []
+    firstSubjectList = []
+    secondarySubjectList = []
 
 
     // 获取操作类型

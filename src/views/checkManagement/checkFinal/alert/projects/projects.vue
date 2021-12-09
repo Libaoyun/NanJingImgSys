@@ -19,6 +19,7 @@
               listQuery.page = 1;
               getProjectList();
             "
+            @input="listQuery.page = 1;getProjectList();"
           ></el-input>
           <el-input
             placeholder="项目名称"
@@ -27,6 +28,7 @@
               listQuery.page = 1;
               getProjectList();
             "
+            @input="listQuery.page = 1;getProjectList();"
           ></el-input>
           <el-input
             placeholder="申请人"
@@ -35,6 +37,7 @@
               listQuery.page = 1;
               getProjectList();
             "
+            @input="listQuery.page = 1;getProjectList();"
           ></el-input>
           <div
             class="searchBtn iconfont iconsearch1"
@@ -67,7 +70,7 @@
           </el-table-column>
           <el-table-column label="序号" type="index" width="50" align="center">
             <template slot-scope="scope">
-              <span>{{scope.$index + 1}}</span>
+              <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
             </template>
           </el-table-column>
           <el-table-column width="150" prop="serialNumber" label="申请单号" align="center" :show-overflow-tooltip="true"></el-table-column>
@@ -134,8 +137,8 @@ export default class projects extends Mixins(tableMixin,dictionaryMixin) {
     this.search.projectName = "";
     this.search.applyUserName = "";
     this.tableRadio = null;
-    this.listQuery.page = 1;
-    this.listQuery.limit = 20;
+    // this.listQuery.page = 1;
+    // this.listQuery.limit = 20;
     this.getProjectTypeList() // 项目类型
     this.getProfessionalCategroyList() // 专业类别
     this.getProjectList();

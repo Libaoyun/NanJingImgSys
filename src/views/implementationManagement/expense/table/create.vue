@@ -200,8 +200,7 @@ import $alert from '../alert'
 })
 export default class extends Mixins(tableMixin,dictionaryMixin) {
   loadingBtn = 0;
-  firstSubjectList = []
-  secondarySubjectList = []
+  
   baseInfo = this.getBaseInfo();
   // 基本信息表单校验规则
   baseFormRules = {
@@ -382,6 +381,8 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   handleChangeFirstSubject(value) {
     this.baseInfo.expenseItems.secondarySubject = ''
     this.baseInfo.expenseItems.secondarySubjectCode = ''
+    this.baseInfo.expenseItems.payNoted = ''
+    
     this.baseInfo.expenseItems.firstSubject = this.GET_DICTIONARY_TEXT(this.firstSubjectList,value)
     // 根据一级科目获取二级科目
     this.getSecondarySubjectList(value)
@@ -389,6 +390,9 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   // 选择二级科目查询预算
   handleChangeSecondarySubject(value) {
     this.baseInfo.expenseItems.secondarySubject = this.GET_DICTIONARY_TEXT(this.secondarySubjectList,value)
+
+    // 支出依据 = 自动带入‘项目名称’研发项目+‘二级科目’支出
+    this.$set(this.baseInfo.expenseItems, 'payNoted', `${this.baseInfo.expenseItems.firstSubject}研发项目${this.baseInfo.expenseItems.secondarySubject}支出`)
     this.getExpenseBudget()
   }
   // 根据一级科目&二级科目&项目ID查询相关费用
