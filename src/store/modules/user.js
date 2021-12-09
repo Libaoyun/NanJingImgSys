@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import {Message} from 'element-ui';
+import router from '@/router'
 import {ACCESS_TOKEN} from '@/utils/storage';
 import {resetRouter} from '@/router/index';
 import {apiUserLogin, apiGetUserInfo, apiLogout} from '@/api/modules/app';
@@ -65,10 +66,18 @@ const user = {
                     });
             });
         },
-        Logout({commit}) {
+        Logout({commit},data) {
             return new Promise((resolve, reject) => {
-                apiLogout()
-                    .then((res) => {
+                if(data && data.reLogin) {
+                    Vue.ls.remove(ACCESS_TOKEN);
+                    Vue.ls.clear();
+                    commit('CLEAR_TAB_LIST');
+                    resetRouter();
+                    router.push({ path: '/login' })
+                    commit('SET_USERINFO', null)
+                    resolve();
+                }else {
+                    apiLogout().then((res) => {
                         Vue.ls.remove(ACCESS_TOKEN);
                         Vue.ls.clear();
                         commit('CLEAR_TAB_LIST');
@@ -78,6 +87,7 @@ const user = {
                     .catch((error) => {
                         reject(error);
                     });
+                }
             });
         },
     },
