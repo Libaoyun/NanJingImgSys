@@ -611,3 +611,8 @@ body .el-table th.gutter{
     width: calc(100% - 30px) !important;
     justify-content: flex-end !important;
 }
+
+// tooltip样式
+.el-tooltip__popper {
+    max-width: 600px;
+}
