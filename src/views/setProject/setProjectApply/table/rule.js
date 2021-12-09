@@ -7,7 +7,7 @@ export default class rule extends Vue {
     digitPattern = /^\d+\.?\d{0,2}$/;
     numPattern = /^\d{0,9}$/;//^[0-9]*$
     taxPattern = /^\d{0,2}$/;
-    phonePattern = /^\d{11}$/; //联系电话只校验数字&长度
+    phonePattern = /^1[3456789]\d{9}$/; //联系电话只校验数字&长度
     emailPattern = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;//邮箱校验
     idCardPattern = /^[1-9]\d{5}(18|19|20|(3\d))\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;//身份证校验
 
