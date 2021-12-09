@@ -101,12 +101,12 @@ export default class extends tableMixin {
                 }).then(() => {
                     // 调接口
                     let params = Object.assign(
+                        this.baseInfo,
                         {
                             creatorOrgId:this.$store.getters.currentOrganization.organizationId,
                             creatorOrgName:this.$store.getters.currentOrganization.organizationName,
                             menuCode:this.MENU_CODE_LIST.projectList
-                        },
-                        this.baseInfo,
+                        }
                     )
                     this.loadingBtn = 1;
                     this.$API.apiUpdateProject(params).then(res=>{
