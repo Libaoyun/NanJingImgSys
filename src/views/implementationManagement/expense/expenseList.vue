@@ -33,8 +33,8 @@
       @selection-change="tableSelectionChange"
       class="global-table-default"
       style="width: 100%;">
-      <el-table-column type="selection" width="55" align="center" ></el-table-column>
-      <el-table-column label="序号" type="index" width="55" :reserve-selection="true" align="center">
+      <el-table-column type="selection" width="55" :reserve-selection="true" align="center" ></el-table-column>
+      <el-table-column label="序号" type="index" width="55" align="center">
         <template slot-scope="scope">
           <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
         </template>
