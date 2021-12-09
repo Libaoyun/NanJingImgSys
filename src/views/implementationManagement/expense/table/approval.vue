@@ -55,9 +55,8 @@
             <el-input
               type="textarea"
               v-model="baseInfo.expenseItems.payNoted"
-              maxlength="500"
+              maxlength="200" rows="5" resize="none"
               disabled
-              show-word-limit
             ></el-input>
           </el-form-item>
         </div>
@@ -108,9 +107,8 @@
               type="textarea"
               v-model="baseInfo.remark"
               placeholder="请输入研发项目课题组申报意见"
-              maxlength="500"
+              maxlength="200" rows="5" resize="none"
               disabled
-              show-word-limit
             ></el-input>
           </el-form-item>
         </div>
@@ -119,6 +117,8 @@
 
     <!--审批-->
     <approval-global type="approval" ref="approvalGlobal"></approval-global>
+    <!-- 附件版块 -->
+    <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList" :onlyView="true" :menuCode="MENU_CODE_LIST.expenseList"></upload-attachment>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
       <loading-btn class="primary" size="mini" @click="resolve(1)" type="primary" :loading="loadingBtn">同意</loading-btn>

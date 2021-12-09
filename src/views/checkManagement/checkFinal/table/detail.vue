@@ -68,6 +68,7 @@
             type="textarea"
             disabled
             v-model="baseInfo.checkInfo.projectAbstract"
+            maxlength="200" rows="5" resize="none"
           ></el-input>
         </el-form-item>
         <el-form-item label="经济技术文件目录及提供单位" prop="directoryAndUnit">
@@ -75,6 +76,7 @@
             type="textarea"
             disabled
             v-model="baseInfo.checkInfo.directoryAndUnit"
+            maxlength="200" rows="5" resize="none"
           ></el-input>
         </el-form-item>
       </el-form>
@@ -123,8 +125,10 @@
 
       </el-table>
     </card-global>
-    <!-- 附件上传 -->
+    <!-- 审批 -->
     <approval-global type="detail" ref="approvalGlobal"></approval-global>
+    <!-- 附件版块 -->
+    <upload-attachment ref="uploadAttachment" :fileList="baseInfo.attachmentList" :onlyView="true" :menuCode="MENU_CODE_LIST.checkFinalList"></upload-attachment>
     <div class="global-fixBottom-actionBtn">
       <el-button size="mini" @click="backBtn">返回</el-button>
     </div>
@@ -209,11 +213,14 @@ export default class extends tableMixin {
   width: 100%;
   height: 100%;
   padding-bottom: 46px;
-  .base-form /deep/ .el-form-item{
-    width: 33%!important;
-  }
-  .check-form /deep/ .el-form-item{
-    width: 100%!important;
+  .check-form{
+    /deep/ .el-form-item{
+      width: 66.6%;
+      .el-form-item__content {
+        display: block;
+        margin-left: 80px;
+      }
+    }
   }
 }
 </style>
