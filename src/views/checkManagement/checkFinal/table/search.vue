@@ -9,7 +9,7 @@
         ref="drawer">
         <span slot="title"><i class="iconfont iconsearch1"></i> 搜索</span>
         <div>
-            <el-form ref="search" :model="searchParams" :rules="rules" :inline="true" size="mini" label-width="70px" label-position="right">
+            <el-form ref="search" :model="searchParams" :rules="rules" :inline="true" size="mini" label-width="90px" label-position="right">
                 <el-form-item label="单据编号" prop="serialNumber">
                     <el-input v-model.trim="searchParams.serialNumber" placeholder="请输入单据编号"></el-input>
                 </el-form-item>

@@ -24,6 +24,7 @@
     <el-table
       ref="tableData"
       :data="tableData"
+      row-key="id"
       :height="tableHeight"
       :border="tableConfig.border"
       v-loading="listLoading"
@@ -32,36 +33,34 @@
       @selection-change="tableSelectionChange"
       class="global-table-default"
       style="width: 100%;">
-      <el-table-column type="selection" width="55" align="center" ></el-table-column>
+      <el-table-column type="selection" width="55" align="center" :reserve-selection="true" ></el-table-column>
       <el-table-column label="序号" type="index" width="55" align="center">
         <template slot-scope="scope">
           <span>{{(listQuery.page-1)*listQuery.limit + scope.$index + 1}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="orgNumber" label="单据编号" width="180" align="center" :show-overflow-tooltip="true">
+      <el-table-column prop="serialNumber" label="单据编号" width="180" align="center" :show-overflow-tooltip="true">
         <template slot-scope="props">
-          <el-button type="text" size="small" @click="detailBtn(props.row)">{{props.row.orgNumber}}</el-button>
+          <el-button type="text" size="small" @click="detailBtn(props.row)">{{props.row.serialNumber}}</el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="orgName" label="项目名称" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="status" label="单据状态" width="100" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{['否','是'][scope.row.status]}}
-        </template>
+      <el-table-column prop="projectName" label="项目名称" width="180" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="processName" label="单据状态" column-key="statusList" :filters="approvalStatusList" width="100" align="center" :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column prop="createUser" label="当前审批人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="remark" label="变更类型" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="updateUser" label="项目负责人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="remark" label="负责人联系电话" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="remark" label="编制人" width="200" align="center" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column prop="updateTime" label="创建日期" width="180" align="center" :show-overflow-tooltip="true">
+      <el-table-column prop="approveUserName" label="当前审批人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="changeType" label="变更类型" width="100" align="center" :show-overflow-tooltip="true">
+      </el-table-column>
+      <el-table-column prop="applyUserName" label="项目负责人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="telephone" label="负责人联系电话" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="createUser" label="编制人" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column prop="createTime" label="创建日期" width="180" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           {{ scope.row.createTime | formatDate }}
         </template>
       </el-table-column>
       <el-table-column prop="updateTime" label="更新日期" width="180" align="center" :show-overflow-tooltip="true">
         <template slot-scope="scope">
-          {{ scope.row.createTime | formatDate }}
+          {{ scope.row.updateTime | formatDate }}
         </template>
       </el-table-column>
     </el-table>
@@ -123,14 +122,16 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
     })
     return list;
   };
-  // 查询外部用户列表
+  // 查询列表
   getChangeList(){
     var params = {};
     params.pageNum = this.listQuery.page; // 页码
     params.pageSize = this.listQuery.limit; // 每页数量
+    params.creatorOrgName = this.$store.getters.currentOrganization.organizationName;
+    params.creatorOrgId = this.$store.getters.currentOrganization.organizationId;
     params = Object.assign(params,this.searchParams,this.filterParams);
     this.listLoading = true
-    this.$API.apiGetProjectList(params).then(res=>{
+    this.$API.apiGetChangeList(params).then(res=>{
       this.listLoading = false
       if(res.data){
         this.tableData = res.data.list;
@@ -150,21 +151,21 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
   }
   // 编辑
   editBtn(){
-    if(this.selected.length !== 1){
-      this.$message({
-          type: 'info',
-          message: '请选择一条记录!'
-      })
-      return
+    if(this.JUDGE_BTN(this.selected, 'delete')){
+      this.$router.push({ name: 'changeEdit',params:{
+        businessId:this.selected[0].businessId
+      }})
     }
-    this.$router.push({ name: 'changeEdit',params:{
-      businessId:this.selected[0].businessId
-    }})
   }
   // 详情
   detailBtn(data) {
     this.$router.push({ name: 'changeDetail',params:{
-      record:data
+      businessId:data.businessId,
+      ids:{
+        waitId:data.waitId,
+        processInstId:data.processInstId,
+        serialNumber:data.serialNumber
+      },
     }})
   }
   // 删除
@@ -178,18 +179,19 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
         const params = {
           creatorOrgId:this.$store.getters.currentOrganization.organizationId,
           creatorOrgName:this.$store.getters.currentOrganization.organizationName,
-          menuCode:this.MENU_CODE_LIST.checkFinalList,
-          idList:this.idList
+          menuCode:this.MENU_CODE_LIST.changeList,
+          businessIdList:this.idList
         }
         this.loadingBtn = loadingBtnIndex
-        this.$API.apiCheckFinalDelete(params).then(res=>{
+        this.$API.apiChangeDelete(params).then(res=>{
           this.loadingBtn = 0
           this.$message({
             type: 'success',
             message: '删除成功!'
           });
           this.resetPageNum();
-          this.clearSelection();
+          this.$refs.tableData.clearSelection();
+          this.getChangeList();
         }).catch(()=>{
             this.loadingBtn = 0;
         })
@@ -209,18 +211,18 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
         this.loadingBtn = loadingBtnIndex
         var params = {
           businessId:this.idList[0],
-          menuCode:this.MENU_CODE_LIST.checkFinalList,
+          menuCode:this.MENU_CODE_LIST.changeList,
           creatorOrgId: this.$store.getters.currentOrganization.organizationId,
           creatorOrgName: this.$store.getters.currentOrganization.organizationName,
           flag: 1
         }
-        this.$API.apiCheckFinalSubmit(params).then(res=>{
+        this.$API.apiChangeSubmit(params).then(res=>{
           this.loadingBtn = 0
           this.$message({
             type: 'success',
             message: '提交成功!'
           });
-          this.getCheckFinalList();
+          this.getChangeList();
         }).catch(()=>{
           this.loadingBtn = 0;
         })
@@ -241,7 +243,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       businessIdList:this.idList,
       menuCode:this.MENU_CODE_LIST.changeList
     };
-    this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/organization/exportExcel',data});
+    this.EXPORT_FILE(this.selected,'excel',{url:'/rdexpense/itemChange/exportExcel',data});
   }
   // 导出pdf
   exportPdfBtn(){
@@ -251,7 +253,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       businessIdList:this.idList,
       menuCode:this.MENU_CODE_LIST.changeList
     }
-    this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/organization/exportPDF',data});
+    this.EXPORT_FILE(this.selected,'pdf',{url:'/rdexpense/itemChange/exportPdf',data});
   }
   // 打印
   printBtn(){
@@ -261,7 +263,7 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       businessIdList:this.idList,
       menuCode:this.MENU_CODE_LIST.changeList
     }
-    this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/organization/exportPDF',data});
+    this.EXPORT_FILE(this.selected,'print',{url:'/rdexpense/itemChange/exportPdf',data});
   }
   // 刷新
   refreshBtn(){
@@ -271,7 +273,9 @@ export default class extends Mixins(tableMixin,dictionaryMixin) {
       // 清除表格筛选条件
       this.$refs.tableData.clearFilter();
       this.filterParams = {};
-      this.clearSelection();
+      // 清除多选表格选中
+      this.$refs.tableData.clearSelection();
+      this.getChangeList();
     }
   }
   // 清除多选表格选中
