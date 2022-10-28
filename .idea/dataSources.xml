@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="研发经费管理-数据库" uuid="34e7a34b-0957-4b2f-999a-af5e3138a5bc">
+      <driver-ref>sqlserver.ms</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
+      <jdbc-url>jdbc:sqlserver://123.60.25.10:15559;database=rdexpense</jdbc-url>
+      <driver-properties>
+        <property name="selectMethod" value="cursor" />
+      </driver-properties>
+    </data-source>
+  </component>
+</project>

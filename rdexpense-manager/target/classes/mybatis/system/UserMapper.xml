@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UserMapper">
+
+
+    <sql id="Base_Column">
+        id, user_code as userCode,user_name as userName,english_user_name as englishUserName,
+        gender,gender_code as genderCode,birth_date as birthDate,height,education,education_code as educationCode,
+        marital_status as maritalStatus,blood_type as bloodType,blood_type_code as bloodTypeCode,mobile_phone as mobilePhone,
+        office_telephone as officeTelephone,email,fax,employee_status as employeeStatus,employee_status_code as employeeStatusCode,
+        employee_type as employeeType,employee_type_code as employeeTypeCode,participation_date as participationDate,entry_date as entryDate,
+        confirmation_date as confirmationDate,leave_date as leaveDate,nationality,native_place as nativePlace,nation,religion,
+        create_user as createUser,create_user_id as createUserId,create_time as createTime,update_user as updateUser,update_user_id as updateUserId,
+            update_time as updateTime,password,version,department_name as departmentName,department_code as departmentCode,
+            post_name as postName,post_code as postCode,business_id as businessId
+
+    </sql>
+
+    <select id="checkUser" resultType="pd" parameterType="pd">
+        select user_code
+        from sys_user_info
+        where user_code = #{userCode}
+    </select>
+
+    <select id="updateCheckUser" resultType="pd" parameterType="pd">
+        select user_code
+        from sys_user_info
+        where user_code = #{userCode} and id != #{id}
+    </select>
+
+    <select id="selectUserInfoAll" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_user_info
+        <where>
+            <if test="userCode!=null and userCode!=''">
+                and user_code LIKE concat('%',#{userCode},'%')
+            </if>
+            <if test="userName!=null and userName!=''">
+                and user_name LIKE concat('%',#{userName},'%')
+            </if>
+            <if test="departmentName!=null and departmentName!=''">
+                and department_name LIKE concat('%',#{departmentName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and post_name LIKE concat('%',#{postName},'%')
+            </if>
+            <if test="mobilePhone!=null and mobilePhone!=''">
+                and mobile_phone LIKE concat('%',#{mobilePhone},'%')
+            </if>
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                and update_user LIKE concat('%',#{updateUser},'%')
+            </if>
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
+            </if>
+
+            <if test="educationCodeList != null and educationCodeList.size()>0">
+                and education_code in
+                <foreach item="item" index="index" collection="educationCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="employeeStatusCodeList != null and employeeStatusCodeList.size()>0">
+                and employee_status_code in
+                <foreach item="item" index="index" collection="employeeStatusCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="employeeTypeCodeList != null and employeeTypeCodeList.size()>0">
+                and employee_type_code in
+                <foreach item="item" index="index" collection="employeeTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+
+    <select id="queryUserAllInfoList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_user_info
+        <where>
+            <if test="userCode!=null and userCode!=''">
+                and user_code LIKE concat('%',#{userCode},'%')
+            </if>
+            <if test="userName!=null and userName!=''">
+                and user_name LIKE concat('%',#{userName},'%')
+            </if>
+            <if test="departmentCode!=null and departmentCode!=''">
+                and department_code LIKE concat('%',#{departmentCode},'%')
+            </if>
+            <if test="postCode!=null and postCode!=''">
+                and post_code LIKE concat('%',#{postCode},'%')
+            </if>
+            <if test="mobilePhone!=null and mobilePhone!=''">
+                and mobile_phone LIKE concat('%',#{mobilePhone},'%')
+            </if>
+            <if test="createUser!=null and createUser!=''">
+                and create_user LIKE concat('%',#{createUser},'%')
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                and update_user LIKE concat('%',#{updateUser},'%')
+            </if>
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
+            </if>
+
+            <if test="educationCodeList != null and educationCodeList.size()>0">
+                and education_code in
+                <foreach item="item" index="index" collection="educationCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="employeeStatusCodeList != null and employeeStatusCodeList.size()>0">
+                and employeeStatusCode in
+                <foreach item="item" index="index" collection="employeeStatusCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="employeeTypeCodeList != null and employeeTypeCodeList.size()>0">
+                and employee_type_code in
+                <foreach item="item" index="index" collection="employeeTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+
+    <insert id="insertUser" parameterType="pd">
+        INSERT INTO sys_user_info
+        (business_id, user_code, user_name, english_user_name, gender, gender_code, birth_date, height, education,
+         education_code,
+         marital_status, blood_type, blood_type_code, mobile_phone, office_telephone, email, fax, employee_status,
+         employee_status_code,
+         employee_type, employee_type_code, participation_date, entry_date, confirmation_date, leave_date, nationality,
+         native_place, nation,
+         religion, create_user, create_user_id, create_time, update_user, update_user_id, update_time, password,
+         version,department_name,department_code,post_name,post_code)
+        VALUES (#{businessId}, #{userCode}, #{userName}, #{englishUserName},
+                #{gender}, #{genderCode}, #{birthDate,jdbcType=DATE}, #{height}, #{education}, #{educationCode},
+                #{maritalStatus}, #{bloodType}, #{bloodTypeCode}, #{mobilePhone},
+                #{officeTelephone}, #{email}, #{fax}, #{employeeStatus}, #{employeeStatusCode},
+                #{employeeType}, #{employeeTypeCode}, #{participationDate,jdbcType=DATE}, #{entryDate,jdbcType=DATE},
+                #{confirmationDate,jdbcType=DATE}, #{leaveDate,jdbcType=DATE}, #{nationality}, #{nativePlace},
+                #{nation}, #{religion},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},
+                getDate(), #{password}, #{version},#{departmentName},
+                #{departmentCode},#{postName},#{postCode})
+    </insert>
+
+
+    <insert id="insertDepartment" parameterType="java.util.List">
+        INSERT INTO sys_user_department_info
+        (user_code,department_name,department_code,post_name,post_code
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userCode},#{item.departmentName},
+            #{item.departmentCode},#{item.postName},#{item.postCode}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateUser" parameterType="pd">
+        update sys_user_info
+        set user_code            = #{userCode},
+            user_name            = #{userName},
+            english_user_name    = #{englishUserName},
+            gender               = #{gender},
+            gender_code          = #{genderCode},
+            birth_date           = #{birthDate,jdbcType=DATE},
+            height               = #{height},
+            education            = #{education},
+            education_code       = #{educationCode},
+            marital_status       = #{maritalStatus},
+            blood_type           = #{bloodType},
+            blood_type_code      = #{bloodTypeCode},
+            mobile_phone         = #{mobilePhone},
+            office_telephone     = #{officeTelephone},
+            email                = #{email},
+            fax                  = #{fax},
+            employee_status      = #{employeeStatus},
+            employee_status_code = #{employeeStatusCode},
+            employee_type        = #{employeeType},
+            employee_type_code   = #{employeeTypeCode},
+            participation_date   = #{participationDate,jdbcType=DATE},
+            entry_date           = #{entryDate,jdbcType=DATE},
+            confirmation_date    = #{confirmationDate,jdbcType=DATE},
+            leave_date           = #{leaveDate,jdbcType=DATE},
+            nationality          = #{nationality},
+            native_place         = #{nativePlace},
+            nation               = #{nation},
+            religion             = #{religion},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate(),
+            department_name = #{departmentName},
+            department_code = #{departmentCode},
+            post_name       = #{postName},
+            post_code       = #{postCode}
+        where business_id = #{businessId}
+    </update>
+
+    <update id="updatePassword" parameterType="pd">
+        update sys_user_info
+        set password       = #{password,jdbcType=VARCHAR},
+            version        =version + 1,
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
+        where user_code = #{userCode,jdbcType=BIGINT}
+    </update>
+
+
+    <update id="resetPassword" parameterType="pd">
+        update sys_user_info
+        set password = #{password,jdbcType=VARCHAR},
+        version = 0,
+        update_user = #{createUser},
+        update_user_id = #{createUserId},
+        update_time = getdate()
+        where id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+
+    <delete id="deleteUserInfo" parameterType="java.util.List">
+        delete from
+        sys_user_info
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteUserDepartment" parameterType="java.util.List">
+        delete from
+        sys_user_department_info
+        where user_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.userCode}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAuthorityUser" parameterType="java.util.List">
+        delete from
+        uq_authority_user
+        where
+        user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.userCode}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAuthorityMenu" parameterType="java.util.List">
+        delete from
+        uq_authority_menu
+        where
+        user_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.userCode}
+        </foreach>
+    </delete>
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </delete>
+
+
+    <select id="queryAllPostData" parameterType="pd" resultType="pd">
+        select
+        user_code as userCode,
+        STRING_AGG(isNULL(department_name,null),',') as departmentName,
+        STRING_AGG(isNULL(post_name,null),',') as postName,
+        STRING_AGG(isNULL(department_code,null),',') as departmentCode,
+        STRING_AGG(isNULL(post_code,null),',') as postCode
+        from sys_user_department_info
+        where user_code in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item.userCode}
+        </foreach>
+        group by user_code
+    </select>
+
+    <select id="queryUserDepartment" parameterType="pd" resultType="pd">
+        select id,
+               user_code       as userCode,
+               department_name as departmentName,
+               department_code as departmentCode,
+               post_name       as postName,
+               post_code       as postCode
+        from sys_user_department_info
+        where user_code = #{userCode}
+    </select>
+
+    <delete id="deleteDepartment" parameterType="pd">
+        delete from
+        sys_user_department_info
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="updateDepartment" parameterType="pd">
+        update sys_user_department_info
+        set department_name = #{departmentName},
+            department_code = #{departmentCode},
+            post_name       = #{postName},
+            post_code       = #{postCode}
+        where user_code = #{userCode}
+    </update>
+
+
+    <select id="selectUserInfoById" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_user_info
+        where user_code = #{userCode}
+    </select>
+
+    <select id="queryUserById" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_user_info
+        where id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryOneRecord" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_user_info
+        where id = #{id}
+    </select>
+
+    <select id="findExternalUser" resultType="pd" parameterType="pd">
+        SELECT
+        <include refid="Base_Column"></include>
+        FROM sys_user_info
+        WHERE  user_code = #{userCode,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryAuthData" resultType="pd" parameterType="pd">
+        SELECT distinct
+            u.scope_code as organizationId,
+            i.org_name   as organizationName,
+            i.company_id as companyId
+        FROM uq_authority_user u
+                 left join sys_organization_info i on i.id = u.scope_code
+        WHERE u.user_id = #{userCode,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryAuthDatas" resultType="pd" parameterType="java.util.List">
+        SELECT distinct
+            u.scope_code as organizationId,
+            i.org_name   as organizationName,
+            i.company_id as companyId
+        FROM uq_authority_user u
+                 left join sys_organization_info i on i.id = u.scope_code
+        WHERE u.user_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

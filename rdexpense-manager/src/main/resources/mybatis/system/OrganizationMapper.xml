@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrganizationMapper">
+
+    <sql id="Base_Column">
+        id,
+        id as orgId,
+        org_name as orgName,
+        remark,
+        status,
+            org_number as orgNumber,
+        company_id as companyId,
+        create_user as createUser,
+        create_user_id as createUserId,
+        create_time as createTime,
+        update_user as updateUser,
+        update_user_id as updateUserId,
+        update_time as updateTime
+
+    </sql>
+
+    <select id="selectByParams" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_organization_info
+        <where>
+            <if test="orgName!=null and orgName!=''">
+                and org_name LIKE concat('%',#{orgName},'%')
+            </if>
+            <if test="orgNumber!=null and orgNumber!=''">
+                and org_number LIKE concat('%',#{orgNumber},'%')
+            </if>
+            <if test="status!=null and status!=''">
+                and status = #{status}
+            </if>
+            <if test="remark!=null and remark!=''">
+                and remark LIKE concat('%',#{remark},'%')
+            </if>
+            <if test="createUserName!=null and createUserName!=''">
+                and create_user LIKE concat('%',#{createUserName},'%')
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                and update_user LIKE concat('%',#{updateUser},'%')
+            </if>
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+
+    <insert id="insertOrganization" parameterType="pd">
+        INSERT INTO sys_organization_info
+        (org_name, remark, status, company_id, org_number, create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        VALUES (#{orgName}, #{remark}, #{status}, #{companyId},#{orgNumber}, #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
+    </insert>
+
+
+    <update id="updateOrganization" parameterType="pd">
+        update sys_organization_info
+        set org_name       = #{orgName,jdbcType=VARCHAR},
+            status        =#{status},
+            remark        =#{remark},
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getDate()
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+
+    <delete id="deleteOrganization" parameterType="java.util.List">
+        delete from
+        sys_organization_info
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAuthorityUser" parameterType="java.util.List">
+        delete from
+        uq_authority_user
+        where
+        scope_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAuthorityMenu" parameterType="java.util.List">
+        delete from
+        uq_authority_menu
+        where
+        scope_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="queryById" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_organization_info
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+
+    <select id="queryByIds" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from sys_organization_info
+        where id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+</mapper>

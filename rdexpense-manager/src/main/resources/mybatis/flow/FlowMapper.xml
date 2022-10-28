@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FlowMapper">
+
+
+    <sql id="Base_Column">
+                d.id,
+                d.id as waitId,
+    activity_id as processInstId,
+    approve_node_id as approveNodeId,
+    approve_node_name as approveNodeName,
+    serial_number as serialNumber,
+    title_name as titleName,
+    create_user_id as createUserId,
+    create_user_name as createUser,
+    next_approve_user_id as nextApproveUserId,
+    next_approve_user_name as nextApproveUserName,
+    next_approve_node_id as nextApproveNodeId,
+    next_approve_node_name as nextApproveNodeName,
+    create_time as createTime,
+    approve_time as approveTime,
+    handle_strategy as handleStrategy,
+    back_flag as backFlag,
+    menu_code as menuCode,
+    d.status,
+    business_id as businessId,
+           detail_name as detailName,
+           approve_name as approveName
+    </sql>
+
+
+    <!-- 新增流程 -->
+    <insert id="insertData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bpm_approval_design
+        (menu_code, flow_content,
+         create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        VALUES (#{menuId}, #{flowContent},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId},getDate())
+    </insert>
+
+    <!-- 更新流程 -->
+    <update id="updateData" parameterType="pd">
+        update bpm_approval_design
+        set flow_content        =#{flowContent},
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!-- 删除流程 -->
+    <delete id="deleteData" parameterType="java.util.List">
+        delete from
+        bpm_approval_design
+        where menu_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 查询流程 -->
+    <select id="getData" resultType="pd" parameterType="pd">
+        select
+            id,
+            menu_code as menuCode,
+            flow_content as flowContent,
+            create_user as createUser,
+            create_user_id as createUserId,
+            create_time as createTime,
+            update_user as updateUser,
+            update_user_id as updateUserId,
+            update_time as updateTime
+        from bpm_approval_design
+        where menu_code = #{menuCode,jdbcType=BIGINT}
+    </select>
+
+
+    <select id="getSerialFlow" resultType="pd" parameterType="pd">
+        select
+            id,
+            flow_id as flowId,
+            flow_content as flowContent,
+            status,
+            start_time as startTime,
+            end_time as endTime
+        from bpm_approval_activity
+        where serial_number = #{serialNumber}
+    </select>
+
+
+
+    <!-- 查询流程 -->
+    <select id="queryByMenuCode" resultType="pd" parameterType="pd">
+        select
+            id as flowId,
+            menu_code as menuCode,
+            flow_content as flowContent,
+            create_user as createUser,
+            create_user_id as createUserId,
+            create_time as createTime,
+            update_user as updateUser,
+            update_user_id as updateUserId,
+            update_time as updateTime
+        from bpm_approval_design
+        where menu_code = #{menuCode,jdbcType=BIGINT}
+    </select>
+
+
+    <insert id="insertApprovalActivity" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bpm_approval_activity
+        (flow_id, serial_number, flow_content, status, start_time,create_user_id,create_user)
+        VALUES (#{flowId}, #{serialNumber}, #{flowContent}, #{status},getDate(), #{createUserId},#{createUser})
+    </insert>
+
+
+    <select id="queryUser" resultType="pd" parameterType="java.util.List">
+        select distinct
+            id,
+            user_code as userCode,
+            user_name as userName
+        from sys_user_info
+        where user_code IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item.handleUserId}
+        </foreach>
+    </select>
+
+
+    <select id="queryUserByPost" resultType="pd" parameterType="java.util.List">
+        select distinct
+            u.id,
+            u.user_code as userCode,
+            u.user_name as userName
+        from sys_user_info u
+        left join sys_user_department_info d on u.user_code = d.user_code
+        where d.post_code IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item.handleUserId}
+        </foreach>
+    </select>
+
+    <insert id="insertApprovalSchedule" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bpm_approval_schedule
+            (  activity_id,
+               approve_user_id,
+               approve_user_name,
+               approve_comment,
+               approve_result_id,
+               approve_result_name,
+               approve_start_time,
+               approve_end_time,
+               department_code,
+               department_name,
+               approve_node_id,
+               next_approve_user_id,
+               next_approve_user_name,
+               next_approve_node_id,
+               file_id,
+               file_name,
+               approve_node_name,
+               next_approve_node_name)
+        VALUES (  #{processInstId},
+                  #{createUserId},
+                  #{createUser},
+                  #{approveComment},
+                  #{approveResultId},
+                  #{approveResultName},
+                  #{approveStartTime,jdbcType=DATE},
+                  getDate(),
+                  #{departmentCode},
+                  #{departmentName},
+                  #{approveNodeId},
+                  #{nextApproveUserId},
+                  #{nextApproveUserName},
+                  #{nextApproveNodeId},
+                  #{fileId},
+                  #{fileName},
+                  #{approveNodeName},
+                  #{nextApproveNodeName})
+    </insert>
+
+
+    <select id="queryMenuData" parameterType="pd" resultType="String">
+        select
+            title
+        from uq_function_menu
+        where menu_code = #{menuCode}
+    </select>
+
+    <insert id="insertApprovalNotDoneUser" parameterType="java.util.List">
+        INSERT INTO bpm_approval_not_done_user
+        (approve_id,user_id,status
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.approveId},#{item.userCode},0
+            )
+        </foreach>
+    </insert>
+
+
+    <insert id="insertApprovalNotDone" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bpm_approval_not_done
+        (  activity_id,
+           approve_node_id,
+           approve_node_name,
+           serial_number,
+           title_name,
+           create_user_id,
+           create_user_name,
+           next_approve_user_id,
+           next_approve_user_name,
+           next_approve_node_id,
+           next_approve_node_name,
+           create_time,
+           approve_time,
+           status,
+           handle_strategy,
+           back_flag,
+           menu_code,
+           business_id,
+           detail_name,
+           approve_name
+
+           )
+        VALUES (  #{processInstId},
+                  #{approveNodeId},
+                  #{approveNodeName},
+                  #{serialNumber},
+                  #{titleName},
+                  #{createUserId},
+                  #{createUser},
+                  #{nextApproveUserId},
+                  #{nextApproveUserName},
+                  #{nextApproveNodeId},
+                  #{nextApproveNodeName},
+                  getDate(),
+                  #{approveTime},
+                  #{status},
+                  #{handleStrategy},
+                  #{backFlag},
+                  #{menuCode},
+                  #{businessId},
+                  #{detailName},
+                  #{approveName}
+
+                  )
+    </insert>
+
+
+    <select id="queryIsDone" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from bpm_approval_not_done d
+        left join bpm_approval_not_done_user u on d.id = u.approve_id
+        where u.user_id = #{createUserId} and d.status = 1
+        ORDER BY d.create_time DESC
+    </select>
+
+    <select id="queryWaitDone" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from bpm_approval_not_done d
+                 left join bpm_approval_not_done_user u on d.id = u.approve_id
+        where u.user_id = #{createUserId} and d.status = 0 and u.status = 0
+        ORDER BY d.create_time DESC
+    </select>
+
+
+    <select id="queryFlowUser" resultType="pd" parameterType="pd">
+        select
+            u.user_code as userCode,user_name as userName,english_user_name as englishUserName,
+            gender,gender_code as genderCode,birth_date as birthDate,height,education,education_code as educationCode,
+            marital_status as maritalStatus,blood_type as bloodType,blood_type_code as bloodTypeCode,mobile_phone as mobilePhone,
+            office_telephone as officeTelephone,email,fax,employee_status as employeeStatus,employee_status_code as employeeStatusCode,
+            employee_type as employeeType,employee_type_code as employeeTypeCode,participation_date as participationDate,entry_date as entryDate,
+            confirmation_date as confirmationDate,leave_date as leaveDate,nationality,native_place as nativePlace,nation,religion,
+               u.department_name as departmentName,u.department_code as departmentCode,
+            u.post_name as postName,u.post_code as postCode
+        from sys_user_info u
+        left join sys_user_department_info d on u.user_code = d.user_code
+        where d.department_code = #{orgId} or d.post_code = #{orgId}
+    </select>
+
+
+    <select id="queryApproveWaitData" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from bpm_approval_not_done d
+                 left join bpm_approval_not_done_user u on d.id = u.approve_id
+        where d.id = #{waitId} and u.user_id = #{createUserId}
+          and d.status = 0 and u.status = 0
+    </select>
+
+
+
+    <select id="queryByProcessInstId" resultType="pd" parameterType="pd">
+        select
+               id,
+            flow_id as flowId,
+            flow_content as flowContent,
+            serial_number as serialNumber,
+               create_user_id as createUserId,
+               create_user as createUser
+        from bpm_approval_activity
+        where id = #{processInstId,jdbcType=BIGINT}
+    </select>
+
+    <update id="updateActivityData" parameterType="pd">
+        update bpm_approval_activity
+        set flow_content        =#{flowContent},
+            status    = #{status},
+            end_time = #{endTime,jdbcType=DATE}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="queryScheduleData" resultType="pd" parameterType="pd">
+        select top 1
+            approve_end_time as approveEndTime
+        from bpm_approval_schedule
+        where activity_id = #{processInstId,jdbcType=BIGINT}
+         order by id desc
+    </select>
+
+
+    <update id="updateApproveStatus" parameterType="pd">
+        update bpm_approval_not_done
+        set approve_time = getDate(),
+            status = 1
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateApproveUserStatus" parameterType="pd">
+        update bpm_approval_not_done_user
+        set status = 1
+        where approve_id = #{id,jdbcType=BIGINT} and user_id = #{createUserId}
+    </update>
+
+    <select id="queryNotApproveUser" resultType="pd" parameterType="pd">
+        select id
+        from bpm_approval_not_done_user
+        where approve_id = #{id,jdbcType=BIGINT}
+          and user_id != #{createUserId} and status = 0
+
+    </select>
+
+
+    <delete id="deleteActivityData" parameterType="pd">
+        delete from
+         bpm_approval_activity
+        where id = #{processInstId,jdbcType=BIGINT}
+    </delete>
+
+    <select id="queryApprovalScheduleByProcessInstId" resultType="pd" parameterType="pd" >
+        select  activity_id,
+           approve_user_id,
+           approve_user_name,
+           approve_comment,
+           approve_result_id,
+           approve_result_name,
+           approve_start_time,
+           approve_end_time,
+           department_code,
+           department_name,
+           approve_node_id,
+           next_approve_user_id,
+           next_approve_user_name,
+           next_approve_node_id,
+           file_id,
+           approve_node_name,
+           next_approve_node_name
+        from
+            bpm_approval_schedule
+        where
+            activity_id = #{processInstId}
+    </select>
+
+    <select id="queryButton" resultType="pd" parameterType="pd" >
+        select
+            r.menu_code,r.com_button,name
+        from uq_button_routing r
+                 left join uq_function_menu m on r.menu_code = m.menu_code
+        where r.auth_menu_code = #{menuCode}
+
+    </select>
+
+</mapper>

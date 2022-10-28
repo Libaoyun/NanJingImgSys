@@ -1,0 +1,93 @@
+server:
+  port: 1001              #tomcat服务端口号      默认是8080
+  max-threads: 2000       #tomcat最大线程数
+  accept-count: 1000       #tomcat最大等待数
+  servlet:
+    context-path: /rdexpense
+
+token:
+  time: 3600               #token的有效时长
+
+wechat:
+  time: 86400
+
+filter:
+  exclude-url: /rdexpense  #过滤器的地址
+
+#附件配置项
+#upload:
+#  common: /data/tbmservices/common/    #普通附件路径
+#  speicial: /data/tbmservices/special/ #特殊附件路径
+
+uploadImg:
+  imgPath: E:\work\中医科皮肤院前后端\IMG\standardBodyPart
+#spring的配置文件
+spring:
+  # sql-server数据源配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    mybatis:
+      # 主数据源
+      master:
+        url: jdbc:sqlserver://localhost:1433;SelectMethod=cursor;allowMultiQueries=true;DatabaseName=rdexpense   #连接数据库的url
+        username: sa                                                                    #用户名
+        password: sa                                                                #密码                                                            #密码
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver                 #连接数据库要加载驱动
+        type: com.alibaba.druid.pool.DruidDataSource
+        maxActive: 500                                                                   #最大连接池数量
+        initialSize: 100                                                                  #初始化时建立物理连接的个数
+        maxWait: 60000                                                                  #获取连接时最大等待时间，单位毫秒
+        minIdle: 60                                                                      #最小连接池数量
+        timeBetweenEvictionRunsMillis: 60000                                            #Destroy线程会检测连接的间隔时间
+        minEvictableIdleTimeMillis: 300000                                              #连接池中连接可空闲的时间
+        validationQuery: select 'x'                                                     #用来检测连接是否有效的sql
+        testWhileIdle: true                                                             #申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis,执行validationQuery检测连接是否有效。
+        testOnBorrow: false                                                             #申请连接时执行validationQuery检测连接是否有效
+        testOnReturn: false                                                             #归还连接时执行validationQuery检测连接是否有效
+        poolPreparedStatements: true                                                    #是否缓存preparedStatement
+        filters: stat                                                                   #属性类型是字符串，通过别名的方式配置扩展插件
+
+          #filter:
+          #stat:
+          # 仅监控慢SQL记录
+          #log-slow-sql: true
+          #slow-sql-millis: 1000
+          #merge-sql: true
+          #wall:
+          #config:
+        #multi-statement-allow: true
+  #redis数据源配置
+  redis:
+    database: 1                # Redis数据库索引
+    host: 127.0.0.1       # Redis服务器地址
+    port: 6379                 # Redis服务器连接端口
+    #password: sjtabc123
+    ssl: false
+    timeout: 1000              # redis连接超时时间（单位毫秒）
+    jedis:
+      pool:
+        max-active: 200          # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1           # 连接池最大阻塞等待时间
+        max-idle: 200            # 连接池中的最大空闲连接
+        min-idle: 0            # 连接池中的最小空闲连接
+  #引入自定义配置文件
+  profiles:
+    active: dev
+  #上传文件大小限制
+  servlet:
+    multipart:
+      max-file-size: 50MB    #是单个文件大小
+      max-request-size: 50MB #设置总上传的数据大小
+# mybatis配置
+mybatis:
+  #  mapper-locations: classpath:firstphase/mapper/mapper/*.xml    # 指向mapper.xml文件的位置：模块名/mapper/*.xml
+  configuration:
+    #驼峰
+    map-underscore-to-camel-case: true
+
+#pagehelper分页插件
+pagehelper:
+  helperDialect: SqlServer
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

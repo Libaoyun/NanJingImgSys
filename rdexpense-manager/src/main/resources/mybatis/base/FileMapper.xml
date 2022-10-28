@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FileMapper">
+
+    <sql id="File">
+        id,
+        business_id as businessId,
+        file_path as filePath,
+        file_ext as fileExt,
+        file_size as fileSize,
+        upload_user_id as uploadUserId,
+        upload_user_name as uploadUserName,
+        file_name as fileName,
+        type,
+        created_at as createdAt,
+        updated_at as updatedAt
+  </sql>
+
+    <select id="queryFile" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment
+        where business_id=#{businessId}
+    </select>
+
+    <select id="queryFiles" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment
+        where business_id=#{businessId} and id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <delete id="deleteFile" parameterType="pd">
+        delete from uq_attachment
+        where business_id = #{businessId}
+        and id = #{id};
+  </delete>
+
+    <delete id="deleteByBusinessId" parameterType="pd">
+        delete from uq_attachment
+        where business_id = #{businessId}
+  </delete>
+
+
+
+    <insert id="saveFileDetail" parameterType="pd">
+        insert into uq_attachment
+        (
+        business_id,
+        file_path,
+        file_ext,
+        file_size,
+        upload_user_id,
+        upload_user_name,
+        file_name,
+        type,
+        created_at,
+        updated_at
+        ) values
+        <foreach item="item" collection="list" separator=",">
+            (
+            #{item.businessId},
+            #{item.filePath},
+            #{item.fileExt},
+            #{item.fileSize},
+            #{item.uploadUserId},
+            #{item.uploadUserName},
+            #{item.fileName},
+            #{item.type},
+            getDate(),
+            getDate()
+            )
+        </foreach>
+    </insert>
+
+    <insert id="saveFile" parameterType="pd">
+        insert into uq_attachment
+        (
+        business_id,
+        file_path,
+        file_ext,
+        file_size,
+        upload_user_id,
+        upload_user_name,
+        file_name,
+        type,
+        created_at,
+        updated_at
+        )
+        values
+        (
+        #{businessId},
+        #{filePath},
+        #{fileExt},
+        #{fileSize},
+        #{uploadUserId},
+        #{uploadUserName},
+        #{fileName},
+        #{type},
+        getDate(),
+        getDate()
+        )
+    </insert>
+
+    <insert id="saveFiles"     parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_attachment
+        (
+        business_id,
+        file_path,
+        file_ext,
+        file_size,
+        upload_user_id,
+        upload_user_name,
+        file_name,
+        type,
+        created_at,
+        updated_at
+        )
+        values
+        (
+        #{businessId},
+        #{filePath},
+        #{fileExt},
+        #{fileSize},
+        #{uploadUserId},
+        #{uploadUserName},
+        #{fileName},
+        #{type},
+        getDate(),
+        getDate()
+        )
+    </insert>
+
+    <delete id="deleteFileByBusinessId" parameterType="java.util.List">
+        delete from uq_attachment
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteById" parameterType="java.util.List">
+        delete from uq_attachment
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <select id="queryFileByBusinessId" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </select>
+
+    <select id="queryFileByBusinessIds" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="fuzzySearch" resultType="pd" parameterType="pd">
+        SELECT
+        id,
+        business_id AS businessId,
+        file_path AS filePath,
+        file_ext AS fileExt,
+        file_size AS fileSize,
+        upload_user_id AS uploadUserId,
+        upload_user_name AS uploadUserName,
+        file_name AS fileName,
+        type,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+        from
+        uq_attachment
+        <where>
+            <if test="uploadUserName!=null and uploadUserName!=''">
+                and upload_user_name LIKE concat ('%',#{uploadUserName},'%')
+            </if>
+            <if test="fileName!=null and fileName!=''">
+                and file_name LIKE concat ('%',#{fileName},'%')
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                and created_at <![CDATA[ >= ]]> #{startDate}
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and created_at <![CDATA[ <= ]]> #{endDate}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="queryFileById" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment
+        where id =#{sceneImage}
+    </select>
+
+    <!-- 批量删除附件 -->
+    <delete id="deleteFileDetailByBusinessIds" parameterType="java.util.List">
+        delete from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </delete>
+
+    <!-- 查询出附件列表的信息 -->
+    <select id="queryByBusinessIds" parameterType="pd" resultType="pd">
+        select
+        <include refid="File"/>
+        from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </select>
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TestMapper">
+	
+	<!--表名 -->
+	<sql id="tableName">
+		Test
+	</sql>
+	
+	<!-- 字段 -->
+	<sql id="Field">
+		tid,	
+		tName,	
+		type,
+		tDesc,	
+		createTime,	
+		updateTime,	
+		createUserID,	
+		updateUserID
+	</sql>
+	
+	<!-- 字段值 -->
+	<sql id="FieldValue">
+		#{tid},	
+		#{tName},		
+		#{type},
+		#{tDesc},	
+		Now(),		
+		Now(),	
+		#{createUserID},	
+		#{updateUserID}
+	</sql>
+	
+	<!-- 新增-->
+	<insert id="insert" parameterType="pd">
+		insert into
+		<include refid="tableName"></include>
+		(
+		<include refid="Field"></include>	
+		) values (
+		<include refid="FieldValue"></include>	
+		)
+	</insert>
+	
+	<insert id="batchInsert" parameterType="list">
+        insert into
+		<include refid="tableName"></include>
+		(
+		<include refid="Field"></include>	
+		) values 
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.tid}, #{item.tName},#{item.type},#{item.tDesc},Now(),Now(),#{item.createUserID},#{item.updateUserID})
+        </foreach>
+    </insert>
+	
+	<!-- 删除-->
+	<delete id="delete" parameterType="pd">
+		delete from
+		<include refid="tableName"></include>
+		where 
+			tid = #{tid}
+	</delete>
+	
+	<!-- 批量删除 -->
+	<delete id="batchDelete" parameterType="String" >
+		delete from
+		<include refid="tableName"></include>
+		where 
+			tid in
+  			 <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                  #{item}
+             </foreach>
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="pd">
+		update
+		<include refid="tableName"></include>
+		set 
+			tName = #{tName},
+			type = #{type},
+			tDesc = #{tDesc},
+			updateTime = Now(),
+			updateUserID = #{updateUserID}
+		where 
+		tid = #{tid}
+	</update>
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+		<include refid="Field"></include>
+		from 
+		<include refid="tableName"></include>
+		where 
+			tid = #{tid}
+	</select>
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById2" parameterType="test" resultType="test">
+		select 
+		<include refid="Field"></include>
+		from 
+		<include refid="tableName"></include>
+		where 
+			tid = #{tid}
+	</select>
+	
+	<!-- 列表 -->
+	<select id="list" parameterType="pd" resultType="pd">
+		select
+		<include refid="Field"></include>
+		from 
+		<include refid="tableName"></include>
+		where
+			1=1
+		<!-- 根据名称进行模糊查询 -->
+		<if test="tName!= null and tName != ''">
+			and tName LIKE CONCAT(CONCAT('%', #{tName}),'%')
+		</if>
+		<!-- 根据描述进行精准查询 -->
+		<if test="tDesc!= null and tDesc != ''">
+			and tDesc = #{tDesc}
+		</if>
+		order by createTime desc
+	</select>
+	
+	<!-- 列表个数 -->
+	<select id="listCount" resultType="int">
+		select
+			count(*) as count
+		from 
+		<include refid="tableName"></include>
+	</select>
+	
+</mapper>
