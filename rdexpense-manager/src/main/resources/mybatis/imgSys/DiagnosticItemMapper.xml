@@ -17,6 +17,20 @@
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
     </insert>
 
+    <!--    查询某项目信息是否存在-->
+    <select id="isExistItem" parameterType="pd" resultType="pd">
+        select item_name as itemName
+        from imgsys_diagnostic_item
+        <where>
+            <if test="itemName!=null and itemName!=''">
+                or item_name = #{itemName}
+            </if>
+            <if test="itemCode!=null and itemCode!=''">
+                or item_code = #{itemCode}
+            </if>
+        </where>
+    </select>
+
     <!--    修改项目信息-->
     <update id="updateDiagnosticItem" parameterType="pd">
         update imgsys_diagnostic_item

@@ -89,7 +89,8 @@ public class Swagger2Configuration {
                         PathSelectors.ant("/flow/**"),//流程配置
                         PathSelectors.ant("/body-part/**"), //科室人体部位配置
                         PathSelectors.ant("/dig-item/**"), //科室项目诊疗配置
-                        PathSelectors.ant("/device/**") //科室设备管理
+                        PathSelectors.ant("/device/**"), //科室设备管理
+                        PathSelectors.ant("/patient/**") //患者基本信息管理
 
 
                 )) // 可以根据url路径设置哪些请求加入文档，忽略哪些请求

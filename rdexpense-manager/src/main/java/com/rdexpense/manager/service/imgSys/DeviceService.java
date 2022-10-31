@@ -18,4 +18,6 @@ public interface DeviceService {
     void updateDevice(PageData pd);
 
     List<PageData> getAllDevice(PageData pageData);
+
+    List<PageData> getBodyPartByDevice(PageData pd);
 }

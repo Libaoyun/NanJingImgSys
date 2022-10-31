@@ -41,6 +41,20 @@
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
     </insert>
 
+    <!--    查询某部位信息是否存在-->
+    <select id="isExistBodyPart" parameterType="pd" resultType="pd">
+        select part_name as partName
+        from imgsys_body_part_info
+        <where>
+            <if test="partName!=null and partName!=''">
+                or part_name = #{partName}
+            </if>
+            <if test="partCode!=null and partCode!=''">
+                or part_code = #{partCode}
+            </if>
+        </where>
+    </select>
+
 <!--    添加部位示意图-->
     <update id="addBodyPartImg" parameterType="pd">
         update imgsys_body_part_info
@@ -96,6 +110,14 @@
         where parent_serial_num = #{partSerialNum}
     </select>
 
+<!--    根据id查询部位详细信息-->
+    <select id="findBodyPartBySerialNum" parameterType="pd" resultType="pd">
+        select
+            <include refid="Base"></include>
+        FROM imgsys_body_part_info
+        WHERE  part_serial_num = #{partSerialNum}
+    </select>
+
     <delete id="deleteBodyPart" parameterType="pd">
         delete
         from imgsys_body_part_info
@@ -114,7 +136,8 @@
 
 <!--    获取所有可用部位（返回给前端图片）    -->
     <select id="getAvailableBodyPart" resultType="pd">
-        SELECT part_name, part_code, part_serial_num, part_sketch_file, part_discription
+        SELECT
+            <include refid="Base"></include>
         FROM imgsys_body_part_info
         WHERE standard_part_flag = 1
     </select>

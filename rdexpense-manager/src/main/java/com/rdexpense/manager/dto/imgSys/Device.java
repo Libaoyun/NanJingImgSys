@@ -46,9 +46,4 @@ public class Device implements Serializable {
     @ApiModelProperty("设备可检查部位")
     List<BodyPart> bodyParts;
 
-    @ApiModelProperty(value = "当前页码,值需大于等于1")
-    private Integer pageNum;
-
-    @ApiModelProperty(value = "每页数量,值需大于等于1")
-    private Integer pageSize;
 }

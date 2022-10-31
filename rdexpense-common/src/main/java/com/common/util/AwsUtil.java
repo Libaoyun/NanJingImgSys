@@ -278,6 +278,17 @@ public class AwsUtil {
             e.getErrorMessage();
         }
     }
+    public static void delFileOne(String object_keys, String bucketName) {
+        AmazonS3 s3 = createConnection();
+        try {
+            DeleteObjectsRequest dor = new DeleteObjectsRequest(bucketName)
+                    .withKeys(object_keys);
+            s3.deleteObjects(dor);
+            logger.info("删除成功");
+        } catch (AmazonServiceException e) {
+            e.getErrorMessage();
+        }
+    }
 
     /**
      * 模糊删除文件

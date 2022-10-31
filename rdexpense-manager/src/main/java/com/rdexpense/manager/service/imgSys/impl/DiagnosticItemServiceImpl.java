@@ -1,11 +1,13 @@
 package com.rdexpense.manager.service.imgSys.impl;
 
 import com.common.base.dao.mysql.BaseDao;
+import com.common.base.exception.MyException;
 import com.common.entity.PageData;
 import com.rdexpense.manager.service.imgSys.DiagnosticItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -24,9 +26,13 @@ public class DiagnosticItemServiceImpl implements DiagnosticItemService {
 
     @Override
     public void addDiagnosticItem(PageData pd) {
+        List<PageData> itemList = (List<PageData>) baseDao.findForList("DiagnosticItemMapper.isExistItem", pd);
+        if (!CollectionUtils.isEmpty(itemList)) {
+            throw new MyException("该项目名称/编码已存在,请检查确认!");
+        }
         PageData maxIdData = (PageData) baseDao.findForObject("DiagnosticItemMapper.selectMaxIdAndSerialNum", pd);
         Integer maxId = (maxIdData == null || maxIdData.getInt("id") == null) ? 0 : maxIdData.getInt("id") + 1;
-        // FIXME 这里待讨论序列号初始值为多少，默认200000
+        // FIXME 这里待讨论序列号初始值为多少，暂定默认200000
         Integer maxSerialNum = (maxIdData == null || maxIdData.getInt("itemSerialNum") == null) ? 200000
                 : maxIdData.getInt("id") + 1;
         pd.put("id", maxId);
@@ -37,6 +43,10 @@ public class DiagnosticItemServiceImpl implements DiagnosticItemService {
     @Override
     @Transactional
     public void deleteDiagnosticItem(PageData pd) throws Exception {
+        List<PageData> itemList = (List<PageData>) baseDao.findForList("DiagnosticItemMapper.isExistItem", pd);
+        if (CollectionUtils.isEmpty(itemList)) {
+            throw new MyException("该项目不存在,请刷新后确认!");
+        }
         PageData hasChild = (PageData) baseDao.findForObject("DiagnosticItemMapper.selectCountChild", pd);
         if (hasChild.getInt("countChild") > 0) {
             throw new Exception("该项目下有子项目，请先删除子项目信息！");
@@ -50,6 +60,10 @@ public class DiagnosticItemServiceImpl implements DiagnosticItemService {
     @Override
     @Transactional
     public void updateDiagnosticItem(PageData pd) {
+        List<PageData> itemList = (List<PageData>) baseDao.findForList("DiagnosticItemMapper.isExistItem", pd);
+        if (CollectionUtils.isEmpty(itemList)) {
+            throw new MyException("该项目不存在,请刷新后确认!");
+        }
         baseDao.update("DiagnosticItemMapper.updateDiagnosticItem", pd);
     }
 
@@ -72,6 +86,7 @@ public class DiagnosticItemServiceImpl implements DiagnosticItemService {
         return result;
     }
 
+    // 递归查询子项目
     public List<PageData> recursiveTreeDiagnosticItemList(String parentId, List<PageData> pd) {
         List<PageData> child = new ArrayList<>();
         for (PageData pageData : pd) {
