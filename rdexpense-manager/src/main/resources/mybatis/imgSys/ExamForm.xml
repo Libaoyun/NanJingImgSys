@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ExamFormMapper">
+    <sql id="Base">
+        id, form_serial_num, patient_id_card_no, form_issuer_code, form_registrar_code,
+            department_code, img_department_code, img_laser_id,
+            create_user, create_user_id, update_user, update_user_id, create_time, update_time
+    </sql>
+
+    <insert id="addExamForm" parameterType="pd">
+        insert into sys_exam_form(id, form_serial_num, patient_id_card_no, form_issuer_code, form_registrar_code,
+                                  department_code, img_department_code, img_laser_id,
+                                  create_user, create_user_id, update_user, update_user_id, create_time, update_time)
+        values(#{id}, #{formSerialNum}, #{patientIdCardNo}, #{formIssuerCode}, #{formRegisterCode},
+               #{departmentCode}, #{imgDepartmentCode}, #{imgLaserId},
+               #{create_user}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
+    </insert>
+
+    <select id="selectMaxId" resultType="integer">
+        select max(id) as id
+        from sys_exam_form
+        where 1 = 1
+    </select>
+</mapper>

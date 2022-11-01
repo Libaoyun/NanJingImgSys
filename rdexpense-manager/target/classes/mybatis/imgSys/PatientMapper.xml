@@ -12,8 +12,7 @@
         insert into imgsys_patient_info(id, patient_id_card_no, name, birthday, gender,
                                         education_degree, phone_num, home_address, identifier_id,
                                         outpatient_no, img_laser_id,
-                                        create_user, create_user_id, create_time, update_user, update_user_id,
-                                        update_time)
+                                        create_user, create_user_id, create_time, update_user, update_user_id,update_time)
         values (#{id}, #{patientIdCardNo}, #{name}, #{birthday}, #{gender},
                 #{educationDegree}, #{phoneNum}, #{homeAddress}, #{identifierId},
                 #{outpatientNo}, #{imgLaserId},
