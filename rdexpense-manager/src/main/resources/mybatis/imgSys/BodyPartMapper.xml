@@ -35,9 +35,10 @@
     <insert id="insertBodyPart" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
         insert into imgsys_body_part_info(id, part_name, part_code, part_serial_num, part_discription, part_sketch_file,
                                           parent_serial_num, department_code, standard_part_flag,
-                                          create_user,create_user_id, create_time, update_user, update_user_id, update_time)
+                                          create_user, create_user_id, create_time, update_user, update_user_id,
+                                          update_time)
         values (#{id}, #{partName}, #{partCode}, #{partSerialNum}, #{partDiscription}, #{partSketchFile},
-                #{parentSerialNum},#{departmentCode},#{standardPartFlag},
+                #{parentSerialNum}, #{departmentCode}, #{standardPartFlag},
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
     </insert>
 
@@ -55,11 +56,11 @@
         </where>
     </select>
 
-<!--    添加部位示意图-->
+    <!--    添加部位示意图-->
     <update id="addBodyPartImg" parameterType="pd">
         update imgsys_body_part_info
         <set>
-            <if test="filePath!=null">
+            <if test="filePath!=null and filePath!=''">
                 part_sketch_file = #{filePath},
             </if>
         </set>
@@ -69,25 +70,25 @@
     <update id="updateBodyPart" parameterType="pd">
         update imgsys_body_part_info
         <set>
-            <if test="partName!=null">
+            <if test="partName!=null and partName!=''">
                 part_name = #{partName},
             </if>
-            <if test="partCode!=null">
+            <if test="partCode!=null and partCode!=''">
                 part_code = #{partCode},
             </if>
-            <if test="partDiscription!=null">
+            <if test="partDiscription!=null and partDiscription!=''">
                 part_discription = #{partDiscription},
             </if>
-            <if test="partSketchFile!=null">
+            <if test="partSketchFile!=null and partSketchFile!=''">
                 part_sketch_file = #{partSketchFile},
             </if>
-            <if test="parentSerialNum!=null">
+            <if test="parentSerialNum!=null and parentSerialNum!=''">
                 parent_serial_num = #{parentSerialNum},
             </if>
-            <if test="departmentCode!=null">
+            <if test="departmentCode!=null and departmentCode!=''">
                 department_code = #{departmentCode},
             </if>
-            <if test="standardPartFlag!=null">
+            <if test="standardPartFlag!=null and standardPartFlag!=''">
                 standard_part_flag = #{standardPartFlag},
             </if>
             update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
@@ -110,12 +111,12 @@
         where parent_serial_num = #{partSerialNum}
     </select>
 
-<!--    根据id查询部位详细信息-->
+    <!--    根据id查询部位详细信息-->
     <select id="findBodyPartBySerialNum" parameterType="pd" resultType="pd">
         select
-            <include refid="Base"></include>
+        <include refid="Base"></include>
         FROM imgsys_body_part_info
-        WHERE  part_serial_num = #{partSerialNum}
+        WHERE part_serial_num = #{partSerialNum}
     </select>
 
     <delete id="deleteBodyPart" parameterType="pd">
@@ -134,12 +135,13 @@
         order by partSerialNum asc
     </select>
 
-<!--    获取所有可用部位（返回给前端图片）    -->
-    <select id="getAvailableBodyPart" resultType="pd">
+    <!--    获取所有可用部位（返回给前端图片）    -->
+    <select id="getStandardBodyPart" resultType="pd">
         SELECT
-            <include refid="Base"></include>
+        <include refid="Base"></include>
         FROM imgsys_body_part_info
         WHERE standard_part_flag = 1
+        order by part_code
     </select>
 
     <!--    获取所有部位及子部位-->

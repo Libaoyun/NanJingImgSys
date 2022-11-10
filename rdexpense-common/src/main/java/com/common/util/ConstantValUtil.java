@@ -16,7 +16,9 @@ public class ConstantValUtil {
     // 部位示意图路径
     public static final String BODY_PART_IMAGE = "body-part-img";
 
-    //
+    // 患者影像完整图
+
+    // 患者影像缩略图
 
     // 审批状态：10171001-未提交, 10171002-审批中, 10171003-已废除, 10171004-被打回 10171005-已通过
     public static final String[] APPROVAL_STATUS = {"DICT10171001", "DICT10171002", "DICT10171003", "DICT10171004", "DICT10171005"};

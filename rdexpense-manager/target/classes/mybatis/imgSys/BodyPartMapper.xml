@@ -35,9 +35,10 @@
     <insert id="insertBodyPart" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
         insert into imgsys_body_part_info(id, part_name, part_code, part_serial_num, part_discription, part_sketch_file,
                                           parent_serial_num, department_code, standard_part_flag,
-                                          create_user,create_user_id, create_time, update_user, update_user_id, update_time)
+                                          create_user, create_user_id, create_time, update_user, update_user_id,
+                                          update_time)
         values (#{id}, #{partName}, #{partCode}, #{partSerialNum}, #{partDiscription}, #{partSketchFile},
-                #{parentSerialNum},#{departmentCode},#{standardPartFlag},
+                #{parentSerialNum}, #{departmentCode}, #{standardPartFlag},
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
     </insert>
 
@@ -55,7 +56,7 @@
         </where>
     </select>
 
-<!--    添加部位示意图-->
+    <!--    添加部位示意图-->
     <update id="addBodyPartImg" parameterType="pd">
         update imgsys_body_part_info
         <set>
@@ -110,12 +111,12 @@
         where parent_serial_num = #{partSerialNum}
     </select>
 
-<!--    根据id查询部位详细信息-->
+    <!--    根据id查询部位详细信息-->
     <select id="findBodyPartBySerialNum" parameterType="pd" resultType="pd">
         select
-            <include refid="Base"></include>
+        <include refid="Base"></include>
         FROM imgsys_body_part_info
-        WHERE  part_serial_num = #{partSerialNum}
+        WHERE part_serial_num = #{partSerialNum}
     </select>
 
     <delete id="deleteBodyPart" parameterType="pd">
@@ -134,12 +135,13 @@
         order by partSerialNum asc
     </select>
 
-<!--    获取所有可用部位（返回给前端图片）    -->
-    <select id="getAvailableBodyPart" resultType="pd">
+    <!--    获取所有可用部位（返回给前端图片）    -->
+    <select id="getStandardBodyPart" resultType="pd">
         SELECT
-            <include refid="Base"></include>
+        <include refid="Base"></include>
         FROM imgsys_body_part_info
         WHERE standard_part_flag = 1
+        order by part_code
     </select>
 
     <!--    获取所有部位及子部位-->

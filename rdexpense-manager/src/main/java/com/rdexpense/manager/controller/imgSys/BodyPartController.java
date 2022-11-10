@@ -146,7 +146,7 @@ public class BodyPartController extends BaseController {
     public ResponseEntity<List<BodyPart>> getAvailableBodyPart() {
         PageData pd = this.getParams();
         try {
-            List<PageData> dataList = bodyPartService.getAvailableBodyPart();
+            List<PageData> dataList = bodyPartService.getStandardBodyPart();
             return ResponseEntity.success(PropertyUtil.covertListModel(dataList, BodyPart.class), ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
         } catch (MyException e) {
             logger.error("查询所有部位信息,request=[{}]", pd);
@@ -154,6 +154,7 @@ public class BodyPartController extends BaseController {
         }
     }
 
+    // FIXME 这里可能暂时用不到，因为部位图都是缩略图，无需放大
     @GetMapping("/partImg")
     @ApiOperation(value = "查询某部位完整图片（二进制流）")
 //    @ApiImplicitParam(name = "orgId", value = "部门ID", required = true, dataType = "String")

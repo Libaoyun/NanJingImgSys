@@ -13,7 +13,7 @@
                                         education_degree, phone_num, home_address, identifier_id,
                                         outpatient_no, img_laser_id,
                                         create_user, create_user_id, create_time, update_user, update_user_id,update_time)
-        values (#{id}, #{patientIdCardNo}, #{name}, #{birthday}, #{gender},
+        values (#{id}, #{patientIdCardNo}, #{name}, #{birthday,jdbcType=DATE}, #{gender},
                 #{educationDegree}, #{phoneNum}, #{homeAddress}, #{identifierId},
                 #{outpatientNo}, #{imgLaserId},
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
@@ -52,34 +52,34 @@
         update imgsys_patient_info
         <set>
 
-            <if test="name!=null">
+            <if test="name!=null and name!=''">
                 name = #{name},
             </if>
-            <if test="birthday!=null">
-                birthday = #{birthday},
+            <if test="birthday!=null and birthday!=''">
+                birthday = #{birthday,jdbcType=DATE},
             </if>
-            <if test="deviceType!=null">
+            <if test="deviceType!=null and deviceType!=''">
                 gender = #{gender},
             </if>
-            <if test="educationDegree!=null">
+            <if test="educationDegree!=null and educationDegree!=''">
                 education_degree = #{educationDegree},
             </if>
-            <if test="phoneNum!=null">
+            <if test="phoneNum!=null and phoneNum!=''">
                 phone_num = #{phoneNum},
             </if>
-            <if test="homeAddress!=null">
+            <if test="homeAddress!=null and homeAddress!=''">
                 home_address = #{homeAddress},
             </if>
-            <if test="identifierId!=null">
+            <if test="identifierId!=null and identifierId!=''">
                 identifier_id = #{identifierId},
             </if>
-            <if test="outpatientNo!=null">
+            <if test="outpatientNo!=null and outpatientNo!=''">
                 outpatient_no = #{outpatientNo},
             </if>
-            <if test="imgLaserId!=null">
+            <if test="imgLaserId!=null and imgLaserId!=''">
                 img_laser_id = #{imgLaserId},
             </if>
-            update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
+            update_user = #{createUser}, update_user_id = #{createUserId}, update_time = getDate()
         </set>
         where patient_id_card_no = #{patientIdCardNo}
     </update>
@@ -110,6 +110,21 @@
             </if>
         </where>
         order by create_time asc
+    </select>
+
+    <!--    根据卡号或身份证号查询患者信息-->
+    <select id="getPatientByParams" parameterType="pd" resultType="pd">
+        select 
+            <include refid="Base"></include>
+        from imgsys_patient_info
+        <where>
+            <if test="patientIdCardNo!=null and patientIdCardNo!=''">
+                AND patient_id_card_no = #{patientIdCardNo}
+            </if>
+            <if test="identifierId!=null and identifierId!=''">
+                AND identifier_id = #{identifierId}
+            </if>
+        </where>
     </select>
 
 

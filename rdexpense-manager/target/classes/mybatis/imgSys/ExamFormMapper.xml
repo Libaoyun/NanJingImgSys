@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ExamFormMapper">
+    <sql id="Base">
+        id, form_serial_num as formSerialNum, patient_id_card_no as patientIdCardNo, form_issuer_code as formIssuerCode, form_registrar_code as formRegisterCode,
+            department_code as departmentCode, img_department_code as imgDepartmentCode, img_laser_id as imgLaserId,
+            form_issuer_name as formIssuerName, is_register as isRegister, is_pay as isPay, is_collect as isCollect
+    </sql>
+
+    <insert id="addExamForm" parameterType="pd">
+        insert into imgsys_exam_form(id, form_serial_num, patient_id_card_no, form_issuer_code, form_registrar_code,
+                                  department_code, img_department_code, img_laser_id,
+                                  form_issuer_name, is_register, is_pay,
+                                  create_user, create_user_id, update_user, update_user_id, create_time, update_time)
+        values (#{id}, #{formSerialNum}, #{patientIdCardNo}, #{formIssuerCode}, #{formRegisterCode},
+                #{departmentCode}, #{imgDepartmentCode}, #{imgLaserId},
+                #{formIssuerName}, #{isRegister}, #{isPay},
+                #{createUser}, #{createUserId},  #{createUser}, #{createUserId}, getDate(), getDate())
+    </insert>
+
+    <select id="selectMaxId" resultType="integer">
+        select max(id) as id
+        from imgsys_exam_form
+        where 1 = 1
+    </select>
+
+    <!--    获取所有可用部位（返回给前端图片）    -->
+    <select id="getStandardBodyPart" resultType="pd">
+        SELECT part_name        as partName,
+               part_code        as partCode,
+               part_serial_num  as partSerialNum,
+               part_discription as partDiscription,
+               part_sketch_file as partSketchFile
+        FROM imgsys_body_part_info
+        WHERE standard_part_flag = 1
+        order by part_code
+    </select>
+
+    <!--    获取检查单部位表最大ID-->
+    <select id="selectPartMaxId" resultType="integer">
+        select max(id) as id
+        from imgsys_body_part_of_form
+        where 1 = 1
+    </select>
+
+    <!-- 新增检查单勾选的部位 -->
+    <insert id="addPartOfForm" parameterType="pd">
+        insert into imgsys_body_part_of_form(id, serial_num, part_name, part_code, part_serial_num,
+                                             form_serial_num, is_detail, require_detail,
+                                             is_collect, is_distribute, collectors,
+                                             create_user, create_user_id, update_user, update_user_id, create_time,
+                                             update_time)
+        values (#{id}, #{serialNum}, #{partName}, #{partCode}, #{partSerialNum},
+                #{formSerialNum}, #{isDetail}, #{requireDetail},
+                #{isCollect}, #{isDistribute}, #{collectors},
+                #{createUser}, #{createUserId}, #{createUser}, #{createUserId}, getDate(), getDate())
+    </insert>
+
+    <select id="getListOfRegister" resultType="pd">
+        select
+            p.name,
+            p.gender,
+            p.birthday,
+            p.patient_id_card_no as patientIdCardNo,
+            p.outpatient_no as outpatientNo,
+            p.identifier_id as identifierId,
+            f.form_serial_num as formSerialNum,
+            f.form_issuer_name as formIssuerName,
+            f.create_time as createTime,
+            f.register_time as registerTime,
+            pf.serial_num as serialNum,
+            pf.collectors,
+            pf.part_name as partName,
+            pf.is_collect as isCollect,
+            pf.is_distribute as isDistribute,
+            d.org_name as departmentName
+        FROM
+            imgsys_patient_info p,
+            imgsys_exam_form f,
+            imgsys_body_part_of_form pf,
+            sys_department_info d
+        WHERE
+            f.form_serial_num = pf.form_serial_num
+            AND f.patient_id_card_no = p.patient_id_card_no
+            AND f.department_code = d.department_code collate Chinese_PRC_CI_AI
+    </select>
+
+    <update id="updateFormList" parameterType="pd">
+        update imgsys_body_part_of_form
+        <set>
+            <if test="isCollect!=null and  isCollect!=null">
+                is_collect = #{isCollect},
+            </if>
+            <if test="isDistribute!=null">
+                is_distribute = #{isDistribute},
+            </if>
+            <if test="collectors!=null">
+                collectors = #{collectors},
+            </if>
+            update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
+        </set>
+        where serial_num = #{serialNum}
+    </update>
+</mapper>

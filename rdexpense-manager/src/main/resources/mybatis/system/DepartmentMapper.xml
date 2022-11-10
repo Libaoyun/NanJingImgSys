@@ -239,4 +239,27 @@
             )
         </foreach>
     </insert>
+
+<!--   根据departmentCode获取科室信息 -->
+    <select id="getDepartmentByCode" parameterType="pd" resultType="pd">
+        select
+            id,
+            org_id as orgId,
+            department_code as departmentCode,
+            org_name as orgName,
+            status,
+            department_simple_name as departmentSimpleName,
+            department_level as departmentLevel,
+            department_type as departmentType,
+            fax,
+            in_telephone as inTelephone,
+            out_telephone as outTelephone,
+            department_remark as departmentRemark,
+            department_duty as departmentDuty,
+            department_people as departmentPeople,
+            department_level_code as departmentLevelCode,
+            department_type_code as departmentTypeCode
+        from sys_department_info
+        where department_code = #{departmentCode}
+    </select>
 </mapper>

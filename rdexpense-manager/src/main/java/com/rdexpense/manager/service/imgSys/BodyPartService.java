@@ -22,7 +22,7 @@ public interface BodyPartService {
 
     void addBodyPartImg(PageData pageData);
 
-    List<PageData> getAvailableBodyPart();
+    List<PageData> getStandardBodyPart();
 
 //List<PageData> getAllBodyPart(String parentSerialNum);
 }

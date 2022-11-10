@@ -81,25 +81,25 @@
     <update id="updateDevice" parameterType="pd">
         update imgsys_device_info
         <set>
-            <if test="deviceName!=null">
+            <if test="deviceName!=null and deviceName!=''">
                 device_name = #{deviceName},
             </if>
-            <if test="deviceCode!=null">
+            <if test="deviceCode!=null and deviceCode!=''">
                 device_code = #{deviceCode},
             </if>
-            <if test="deviceType!=null">
+            <if test="deviceType!=null and deviceType!=''">
                 device_type = #{deviceType},
             </if>
-            <if test="funcDescrip!=null">
+            <if test="funcDescrip!=null and funcDescrip!=''">
                 func_descrip = #{funcDescrip},
             </if>
-            <if test="departmentCode!=null">
+            <if test="departmentCode!=null and departmentCode!=''">
                 department_code = #{departmentCode},
             </if>
-            <if test="deviceModel!=null">
+            <if test="deviceModel!=null and deviceModel!=''">
                 device_model = #{deviceModel},
             </if>
-            <if test="deviceStatus!=null">
+            <if test="deviceStatus!=null and deviceStatus!=''">
                 device_status = #{deviceStatus},
             </if>
             update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()

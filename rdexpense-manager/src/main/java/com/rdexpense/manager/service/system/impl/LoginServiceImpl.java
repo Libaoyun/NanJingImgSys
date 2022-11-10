@@ -208,6 +208,9 @@ public class LoginServiceImpl implements LoginService {
         pageData.put("exptime",exp);
         pageData.put("userCode",user.getString("userCode"));
         pageData.put("userName",user.getString("userName"));
+        // FIXME 这里新增了用户部门信息
+        pageData.put("departmentId",user.getString("departmentCode"));
+        pageData.put("department",user.getString("departmentName"));
         pageData.put("firstLogin",user.getInt("version") == 0);
 
 
