@@ -12,10 +12,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-@Component
+//@Component
 public class Base64ImageUtil {
 	//配置文件中配置
-    @Value("${uploadImg.imgPath}")
+//    @Value("${uploadImg.imgPath}")
     private String uploadPath;//此处路径为 D:/upload/
 
     /**

@@ -19,8 +19,9 @@ filter:
 #  common: /data/tbmservices/common/    #普通附件路径
 #  speicial: /data/tbmservices/special/ #特殊附件路径
 
-uploadImg:
-  imgPath: E:\work\中医科皮肤院前后端\IMG\standardBodyPart
+#uploadImg:
+#  imgPath: E:\work\中医科皮肤院前后端\IMG\standardBodyPart
+
 #spring的配置文件
 spring:
   # sql-server数据源配置
@@ -29,7 +30,7 @@ spring:
     mybatis:
       # 主数据源
       master:
-        url: jdbc:sqlserver://localhost:1433;SelectMethod=cursor;allowMultiQueries=true;DatabaseName=rdexpense   #连接数据库的url
+        url: jdbc:sqlserver://localhost:1433;SelectMethod=cursor;allowMultiQueries=true;DatabaseName=imgSys   #连接数据库的url
         username: sa                                                                    #用户名
         password: sa                                                                #密码                                                            #密码
         driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver                 #连接数据库要加载驱动
