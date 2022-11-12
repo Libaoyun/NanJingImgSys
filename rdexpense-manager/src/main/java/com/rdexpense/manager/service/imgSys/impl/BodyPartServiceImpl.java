@@ -133,13 +133,12 @@ public class BodyPartServiceImpl implements BodyPartService {
     }
 
     /**
-     * 获取所有部位及其示意图，从云上获取
+     * 获取所有标准部位及其示意图，从云上获取，Base64编码
      * @return
      */
-    // FIXME 这个功能暂时用不到！！！！！！
     @Override
-    public List<PageData> getAvailableBodyPart() {
-        List<PageData> list = (List<PageData>) baseDao.findForList("BodyPartMapper.getAvailableBodyPart");
+    public List<PageData> getStandardBodyPart() {
+        List<PageData> list = (List<PageData>) baseDao.findForList("BodyPartMapper.getStandardBodyPart");
         for (PageData pageData : list){
             if (pageData.getString("partSketchFile")!=null && pageData.getString("partSketchFile")!= ""){
 

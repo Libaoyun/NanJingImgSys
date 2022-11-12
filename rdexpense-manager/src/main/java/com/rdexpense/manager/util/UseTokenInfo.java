@@ -57,6 +57,7 @@ public class UseTokenInfo {
         return null;
     }
 
+
     public boolean checkSelf(String userId,String token) {
         UserInfoDTO info = getUserInfoByToken(token);
         return String.valueOf(info.getUserCode()).equals(userId);

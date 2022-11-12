@@ -13,7 +13,6 @@ import com.github.pagehelper.PageHelper;
 import com.rdexpense.manager.dto.base.UserInfoDTO;
 import com.rdexpense.manager.util.UseTokenInfo;
 
-import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.ognl.Ognl;
@@ -409,6 +408,8 @@ public class BaseController extends BaseUtil {
         } else if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("DELETE")) {
             pageData = this.getPageJson(this.getRequest(), null);
         }
+
+        // FIXME 这里更改了用户实体类
         UserInfoDTO userInfoVo = useTokenInfo.getUserInfoByToken(userToken);
 
         pageData.put("createUserId", userInfoVo.getUserCode());
@@ -419,6 +420,7 @@ public class BaseController extends BaseUtil {
         pageData.put("post", userInfoVo.getPost());
         pageData.put("postId", userInfoVo.getPostId());
         pageData.put("token", userToken);
+
         return pageData;
     }
 

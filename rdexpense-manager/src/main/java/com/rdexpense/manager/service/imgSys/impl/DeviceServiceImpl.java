@@ -89,7 +89,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     /**
-     * 更新设备信息时也要考虑关联部位情况
+     * 更新设备信息时也要考虑关联部位是否有改动
      * @param pd
      */
     @Override
@@ -136,7 +136,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     /**
-     * 新增设备/根据设备id查找部位时的所有部位以及相应示意图
+     * 根据设备id查找设备相关部位的完整信息（主要用于获取部位示意图）
      * @param pd
      * @return
      */

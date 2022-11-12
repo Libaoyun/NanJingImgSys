@@ -35,19 +35,19 @@
     <update id="updateDiagnosticItem" parameterType="pd">
         update imgsys_diagnostic_item
         <set>
-            <if test="itemName!=null">
+            <if test="itemName!=null and itemName!=''">
                 item_name = #{itemName},
             </if>
-            <if test="itemCode!=null">
+            <if test="itemCode!=null and itemCode!=''">
                 item_code = #{itemCode},
             </if>
-            <if test="itemDiscrip!=null">
+            <if test="itemDiscrip!=null and itemDiscrip!=''">
                 item_discrip = #{itemDiscrip},
             </if>
-            <if test="parentSerialNum!=null">
+            <if test="parentSerialNum!=null and parentSerialNum!=''">
                 parent_serial_num = #{parentSerialNum},
             </if>
-            <if test="departmentCode!=null">
+            <if test="departmentCode!=null and departmentCode!=''">
                 department_code = #{departmentCode},
             </if>
             update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
