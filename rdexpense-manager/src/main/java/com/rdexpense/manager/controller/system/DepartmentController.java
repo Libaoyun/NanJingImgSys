@@ -27,11 +27,11 @@ import static com.common.util.ConstantMsgUtil.*;
 /**
  * @author luxiangbao
  * @date 2021/11/12 11:44
- * @description 组织管理
+ * @description 科室管理
  */
 @RestController
 @RequestMapping("/department")
-@Api(value = "组织管理", tags = "组织管理")
+@Api(value = "科室管理", tags = "科室管理")
 public class DepartmentController extends BaseController {
     private static final Logger logger = LoggerFactory.getLogger(DepartmentController.class);
 
@@ -220,6 +220,29 @@ public class DepartmentController extends BaseController {
             logUtil.saveLogData(result.getCode(), 3, "组织", pd);
         }
     }
+
+    /*@ApiOperation(value = "更改科室资源使用权限")
+    @PostMapping(value = "/permissions")
+    public ResponseEntity updateUsePermissions(DepartmentTreeDeleteDTO departmentTreeDeleteDTO) {
+        PageData pd = this.getParams();
+        CheckParameter.checkDefaultParams(pd);
+        CheckParameter.stringLengthAndEmpty(pd.getString("orgId"), "节点ID",128);
+
+        ResponseEntity result = null;
+        try {
+            departmentService.deleteOrgNode(pd);
+            result = ResponseEntity.success(null, INFO_DELETE_SUCCESS.desc());
+            return result;
+        } catch (Exception e) {
+            result = ResponseEntity.failure(ConstantMsgUtil.ERR_DELETE_FAIL.val(), e.getMessage());
+            logger.error("删除组织,request=[{}]", pd);
+            throw new MyException(ERR_DELETE_FAIL.desc(), e);
+        } finally {
+            logUtil.saveLogData(result.getCode(), 3, "组织", pd);
+        }
+    }*/
+
+
 
 
 
