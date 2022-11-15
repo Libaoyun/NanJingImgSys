@@ -102,13 +102,14 @@ public class BodyPartServiceImpl implements BodyPartService {
     public List<PageData> getAllBodyPart(String rootSerialNum) {
         List<PageData> result = new LinkedList<>();
         List<PageData> pd = (List<PageData>) baseDao.findForList("BodyPartMapper.getAllBodyPart");
-        for (PageData pageData : pd){
+        // 这里暂时不需要返回base64信息
+        /*for (PageData pageData : pd){
             if (pageData.getString("partSketchFile")!=null && pageData.getString("partSketchFile")!= ""){
                 // 转为Base64时需要加上头
                 pageData.put("base64Str", "data:image/jpeg;base64," + AwsUtil.downloadBase64(
                         pageData.getString("partSketchFile"), ConstantValUtil.BODY_PART_IMAGE));
             }
-        }
+        }*/
         if(pd != null && pd.size() > 0){
             List<PageData> list = recursiveTreeBodyPartList(rootSerialNum,pd);
             result.addAll(list);

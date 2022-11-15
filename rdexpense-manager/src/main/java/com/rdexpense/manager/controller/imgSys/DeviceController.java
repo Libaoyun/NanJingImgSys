@@ -141,8 +141,13 @@ public class DeviceController extends BaseController {
         }
     }
 
+    /**
+     * 新增设备时可查看所有部位，修改部位时可以查看设备已配置可选的部位(根据是否有DeviceSerialNum)
+     * @param device
+     * @return
+     */
     @GetMapping("/sketch")
-    @ApiOperation(value = "新增设备/根据设备id查找部位时的所有部位以及相应示意图")
+    @ApiOperation(value = "新增设备/修改设备时可见部位示意图")
     public ResponseEntity<List<BodyPart>> getBodyPartByDevice(Device device) {
         PageData pd = this.getParamsFormat("XML");
         try {
