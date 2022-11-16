@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PatientInfo">
+    <!--namespace根据自己需要创建的的mapper的路径和名称填写-->
+    <sql id="Base_Column">
+        id, serial_num as serialNum, patient_id_card_no as patientIdCardNo, img_laser_id as imgLaserId, patient_name as patientName,
+        birthday, gender, education, phone_num as phoneNum, home_address as homeAddress, id_number as idNumber,
+        create_by as createBy, create_time as createTime, modified_by as modifiedBy, modified_time as modifiedTime
+    </sql>
+
+    <insert id="insert" parameterType="pd">
+        INSERT INTO imgsys_patient_info
+        (serial_num, patient_id_card_no, img_laser_id, patient_name, birthday, gender, education, phone_num,
+         home_address, id_number, create_by, create_time, modified_by, modified_time)
+        VALUES (#{serialNum}, #{patientIdCardNo}, #{imgLaserId}, #{patientName}, #{birthday}, #{gender},
+                #{education}, #{phoneNum}, #{homeAddress}, #{idNumber}, #{createBy}, getDate(),
+                #{modifiedBy}, getDate())
+    </insert>
+
+    <update id="edit" parameterType="pd">
+        update  imgsys_patient_info
+        set     patient_id_card_no      = #{patientIdCardNo},
+                img_laser_id            = #{imgLaserId},
+                patient_name            = #{patientName},
+                birthday                = #{birthday},
+                gender                  = #{gender},
+                education               = #{education},
+                phone_num               = #{phoneNUm},
+                home_address            = #{homeAddress},
+                id_number               = #{idNumber},
+                modified_by             = #{modifiedBy},
+                modified_by             = getDate()
+        where serial_number         = #{SerialNumber}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from
+            imgsys_patient_info
+        where serial_num in
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item.serial_num}
+            </foreach>
+    </delete>
+
+    <select id="queryByLaserId" parameterType="pd" resultType="pd">
+        select
+            <include refid="Base_Column"/>
+        from
+            imgsys_patient_info
+        where
+            img_laser_id          = #{imgLaserId}
+    </select>
+
+    <select id="queryByCardNo" parameterType="pd" resultType="pd">
+        select
+            <include refid="Base_Column"/>
+        from
+            imgsys_patient_info
+        where
+            patient_id_card_no    = #{patientIdCardNo}
+    </select>
+
+    <select id="queryBySerialNum" parameterType="pd" resultType="pd">
+        select
+            <include refid="Base_Column"/>
+        from
+            imgsys_patient_info
+        where
+            serial_num    = #{serialNum}
+    </select>
+
+</mapper>

@@ -64,7 +64,7 @@ public class Doc2Pdf {
             log.info("==============思源黑体========="+fontSans);
             log.info("==============思源宋体========="+fontSerif);
             log.info("==============宋体========="+simsun);
-            String[] fontsPath = new String[]{fontSerif, fontSans,simsun};
+            String[] fontsPath = new String[]{fontSerif, fontSans, simsun};
             FontSettings.setFontsFolders(fontsPath, false);
 //            DocumentBuilder builder = new DocumentBuilder(doc);
 //            Font font = builder.getFont();

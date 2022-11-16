@@ -130,8 +130,10 @@ public class AwsUtil {
         try {
             logger.info("上传开始");
             long a = System.currentTimeMillis();
+
             // 上传文件
             s3.putObject(bucketName, filePath, file.getInputStream(), objectMetadata);
+
             long b = System.currentTimeMillis();
             logger.info("上传成功:" + (b - a));
             //设置有效期
@@ -155,6 +157,7 @@ public class AwsUtil {
         }
         return pageData;
     }
+
 
     /**
      * 文件上传(后端上传)

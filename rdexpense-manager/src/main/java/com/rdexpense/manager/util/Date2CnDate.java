@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
 public class Date2CnDate {
     public static String convertDate2CnDate(String date) throws ParseException {
         String cnDate = "";
@@ -73,4 +74,40 @@ public class Date2CnDate {
             sign = '九';
         return sign;
     }
+
+    public static long CnDigit2Digit(char sign) {
+        long res = -1;
+        if (sign == '〇' || sign == '零')
+            res = 0;
+        if (sign == '一' || sign == '壹')
+            res = 1;
+        if (sign == '二' || sign == '贰')
+            res = 2;
+        if (sign == '三' || sign == '叁')
+            res = 3;
+        if (sign == '四' || sign == '肆')
+            res = 4;
+        if (sign == '五' || sign == '伍')
+            res = 5;
+        if (sign == '六' || sign == '陆')
+            res = 6;
+        if (sign == '七' || sign == '柒')
+            res = 7;
+        if (sign == '八' || sign == '捌')
+            res = 8;
+        if (sign == '九' || sign == '玖')
+            res = 9;
+        if (sign == '十' || sign == '拾')
+            res = 10;
+        if (sign == '百' || sign == '佰')
+            res = 100;
+        if (sign == '千' || sign == '仟')
+            res = 1000;
+        if (sign == '万')
+            res = 10000;
+        if (sign == '亿')
+            res = 100000000;
+        return res;
+    }
 }
+

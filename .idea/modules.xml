@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/rdexpense-back.iml" filepath="$PROJECT_DIR$/rdexpense-back.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rdexpense-common/rdexpense-common.iml" filepath="$PROJECT_DIR$/rdexpense-common/rdexpense-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rdexpense-manager/rdexpense-manager.iml" filepath="$PROJECT_DIR$/rdexpense-manager/rdexpense-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rdexpense-redis/rdexpense-redis.iml" filepath="$PROJECT_DIR$/rdexpense-redis/rdexpense-redis.iml" />
+    </modules>
+  </component>
+</project>

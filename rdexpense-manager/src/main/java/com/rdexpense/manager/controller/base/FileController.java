@@ -50,8 +50,11 @@ public class FileController extends BaseController {
         try {
             MultipartFile file = uploadFileDto.getFile();
             String fileName = file.getOriginalFilename();
+            String suffix = fileName.substring(fileName.indexOf('.')+1, fileName.length());
+            //String res = FileUtil.upload(file, "imgsys", "d:/imgsys_file/");
             PageData pageData = AwsUtil.upload(file, ConstantValUtil.BUCKET_PRIVATE);
-            pageData.put("fileName", fileName);
+            //PageData pageData = new PageData();
+            //pageData.put("fileName", res);
             return PropertyUtil.pushData(pageData, AttachmentDto.class,INFO_UPLOAD_SUCCESS.desc());
         } catch (MyException e) {
             ResponseEntity.failure(ERR_UPLOAD_FAIL.val(),ERR_UPLOAD_FAIL.desc());

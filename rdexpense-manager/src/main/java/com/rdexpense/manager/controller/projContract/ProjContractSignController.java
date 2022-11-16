@@ -11,6 +11,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.rdexpense.manager.controller.base.BaseController;
 import com.rdexpense.manager.dto.projContract.*;
+import com.rdexpense.manager.dto.projectApply.ProjectApplyListDto;
 import com.rdexpense.manager.service.projectApply.ProjApplyMainService;
 import com.rdexpense.manager.service.projContract.ProjContractSignService;
 import com.rdexpense.manager.util.LogUtil;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -57,15 +59,13 @@ public class ProjContractSignController extends BaseController {
     @Autowired
     private ProjApplyMainService projApplyMainService;
 
-
-
     @Autowired
     private LogUtil logUtil;
 
     @PostMapping("/querProjectList")
     @ApiOperation(value = "查询项目列表", notes = "查询项目列表")
-    public ResponseEntity<PageInfo<ProjApplyMainSearchDto>>
-        querProjectList(ProjApplyMainSearchDto projApplyMainSearchDto) {
+    public ResponseEntity<PageInfo<ProjApplyMainListDto>>
+        querProjectList(ProjApplyMainListDto projApplyMainListDto) {
         PageData pd = this.getParams();
         ResponseEntity result = null;
 
@@ -74,7 +74,7 @@ public class ProjContractSignController extends BaseController {
             List<PageData> list = projApplyMainService.queryProjApplyMainList(pd);
 
             PageInfo<PageData> pageInfo = new PageInfo<>(list);
-            result = ResponseEntity.success(PropertyUtil.pushPageList(pageInfo, ProjApplyMainSearchDto.class),
+            result = ResponseEntity.success(PropertyUtil.pushPageList(pageInfo, ProjApplyMainListDto.class),
                     ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
             return result;
         } catch (Exception e) {
@@ -132,12 +132,13 @@ public class ProjContractSignController extends BaseController {
 
     @ApiOperation(value = "更新项目合同")
     @PostMapping("/updateContract")
-    public ResponseEntity updateProjContract(ProjContractListDto projContractListDto) {
+    public ResponseEntity updateProjContract(ProjContractAddDto projContractAddDto) {
         PageData pd = this.getParams();
         //CheckParameter.checkDefaultParams(pd);
         //CheckParameter.stringLengthAndEmpty(pd.getString("id"), "主键ID",128);
         //CheckParameter.stringLengthAndEmpty(pd.getString("projectName"), "项目名称",128);
 
+        //删除后重新添加
         ResponseEntity result = null;
         try {
             projContractSignService.updateProjContract(pd);
@@ -180,23 +181,25 @@ public class ProjContractSignController extends BaseController {
 
     @PostMapping("/queryProjContractList")
     @ApiOperation(value = "查询项目合同列表", notes = "查询项目合同列表")
-    public ResponseEntity<PageInfo<ProjContractListDto>> queryUserList(ProjContractSearchDto projContractSearchDto) {
+    public ResponseEntity<PageInfo<ProjContractListDto>>
+        querProjectContractList(ProjContractSearchDto projContractSearchDto) {
         PageData pd = this.getParams();
         ResponseEntity result = null;
 
         try {
             PageHelper.startPage(pd.getInt("pageNum"), pd.getInt("pageSize"));
             List<PageData> list = projContractSignService.queryProjContractList(pd);
+
             PageInfo<PageData> pageInfo = new PageInfo<>(list);
             result = ResponseEntity.success(PropertyUtil.pushPageList(pageInfo, ProjContractListDto.class),
-                                            ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
+                    ConstantMsgUtil.INFO_QUERY_SUCCESS.desc());
             return result;
         } catch (Exception e) {
-            logger.error("查询项目合同列表,request=[{}]", pd);
+            logger.error("查询项目列表,request=[{}]", pd);
             result = ResponseEntity.failure(ConstantMsgUtil.ERR_QUERY_FAIL.val(), e.getMessage());
             throw new MyException(ConstantMsgUtil.ERR_DELETE_FAIL.desc(), e);
         } finally {
-            logUtil.saveLogData(result.getCode(), 4, "项目合同信息", pd);
+            logUtil.saveLogData(result.getCode(), 1, "项目信息", pd);
         }
     }
 
@@ -311,7 +314,7 @@ public class ProjContractSignController extends BaseController {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");//设置日期格式
         String date = df.format(new Date());
-        String serialNumber = SerialNumberUtil.generateSerialNo("planarSectionalViews");
+        String serialNumber = SerialNumberUtil.generateSerialNo("YFHT");
 
         //文件名
         String fileName = "项目合同签订管理_" + date + "_" + serialNumber + ".pdf";
@@ -341,6 +344,36 @@ public class ProjContractSignController extends BaseController {
             throw new MyException(ConstantMsgUtil.ERR_EXPORT_FAIL.desc(), e);
         } finally {
             logUtil.saveLogData(result.getCode(), 6, "项目合同签订信息pdf", pd);
+        }
+    }
+
+
+    @ApiOperation(value = "打印合同", notes = "打印合同")
+    @PostMapping(value = "/printContractPdf")
+    @ApiImplicitParam(name = "businessId", value = "业务主键id", required = true, dataType = "string")
+    public Object printContractPdf(IdProjContractListDto idProjContractListDto) {
+        PageData pd = this.getParams();
+        CheckParameter.checkDefaultParams(pd);
+
+        ResponseEntity result = null;
+        HttpServletResponse response = this.getResponse();
+        HttpServletRequest request = this.getRequest();
+
+        //校验取出参数
+        String idString = pd.getString("idList");
+        if (StringUtils.isBlank(idString)) {
+            throw new MyException(ConstantMsgUtil.ERR_NO_EMPTY.desc());
+        }
+
+        try {
+            String serialNumber = SerialNumberUtil.generateSerialNo("YFHT");
+            result = projContractSignService.printContractPdf(pd, serialNumber, response);
+            return result;
+        } catch (Exception e) {
+            result = ResponseEntity.failure(ERR_SAVE_FAIL.val(), e.getMessage());
+            throw new MyException(ERR_EXPORT_FAIL.desc(), e);
+        } finally {
+            logUtil.saveLogData(result.getCode(), 7, "打印项目合同pdf", pd);
         }
     }
 }

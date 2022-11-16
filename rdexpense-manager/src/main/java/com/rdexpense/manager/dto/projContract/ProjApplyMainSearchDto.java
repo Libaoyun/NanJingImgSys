@@ -1,11 +1,14 @@
 package com.rdexpense.manager.dto.projContract;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rdexpense.manager.dto.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
 @Data
 @ApiModel(value = "立项项目列表查询入参")
@@ -48,6 +51,20 @@ public class ProjApplyMainSearchDto extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "合同状态码")
     private String contractStatusCode;
+
+    @ApiModelProperty(value = "起始年度")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date startYear;
+
+    @ApiModelProperty(value = "结束年度")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date endYear;
+
+    @ApiModelProperty(value = "专业类别")
+    private String professionalCategory;
+
+    @ApiModelProperty(value = "编制人")
+    private String creatorUserName;
 
     @ApiModelProperty(value = "当前页码,值需大于等于1",required=true)
     private Integer pageNum;

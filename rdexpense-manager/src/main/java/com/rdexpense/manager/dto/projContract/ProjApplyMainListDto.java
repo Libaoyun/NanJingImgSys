@@ -36,7 +36,8 @@ public class ProjApplyMainListDto implements Serializable {
     private String creatorUser;
 
     @ApiModelProperty(value = "编制日期")
-    private String createdDate;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone="GMT+8")
+    private Date createdDate;
 
     @ApiModelProperty(value = "项目名称")
     private String projectName;
@@ -87,11 +88,11 @@ public class ProjApplyMainListDto implements Serializable {
 
     @ApiModelProperty(value = "起始年度")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private String startDate;
+    private Date startDate;
 
     @ApiModelProperty(value = "终止年度")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private String endDate;
+    private Date endDate;
 
     @ApiModelProperty(value = "邮编")
     private String zipCode;

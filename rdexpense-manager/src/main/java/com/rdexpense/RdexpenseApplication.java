@@ -1,5 +1,6 @@
 package com.rdexpense;
 
+import com.rdexpense.manager.util.ThirdAppToken;
 import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,9 +22,9 @@ public class RdexpenseApplication {
 
 	public static void main(String[] args) {
 
-
 		SpringApplication application = new SpringApplication(RdexpenseApplication.class);
 		application.run(args);
+
 		logger.info("=========启动结束---RdexpenseApplication=========");
 	}
 

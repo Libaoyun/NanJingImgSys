@@ -16,6 +16,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.rdexpense.manager.service.flow.FlowService;
 import com.rdexpense.manager.service.system.LoginService;
+import com.rdexpense.manager.util.MacAddressUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -70,6 +71,8 @@ public class LoginServiceImpl implements LoginService {
 
         //校验用户密码
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        pd.put("password1", encoder.encode(pd.getString("password")));
+
         boolean matches = encoder.matches(pd.getString("password"), user.getString("password"));
         if (!matches) {
             throw new MyException(ErrorCodeEnum.USER_LOGIN_EXCEPTION.desc());
@@ -93,7 +96,7 @@ public class LoginServiceImpl implements LoginService {
         if(redisDao.existsKey(token)){
             data= (PageData) redisDao.vGet(token);
             if(data == null){
-                log.warn("获取redis信息异常：request = [{}]", JSON.toJSONString(token));
+//                log.warn("获取redis信息异常：request = [{}]", JSON.toJSONString(token));
                 throw new MyException(ErrorCodeEnum.GET_USER_TOKEN_EXCEPTION.desc());
             }
 
@@ -103,6 +106,17 @@ public class LoginServiceImpl implements LoginService {
         }
 
         return data;
+    }
+
+    @Override
+    public void getTest(String tokenKey) {
+        MacAddressUtil macAddressUtil = new MacAddressUtil();
+        String localMacAddr = "";//macAddressUtil.getMacAddr();
+
+        boolean result = redisDao.vSet(tokenKey, localMacAddr, 1000L);
+
+        Object obj = redisDao.vGet(tokenKey);
+        Long expTime = redisDao.getExpire(tokenKey);
     }
 
 
@@ -215,8 +229,4 @@ public class LoginServiceImpl implements LoginService {
 
         return tokenKey;
     }
-
-
-
-
 }

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProjContractSignMapper">
+
+    <sql id="Base_Column">
+        id, business_id as businessId, serial_number as serialNumber, creator_org_id as creatorOrgId,
+        creator_org_name as creatorOrgName, creator_user_id as creatorUserId, creator_user_name as creatorUserName,
+        created_date as createdDate, project_id as projectId, project_name as projectName, unit_id as unitId,
+        unit_name as unitName, project_leader_id as projectLeaderId, project_leader_name as projectLeaderName,
+        leader_post_id as leaderPostId, leader_post_name as leaderPostName, start_date as startDate,
+        end_date as endDate, secrets_code as secretsCode, secrets_name as secretsName,
+        contract_status_code as contractStatusCode, contract_status_name as contractStatusName,
+        create_time as createTime, update_time as updateTime, update_user as updateUser,
+        update_user_id as updateUserId
+    </sql>
+
+    <select id="check" resultType="pd" parameterType="pd">
+        select project_name
+        from project_contract_signing
+        where project_id = #{projectId}
+    </select>
+
+    <insert id="insert" parameterType="pd">
+        INSERT INTO project_contract_signing
+        (business_id, serial_number, creator_org_id, creator_org_name, creator_user_id,
+         creator_user_name, created_date, project_id, project_name, unit_id,
+         unit_name, project_leader_id, project_leader_name, leader_post_id, leader_post_name,
+         start_date, end_date, secrets_code, secrets_name, contract_status_code,
+         contract_status_name, create_time, update_time, update_user, update_user_id)
+        VALUES (#{businessId}, #{serialNumber}, #{creatorOrgId}, #{creatorOrgName}, #{creatorUserId},
+                #{creatorUserName}, #{createdDate, jdbcType=DATE}, #{projectId}, #{projectName}, #{unitId},
+                #{unitName}, #{projectLeaderId}, #{projectLeaderName}, #{leaderPostId}, #{leaderPostName},
+                #{startDate, jdbcType=DATE}, #{endDate, jdbcType=DATE}, #{secretsCode}, #{secretsName}, #{contractStatusCode},
+                #{contractStatusName}, getDate(), getDate(), #{updateUser}, #{updateUserId})
+    </insert>
+
+    <update id="update" parameterType="pd">
+        update project_contract_signing
+        set creator_org_id          = #{creatorOrgId},
+            creator_org_name        = #{creatorOrgName},
+            creator_user_id         = #{creatorUserId},
+            creator_user_name       = #{creatorUserName},
+            created_date            = #{createdDate, jdbcType=DATE},
+            project_id              = #{projectId},
+            project_name            = #{projectName},
+            unit_id                 = #{unitId},
+            unit_name               = #{unitName},
+            project_leader_id       = #{projectLeaderId},
+            project_leader_name     = #{projectLeaderName},
+            leader_post_id          = #{leaderPostId},
+            leader_post_name        = #{leaderPostName},
+            start_date              = #{startDate, jdbcType=DATE},
+            end_date                = #{endDate, jdbcType=DATE},
+            secrets_code            = #{secretsCode},
+            secrets_name            = #{secretsName},
+            contract_status_code    = #{contractStatusCode},
+            contract_status_name    = #{contractStatusName},
+            update_time             = getDate(),
+            update_user             = #{updateUser},
+            update_user_id          = #{updateUserId}
+        where serial_number         = #{serialNumber}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from
+        project_contract_signing
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+    </delete>
+
+    <select id="queryBySerialNumber" parameterType="pd" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_contract_signing
+        where serial_number = #{serialNumber}
+        ORDER BY create_time DESC;
+    </select>
+
+
+
+    <select id="queryById" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_contract_signing
+        where id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <select id="queryByBusinessId" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_contract_signing
+        where business_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryOneByBusinessId" parameterType="pd" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_contract_signing
+        where business_id = #{businessId}
+    </select>
+
+    <select id="selectAll" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_contract_signing
+        <where>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="projectLeaderName!=null and projectLeaderName!=''">
+                and project_leader_name LIKE concat('%',#{projectLeaderName},'%')
+            </if>
+            <if test="leaderPostName!=null and leaderPostName!=''">
+                and leader_post_name LIKE concat('%',#{leaderPostName},'%')
+            </if>
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and creator_user_name LIKE concat('%',#{creatorUserName},'%')
+            </if>
+            <if test="unitName!=null and unitName!=''">
+                and unit_name LIKE concat('%',#{unitName},'%')
+            </if>
+            <if test="createTime!=null and createTime!=''">
+                and convert(varchar,create_time,120) LIKE concat('%',#{createTime},'%')
+            </if>
+            <if test="updateTime!=null and updateTime!=''">
+                and convert(varchar,update_time,120) LIKE concat('%',#{updateTime},'%')
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                and convert(varchar,start_date,120) LIKE concat('%',#{startDate},'%')
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                and convert(varchar,end_date,120) LIKE concat('%',#{endDate},'%')
+            </if>
+            <if test="contractStatusCodeList != null and contractStatusCodeList.size()>0">
+                and contract_status_code in
+                <foreach item="item" index="index" collection="contractStatusCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="secretsCodeList != null and secretsCodeList.size()>0">
+                and secrets_code in
+                <foreach item="item" index="index" collection="secretsCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY start_date DESC;
+    </select>
+
+</mapper>

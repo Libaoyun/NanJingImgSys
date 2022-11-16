@@ -17,7 +17,6 @@ import java.io.Serializable;
 public class ProjectApplySurveyDto implements Serializable {
 
 
-
     @ApiModelProperty(value = "国内外现状")
     private String currentSituation;
 

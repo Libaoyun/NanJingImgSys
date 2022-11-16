@@ -318,7 +318,7 @@ public class FileUtil {
 		String timeFormate = df.format(now);// now为获取当前系统时间
 
 		// 判断是否有对应的上传文件夹，没有则创建文件夹：根路径/模块名称/月份
-		judgeFile(path,model, timeFormate);
+		judgeFile(path, model, timeFormate);
 		//生成服务器上的文件名，使用uuid保证唯一
 		String serveFileName = UUID.randomUUID().toString();
 		// 上传文件

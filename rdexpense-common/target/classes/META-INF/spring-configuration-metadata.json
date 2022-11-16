@@ -1,0 +1,12 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.common.base.dao.mysql.impl.mybatis.DataSourceConfig",
+      "name": "spring.datasource.mybatis.master",
+      "sourceMethod": "dataSource()",
+      "type": "javax.sql.DataSource"
+    }
+  ],
+  "properties": []
+}

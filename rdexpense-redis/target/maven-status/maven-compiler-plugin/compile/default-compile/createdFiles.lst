@@ -1,0 +1,5 @@
+com\common\base\dao\redis\impl\AbstractBaseRedisDao.class
+com\common\base\dao\redis\impl\RedisConfig.class
+com\common\base\dao\redis\RedisDao.class
+com\common\base\dao\redis\impl\JedisConfig.class
+com\common\base\dao\redis\impl\RedisDaoImpl.class

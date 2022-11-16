@@ -27,5 +27,5 @@ public interface LoginService {
     PageData logout(String token);
 
 
-
+    void getTest(String tokenKey);
 }

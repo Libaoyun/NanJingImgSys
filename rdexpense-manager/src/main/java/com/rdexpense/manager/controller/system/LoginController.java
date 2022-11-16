@@ -43,6 +43,8 @@ public class LoginController extends BaseController {
     private LogUtil logUtil;
 
 
+
+
     /**
      * 外部用户登录
      * @param authDto 请求对象
@@ -54,6 +56,7 @@ public class LoginController extends BaseController {
         PageData pd = this.getLoginParams();
         CheckParameter.stringLengthAndEmpty(pd.getString("userCode"), "用户名",64);
         CheckParameter.stringLengthAndEmpty(pd.getString("password"), "密码",64);
+
 
         ResponseEntity result = null;
         PageData data = null;
