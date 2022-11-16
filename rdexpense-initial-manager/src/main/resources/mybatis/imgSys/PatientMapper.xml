@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PatientMapper">
+    <sql id="Base">
+        id, patient_id_card_no as patientIdCardNo, name, birthday, gender,
+            education_degree as educationDegree, phone_num as phoneNum, home_address as homeAddress, identifier_id as identifierId,
+            outpatient_no as outpatientNo, img_laser_id as imgLaserId
+    </sql>
+
+    <!--    新增患者基本信息-->
+    <insert id="addPatientInfo" parameterType="pd">
+        insert into imgsys_patient_info(id, patient_id_card_no, name, birthday, gender,
+                                        education_degree, phone_num, home_address, identifier_id,
+                                        outpatient_no, img_laser_id,
+                                        create_user, create_user_id, create_time, update_user, update_user_id,update_time)
+        values (#{id}, #{patientIdCardNo}, #{name}, #{birthday,jdbcType=DATE}, #{gender},
+                #{educationDegree}, #{phoneNum}, #{homeAddress}, #{identifierId},
+                #{outpatientNo}, #{imgLaserId},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
+    </insert>
+
+    <!--    查询该患者信息是否存在-->
+    <select id="isExistPatient" parameterType="pd" resultType="pd">
+        select patient_id_card_no
+        from imgsys_patient_info
+        <where>
+            <if test="patientIdCardNo!=null and patientIdCardNo!=''">
+                or patient_id_card_no = #{patientIdCardNo}
+            </if>
+            <if test="identifierId!=null and identifierId!=''">
+                or identifier_id = #{identifierId}
+            </if>
+            <if test="imgLaserId!=null and imgLaserId!=''">
+                or img_laser_id = #{imgLaserId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMaxId" resultType="integer">
+        select max(id) as id
+        from imgsys_patient_info
+        where 1 = 1
+    </select>
+
+    <delete id="deletePatient" parameterType="pd">
+        delete
+        from imgsys_patient_info
+        where patient_id_card_no = #{patientIdCardNo}
+    </delete>
+
+    <update id="updatePatient" parameterType="pd">
+        update imgsys_patient_info
+        <set>
+
+            <if test="name!=null and name!=''">
+                name = #{name},
+            </if>
+            <if test="birthday!=null and birthday!=''">
+                birthday = #{birthday,jdbcType=DATE},
+            </if>
+            <if test="deviceType!=null and deviceType!=''">
+                gender = #{gender},
+            </if>
+            <if test="educationDegree!=null and educationDegree!=''">
+                education_degree = #{educationDegree},
+            </if>
+            <if test="phoneNum!=null and phoneNum!=''">
+                phone_num = #{phoneNum},
+            </if>
+            <if test="homeAddress!=null and homeAddress!=''">
+                home_address = #{homeAddress},
+            </if>
+            <if test="identifierId!=null and identifierId!=''">
+                identifier_id = #{identifierId},
+            </if>
+            <if test="outpatientNo!=null and outpatientNo!=''">
+                outpatient_no = #{outpatientNo},
+            </if>
+            <if test="imgLaserId!=null and imgLaserId!=''">
+                img_laser_id = #{imgLaserId},
+            </if>
+            update_user = #{createUser}, update_user_id = #{createUserId}, update_time = getDate()
+        </set>
+        where patient_id_card_no = #{patientIdCardNo}
+    </update>
+
+    <!--    关键词&分页查询所有患者信息-->
+    <select id="getAllPatient" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base"></include>
+        from imgsys_patient_info
+        <where>
+            <if test="patientIdCardNo!=null and patientIdCardNo!=''">
+                and patient_id_card_no LIKE concat('%',#{patientIdCardNo},'%')
+            </if>
+            <if test="name!=null and name!=''">
+                and name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="identifierId!=null and identifierId!=''">
+                and identifier_id LIKE concat('%',#{identifierId},'%')
+            </if>
+            <if test="outpatientNo!=null and outpatientNo!=''">
+                and outpatient_no LIKE concat('%',#{outpatientNo},'%')
+            </if>
+            <if test="imgLaserId!=null and imgLaserId!=''">
+                and img_laser_id LIKE concat('%',#{imgLaserId},'%')
+            </if>
+            <if test="phoneNum!=null and phoneNum!=''">
+                and phone_num LIKE concat('%',#{phoneNum},'%')
+            </if>
+        </where>
+        order by create_time asc
+    </select>
+
+    <!--    根据卡号或身份证号查询患者信息-->
+    <select id="getPatientByParams" parameterType="pd" resultType="pd">
+        select 
+            <include refid="Base"></include>
+        from imgsys_patient_info
+        <where>
+            <if test="patientIdCardNo!=null and patientIdCardNo!=''">
+                AND patient_id_card_no = #{patientIdCardNo}
+            </if>
+            <if test="identifierId!=null and identifierId!=''">
+                AND identifier_id = #{identifierId}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

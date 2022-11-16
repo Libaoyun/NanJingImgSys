@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BudgetAndPayContrastMapper">
+
+
+    <select id="queryProjectByYear" parameterType="pd" resultType="pd">
+
+        SELECT a.business_id,b.creator_org_id as creatorOrgId,
+               b.project_name as projectName,b.serial_number as serialNumber,
+               b.start_year as startYear,b.end_year as endYear
+        FROM (
+          SELECT business_id FROM project_apply_budget_month_detail WHERE years BETWEEN #{startYear} AND #{endYear} GROUP BY business_id
+      ) a LEFT JOIN project_apply_main b ON a.business_id=b.business_id
+
+        WHERE b.process_status='DICT10171005'
+          AND b.bureau_level = '0'
+          AND creator_org_id = #{creatorOrgId}
+    </select>
+
+
+    <select id="queryAllProjectBudget" parameterType="pd" resultType="pd">
+        SELECT
+            business_id as businessId,
+            source_account as sourceAccount,
+            ISNULL(source_budget_change, source_budget) as sourceBudget,
+            expense_account as expenseAccount,
+            ISNULL(expense_budget_change, expense_budget) as expenseBudget,
+            expense_account_code as expenseAccountCode
+        FROM  project_apply_funds_budget
+        WHERE business_id IN
+        <foreach item="item" index="index" collection="projectInfoList" open="(" separator="," close=")">
+            #{item.business_id}
+        </foreach>
+
+
+    </select>
+
+    <select id="queryProjectExpenseBudget" parameterType="pd" resultType="pd">
+        SELECT
+        business_id as businessId,
+        january,february,march,april,
+        may,june,july,august,
+        september,
+        october,
+        november,
+        december,
+        years,
+        expense_account as expenseAccount,
+        expense_account_code as expenseAccountCode
+        FROM project_apply_budget_month_detail
+        WHERE years BETWEEN #{startYear} AND #{endYear}
+        AND business_id IN
+        <foreach item="item" index="index" collection="projectInfoList" open="(" separator="," close=")">
+            #{item.business_id}
+        </foreach>
+
+    </select>
+
+
+
+    <select id="queryBudgetExpenses" parameterType="pd" resultType="pd">
+
+        SELECT
+            creator_org_id AS creatorOrgId,
+            secondary_subject_code AS secondarySubjectCode,
+            secondary_subject AS secondarySubject,
+            amount
+        FROM item_expenses
+        WHERE process_status = 'DICT10171005'
+          AND creator_org_id = #{creatorOrgId}
+          AND belonging_month BETWEEN #{startMonth} AND #{endMonth}
+          AND project_apply_main_id IN
+          <foreach item="item" index="index" collection="projectInfoList" open="(" separator="," close=")">
+             #{item.business_id}
+          </foreach>
+    </select>
+
+
+    <select id="selectDicEnumByParentIds" resultType="pd" parameterType="pd">
+        select dic_type_id,dic_enum_id,dic_enum_name
+        from uq_dictionary
+        WHERE dic_type_id = #{expenseAccountCode} AND is_valid = 1
+    </select>
+
+    <select id="queryProjectInfo" resultType="pd" parameterType="pd">
+        select id,
+               creator_org_id as creatorOrgId,
+               business_id as businessId,
+               serial_number as serialNumber,
+               project_name as projectName,
+               start_year as startYear,
+               end_year as endYear
+        from project_apply_main
+        WHERE process_status = 'DICT10171005'
+          AND creator_org_id = #{creatorOrgId}
+          AND bureau_level = '0'
+        <if test="startMonth!=null and startMonth!=''">
+            and CONVERT(varchar(7), update_time, 23) <![CDATA[ >= ]]> #{startMonth}
+        </if>
+        <if test="endMonth!=null and endMonth!=''">
+            and CONVERT(varchar(7), update_time, 23) <![CDATA[ <= ]]> #{endMonth}
+        </if>
+        <if test="serialNumber!=null and serialNumber!=''">
+            and serial_number LIKE concat('%',#{serialNumber},'%')
+        </if>
+        <if test="projectName!=null and projectName!=''">
+            and project_name LIKE concat('%',#{projectName},'%')
+        </if>
+        <if test="startYear!=null and startYear!=''">
+            and CONVERT(varchar(10), start_year, 23) <![CDATA[ >= ]]> #{startYear}
+        </if>
+        <if test="endYear!=null and endYear!=''">
+            and CONVERT(varchar(10), end_year, 23) <![CDATA[ <= ]]> #{endYear}
+        </if>
+
+    </select>
+
+    <select id="selectProjectBudgetValue" parameterType="pd" resultType="pd">
+        select
+            business_id as businessId,
+            source_account as sourceAccount,
+            ISNULL(source_budget_change, source_budget) as sourceBudget,
+            expense_account as expenseAccount,
+            ISNULL(expense_budget_change, expense_budget) as expenseBudget,
+            expense_account_code as expenseAccountCode
+        from project_apply_funds_budget
+        WHERE business_id=#{businessId}
+    </select>
+
+
+    <select id="selectProjectChangeBudgetValue" parameterType="pd" resultType="pd">
+
+        SELECT
+        c.creator_org_id AS creatorOrgId,
+        u.source_account as sourceAccount,
+        u.source_budget as sourceBudget,
+        ISNULL(u.source_budget_change, u.source_budget) as sourceBudgetChange,
+        u.expense_account as expenseAccount,
+        u.expense_budget as expenseBudget,
+        ISNULL(u.expense_budget_change, u.expense_budget) as expenseBudgetChange,
+        u.expense_account_code as expenseAccountCode
+        FROM item_change_funds_budget u LEFT JOIN item_change c ON u.business_id=c.business_id
+
+        WHERE process_status = 'DICT10171005' and c.project_apply_main_id = #{businessId}
+
+    </select>
+
+    <select id="queryOrgIdList" parameterType="pd" resultType="pd">
+        SELECT org_number,org_name FROM sys_organization_info WHERE status = 1
+    </select>
+
+
+
+
+
+    <select id="queryCompanyProjectInfo" resultType="pd" parameterType="pd">
+        select id,
+        creator_org_id as creatorOrgId,
+        business_id,
+        serial_number as serialNumber,
+        project_name as projectName,
+        start_year as startYear,
+        end_year as endYear
+        from project_apply_main
+        WHERE process_status = 'DICT10171005'
+        AND bureau_level = '0'
+        AND creator_org_id IN
+        <foreach item="item" index="index" collection="orgIdList" open="(" separator="," close=")">
+            #{item.org_number}
+        </foreach>
+<!--        <if test="startMonth!=null and startMonth!=''">-->
+<!--            and CONVERT(varchar(7), update_time, 23) <![CDATA[ >= ]]> #{startMonth}-->
+<!--        </if>-->
+<!--        <if test="endMonth!=null and endMonth!=''">-->
+<!--            and CONVERT(varchar(7), update_time, 23) <![CDATA[ <= ]]> #{endMonth}-->
+<!--        </if>-->
+        <if test="projectName!=null and projectName!=''">
+            and project_name LIKE concat('%',#{projectName},'%')
+        </if>
+
+    </select>
+
+
+    <select id="queryCompanyProjectByYear" parameterType="pd" resultType="pd">
+
+        SELECT a.business_id,b.creator_org_id as creatorOrgId
+        FROM (
+                 SELECT business_id FROM project_apply_budget_month_detail WHERE years BETWEEN #{startYear} AND #{endYear} GROUP BY business_id
+             ) a LEFT JOIN project_apply_main b ON a.business_id=b.business_id
+
+        WHERE b.process_status='DICT10171005'
+          AND b.bureau_level = '0'
+          AND creator_org_id IN
+            <foreach item="item" index="index" collection="orgIdList" open="(" separator="," close=")">
+                #{item.org_number}
+            </foreach>
+    </select>
+
+
+    <select id="queryCompanyBudgetExpenses" parameterType="pd" resultType="pd">
+
+        SELECT
+        creator_org_id AS creatorOrgId,
+        secondary_subject_code AS secondarySubjectCode,
+        secondary_subject AS secondarySubject,
+        amount
+        FROM item_expenses
+        WHERE process_status = 'DICT10171005'
+        AND belonging_month BETWEEN #{startMonth} AND #{endMonth}
+        AND creator_org_id IN
+        <foreach item="item" index="index" collection="orgIdList" open="(" separator="," close=")">
+            #{item.org_number}
+        </foreach>
+        AND project_apply_main_id IN
+        <foreach item="item" index="index" collection="projectInfoList" open="(" separator="," close=")">
+            #{item.business_id}
+        </foreach>
+    </select>
+
+
+    <select id="queryOneProjectExpenseBudget" parameterType="pd" resultType="pd">
+        SELECT
+        business_id as businessId,
+        january,february,march,april,
+        may,june,july,august,
+        september,
+        october,
+        november,
+        december,
+        years,
+        expense_account as expenseAccount,
+        expense_account_code as expenseAccountCode
+        FROM project_apply_budget_month_detail
+        WHERE years BETWEEN #{startYear} AND #{endYear}
+        AND business_id = #{business_id}
+
+    </select>
+
+
+    <select id="queryOneBudgetExpenses" parameterType="pd" resultType="pd">
+
+        SELECT
+        creator_org_id AS creatorOrgId,
+        secondary_subject_code AS secondarySubjectCode,
+        secondary_subject AS secondarySubject,
+        amount
+        FROM item_expenses
+        WHERE process_status = 'DICT10171005'
+        AND creator_org_id = #{creatorOrgId}
+        AND belonging_month BETWEEN #{startMonth} AND #{endMonth}
+        AND project_apply_main_id = #{business_id}
+    </select>
+
+
+    <select id="selectOneDicEnumByParentIds" resultType="pd" parameterType="pd">
+        select dic_type_id,dic_enum_id,dic_enum_name
+        from uq_dictionary
+        WHERE dic_type_id = #{dicTypeId} AND is_valid = 1
+    </select>
+
+
+</mapper>

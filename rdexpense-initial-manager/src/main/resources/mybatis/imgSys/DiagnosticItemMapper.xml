@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DiagnosticItemMapper">
+
+    <sql id="Base">
+        id, item_name as itemName, item_code as itemCode, item_serial_num as itemSerialNum, item_discrip as itemDiscrip,
+            parent_serial_num as parentSerialNum, department_code as departmentCode
+    </sql>
+
+    <!-- 新增项目信息-->
+    <insert id="insertDiagnosticItem" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into imgsys_diagnostic_item(id, item_name, item_code, item_serial_num, item_discrip,
+                                           parent_serial_num, department_code,
+                                           create_user,create_user_id, create_time, update_user, update_user_id, update_time)
+        values (#{id}, #{itemName}, #{itemCode}, #{itemSerialNum}, #{itemDiscrip},
+                #{parentSerialNum},#{departmentCode},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
+    </insert>
+
+    <!--    查询某项目信息是否存在-->
+    <select id="isExistItem" parameterType="pd" resultType="pd">
+        select item_name as itemName
+        from imgsys_diagnostic_item
+        <where>
+            <if test="itemName!=null and itemName!=''">
+                or item_name = #{itemName}
+            </if>
+            <if test="itemCode!=null and itemCode!=''">
+                or item_code = #{itemCode}
+            </if>
+        </where>
+    </select>
+
+    <!--    修改项目信息-->
+    <update id="updateDiagnosticItem" parameterType="pd">
+        update imgsys_diagnostic_item
+        <set>
+            <if test="itemName!=null and itemName!=''">
+                item_name = #{itemName},
+            </if>
+            <if test="itemCode!=null and itemCode!=''">
+                item_code = #{itemCode},
+            </if>
+            <if test="itemDiscrip!=null and itemDiscrip!=''">
+                item_discrip = #{itemDiscrip},
+            </if>
+            <if test="parentSerialNum!=null and parentSerialNum!=''">
+                parent_serial_num = #{parentSerialNum},
+            </if>
+            <if test="departmentCode!=null and departmentCode!=''">
+                department_code = #{departmentCode},
+            </if>
+            update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
+        </set>
+        where item_serial_num = #{itemSerialNum}
+    </update>
+
+    <!--    查询项目最大id -->
+    <select id="selectMaxIdAndSerialNum" parameterType="pd" resultType="pd">
+        select max(id) as id, max(item_serial_num) as itemSerialNum
+        from imgsys_diagnostic_item
+        where 1 = 1
+    </select>
+
+    <!--    查询是否有子项目 -->
+    <select id="selectCountChild" parameterType="pd" resultType="pd">
+        select count(1) as countChild
+        from imgsys_diagnostic_item
+        where parent_serial_num = #{itemSerialNum}
+    </select>
+
+    <!--    删除项目信息-->
+    <delete id="deleteDiagnosticItem" parameterType="pd">
+        delete
+        from imgsys_diagnostic_item
+        where item_serial_num = #{itemSerialNum}
+    </delete>
+
+
+    <!--    获取所有部位，至于子部位的获取，在service层处理，这里会报错说结果集已关闭-->
+    <select id="getAllDiagnosticItem" parameterType="list" resultType="pd">
+        SELECT
+        <include refid="Base"></include>
+        FROM
+        imgsys_diagnostic_item
+        WHERE
+        department_code in
+        <foreach item="departmentId" collection="list" separator="," open="(" close=")" index="">
+            #{departmentId}
+        </foreach>
+        order by itemSerialNum asc
+    </select>
+</mapper>

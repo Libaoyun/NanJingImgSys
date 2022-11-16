@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BodyPartMapper">
+
+    <!-- 通用查询映射结果 -->
+    <!--    <resultMap id="BaseResultMap" type="com.rdexpense.manager.dto.imgSys.BodyPart">-->
+    <!--        <result column="id" property="id"/>-->
+    <!--        <result column="part_name" property="partName"/>-->
+    <!--        <result column="part_code" property="partCode"/>-->
+    <!--        <result column="part_serial_num" property="partSerialNum"/>-->
+    <!--        <result column="part_discription" property="partDiscription"/>-->
+    <!--        <result column="part_sketch_file" property="partSketchFile"/>-->
+    <!--        <result column="parent_serial_num" property="parentSerialNum"/>-->
+    <!--        <result column="department_code" property="departmentCode"/>-->
+    <!--        <result column="standard_part_flag" property="standardPartFlag"/>-->
+    <!--    </resultMap>-->
+
+    <!--    <resultMap id="getBodyPartWithChildren" type="com.rdexpense.manager.dto.imgSys.BodyPart" extends="BaseResultMap">-->
+    <!--        &lt;!&ndash;        递归查询，操作简便，通过递归父Id查询所有子部门，然后广度优先查找&ndash;&gt;-->
+    <!--        <collection property="children" ofType="com.rdexpense.manager.dto.imgSys.BodyPart"-->
+    <!--                    select="getAllBodyPart"-->
+    <!--                    column="part_serial_num"-->
+    <!--        >-->
+    <!--        </collection>-->
+    <!--    </resultMap>-->
+
+    <sql id="Base">
+        id,part_name as partName,part_code as partCode,part_serial_num as partSerialNum,part_discription as partDiscription,
+            part_sketch_file as partSketchFile,parent_serial_num as parentSerialNum,department_code as departmentCode,
+            standard_part_flag as standardPartFlag
+    </sql>
+
+
+    <!-- 新增部位信息-->
+    <insert id="insertBodyPart" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into imgsys_body_part_info(id, part_name, part_code, part_serial_num, part_discription, part_sketch_file,
+                                          parent_serial_num, department_code, standard_part_flag,
+                                          create_user, create_user_id, create_time, update_user, update_user_id,
+                                          update_time)
+        values (#{id}, #{partName}, #{partCode}, #{partSerialNum}, #{partDiscription}, #{partSketchFile},
+                #{parentSerialNum}, #{departmentCode}, #{standardPartFlag},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
+    </insert>
+
+    <!--    查询某部位信息是否存在-->
+    <select id="isExistBodyPart" parameterType="pd" resultType="pd">
+        select part_name as partName
+        from imgsys_body_part_info
+        <where>
+            <if test="partName!=null and partName!=''">
+                or part_name = #{partName}
+            </if>
+            <if test="partCode!=null and partCode!=''">
+                or part_code = #{partCode}
+            </if>
+        </where>
+    </select>
+
+    <!--    添加部位示意图-->
+    <update id="addBodyPartImg" parameterType="pd">
+        update imgsys_body_part_info
+        <set>
+            <if test="filePath!=null and filePath!=''">
+                part_sketch_file = #{filePath},
+            </if>
+        </set>
+        where part_serial_num = #{partSerialNum}
+    </update>
+
+    <update id="updateBodyPart" parameterType="pd">
+        update imgsys_body_part_info
+        <set>
+            <if test="partName!=null and partName!=''">
+                part_name = #{partName},
+            </if>
+            <if test="partCode!=null and partCode!=''">
+                part_code = #{partCode},
+            </if>
+            <if test="partDiscription!=null and partDiscription!=''">
+                part_discription = #{partDiscription},
+            </if>
+            <if test="partSketchFile!=null and partSketchFile!=''">
+                part_sketch_file = #{partSketchFile},
+            </if>
+            <if test="parentSerialNum!=null and parentSerialNum!=''">
+                parent_serial_num = #{parentSerialNum},
+            </if>
+            <if test="departmentCode!=null and departmentCode!=''">
+                department_code = #{departmentCode},
+            </if>
+            <if test="standardPartFlag!=null and standardPartFlag!=''">
+                standard_part_flag = #{standardPartFlag},
+            </if>
+            update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
+
+        </set>
+        where part_serial_num = #{partSerialNum}
+    </update>
+
+    <!--    查询项目最大id -->
+    <select id="selectMaxIdAndSerialNum" parameterType="pd" resultType="pd">
+        select max(id) as id, max(part_serial_num) as partSerialNum
+        from imgsys_body_part_info
+        where 1 = 1
+    </select>
+
+    <!--    查询是否有子部位 -->
+    <select id="selectCountChild" parameterType="pd" resultType="pd">
+        select count(1) as countChild
+        from imgsys_body_part_info
+        where parent_serial_num = #{partSerialNum}
+    </select>
+
+    <!--    根据id查询部位详细信息-->
+    <select id="findBodyPartBySerialNum" parameterType="pd" resultType="pd">
+        select
+        <include refid="Base"></include>
+        FROM imgsys_body_part_info
+        WHERE part_serial_num = #{partSerialNum}
+    </select>
+
+    <delete id="deleteBodyPart" parameterType="pd">
+        delete
+        from imgsys_body_part_info
+        where part_serial_num = #{partSerialNum}
+    </delete>
+
+
+    <!--    获取所有部位，至于子部位的获取，在service层处理，这里会报错说结果集已关闭-->
+    <select id="getAllBodyPart" resultType="pd" parameterType="string">
+        SELECT
+        <include refid="Base"/>
+        FROM imgsys_body_part_info
+        WHERE department_code in
+        <foreach item="departmentId" collection="list" separator="," open="(" close=")" index="">
+            #{departmentId}
+        </foreach>
+        order by partSerialNum asc
+    </select>
+
+    <!--    获取所有可用部位（返回给前端图片）    -->
+    <select id="getStandardBodyPart" resultType="pd">
+        SELECT
+        <include refid="Base"></include>
+        FROM imgsys_body_part_info
+        <where>
+            standard_part_flag = 1
+            <if test="departments!=null and departments.size>0">
+                AND department_code in
+                <foreach item="departmentId" collection="departments" separator="," open="(" close=")" index="">
+                    #{departmentId}
+                </foreach>
+            </if>
+            <if test="departmentId!=null and departmentId!=''">
+                AND department_code = #{departmentId}
+            </if>
+        </where>
+        order by part_code
+    </select>
+
+    <!--    获取所有部位及子部位-->
+    <!--<select id="getAllBodyPart" resultMap="getBodyPartWithChildren">
+        SELECT id, part_name, part_code, part_serial_num, part_discription, part_sketch_file,
+               parent_serial_num, department_code, standard_part_flag
+        FROM
+            imgsys_body_part_info
+        WHERE
+            parent_serial_num = #{partSerialNum}
+    </select>-->
+    <!--<select id="getAllBodyPart" resultType="pd">
+        WITH cte_child ( id, part_name, part_code, part_serial_num, part_discription, part_sketch_file, parent_serial_num, department_code, standard_part_flag ) AS (
+            SELECT
+                id,
+                part_name,
+                part_code,
+                part_serial_num,
+                part_discription,
+                part_sketch_file,
+                parent_serial_num,
+                department_code,
+                standard_part_flag
+            FROM
+                imgsys_body_part_info
+            WHERE
+                parent_serial_num = 0
+            UNION ALL
+            SELECT
+                a.id,
+                a.part_name,
+                a.part_code,
+                a.part_serial_num,
+                a.part_discription,
+                a.part_sketch_file,
+                a.parent_serial_num,
+                a.department_code,
+                a.standard_part_flag
+            FROM
+                imgsys_body_part_info a
+                    INNER JOIN cte_child b ON ( a.parent_serial_num= b.part_serial_num )
+        ) SELECT
+            *
+        FROM
+            cte_child;
+    </select>-->
+
+
+</mapper>

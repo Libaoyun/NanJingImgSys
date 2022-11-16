@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AttendanceMapper">
+
+    <sql id="record">
+                id,business_id,serial_number,creator_org_id,creator_org_name,creator_user_id,creator_user,created_date,project_name,project_id,
+                unit_name,project_leader,attendance_month,create_time,update_time,
+                update_user,update_user_id,process_status
+    </sql>
+
+    <sql id="recordAndDic">
+        r.id,r.business_id as businessId,r.serial_number as serialNumber,r.creator_org_id as creatorOrgId,r.creator_org_name as creatorOrgName ,
+         r.creator_user_id as createUserId,r.creator_user as createUser,r.created_date as createdDate,r.project_name as projectName,
+        r.unit_name as unitName,r.project_leader as projectLeader,r.attendance_month as attendanceMonth,r.project_id as projectId,r.create_time as createTime,r.update_time as updateTime ,r.update_user as updateUser,
+         r.update_user_id as updateUserId,process_status as processStatus,d.dic_enum_name as processName
+    </sql>
+
+
+    <select id="queryByParams" parameterType="pd" resultType="pd">
+        select
+        <include refid="recordAndDic"></include>
+        FROM (
+        select
+        <include refid="record"></include>
+        from researcher_manage_main
+        where (process_status != #{processStatus} and process_status != #{processStatus1} ) or creator_user_id=#{createUserId}) as r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                r.creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="projectLeader!=null and projectLeader!=''">
+                and r.project_leader like concat('%',#{projectLeader},'%')
+            </if>
+
+            <if test="unitName!=null and unitName!=''">
+                and r.unit_name LIKE concat('%',#{unitName},'%')
+            </if>
+
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and r.creator_user LIKE concat ('%',#{creatorUserName},'%')
+            </if>
+
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and r.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and r.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and r.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and r.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+            <if test="attendanceMonth!=null and attendanceMonth!=''">
+                and convert(varchar,r.attendance_month,120) LIKE concat('%',#{attendanceMonth},'%')
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        ORDER BY r.update_time DESC
+    </select>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into researcher_manage_main
+        (business_id,serial_number,process_status,creator_org_id,creator_org_name,creator_user_id,creator_user,created_date,project_name,
+         project_id,unit_name,project_leader,attendance_month,create_time,update_time,update_user,update_user_id,
+         attend_unit,attend_date,attend_days,attend_peoples,attend_project,salary_unit,salary_date,salary_project)
+        values (#{businessId},#{serialNumber},#{processStatus},#{creatorOrgId},#{creatorOrgName} ,
+                #{creatorUserId},#{creatorUserName},#{createdDate,jdbcType=DATE},#{projectName},
+                #{projectId},#{unitName},#{projectLeader},#{attendanceMonth,jdbcType=DATE},getDate(),getDate() ,#{creatorUserName},#{creatorUserId},
+                #{attendUnit},#{attendDate},#{attendDays},#{attendPeoples},#{attendProject},#{salaryUnit},#{salaryDate},#{salaryProject}
+                )
+    </insert>
+
+
+    <insert id="batchInsertResearchUser" parameterType="java.util.List">
+        INSERT INTO researcher_manage_user_info
+        (  business_id,user_name,id_card,age,gender,education,belong_department,belong_post,major_studied,
+        major_worked,belong_unit,task_division,work_rate,telephone,create_time,creator_user,creator_user_id,
+        start_date,end_date
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.userName},#{item.idCard},#{item.age},#{item.gender},#{item.education},#{item.belongDepartment},#{item.belongPost},
+            #{item.majorStudied}, #{item.majorWorked},#{item.belongUnit},#{item.taskDivision},#{item.workRate},#{item.telephone},#{item.createTime,jdbcType=DATE},
+            #{item.creatorUser},#{item.creatorUserId}, #{item.startDate,jdbcType=DATE},#{item.endDate,jdbcType=DATE}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertAttendanceList" parameterType="java.util.List">
+        INSERT INTO researcher_manage_attendance_info
+        (  business_id,number,user_name,id_card,post_name,week_day,type,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12
+        ,day13,day14,day15,day16,day17,day18,day19,day20,day21,day22,day23,day24,day25,day26,day27,day28,day29,day30,day31
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.number},#{item.userName},#{item.idCard},#{item.postName},#{item.weekDay},#{item.type},#{item.day1},#{item.day2}
+            ,#{item.day3},#{item.day4},#{item.day5},#{item.day6},#{item.day7},#{item.day8},#{item.day9},#{item.day10},#{item.day11},#{item.day12},#{item.day13}
+            ,#{item.day14},#{item.day15},#{item.day16},#{item.day17},#{item.day18},#{item.day19},#{item.day20},#{item.day21},#{item.day22},#{item.day23},#{item.day24}
+            ,#{item.day25},#{item.day26},#{item.day27},#{item.day28},#{item.day29},#{item.day30},#{item.day31}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertSalaryList" parameterType="java.util.List">
+        INSERT INTO researcher_manage_salary_info
+        (  business_id,number,user_name,id_card,post_name,salary,endowment_insurance,medical_insurance,unemployment_insurance,
+        injury_insurance,maternity_insurance,accumulation_fund,year_fund
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.number},#{item.userName},#{item.idCard},#{item.postName},#{item.salary, jdbcType=DECIMAL}
+            ,#{item.endowmentInsurance, jdbcType=DECIMAL},#{item.medicalInsurance, jdbcType=DECIMAL},#{item.unemploymentInsurance, jdbcType=DECIMAL}
+            ,#{item.injuryInsurance, jdbcType=DECIMAL},#{item.maternityInsurance, jdbcType=DECIMAL},#{item.accumulationFund, jdbcType=DECIMAL}
+            ,#{item.yearFund}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertShareList" parameterType="java.util.List">
+        INSERT INTO researcher_manage_share_info
+        (  business_id,number,user_name,id_card,post_name,week_day,type,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12
+        ,day13,day14,day15,day16,day17,day18,day19,day20,day21,day22,day23,day24,day25,day26,day27,day28,day29,day30,day31,
+        days,
+        days_sum,
+        attend_rate,
+        wages_salary,
+        endowment_insurance,
+        medical_insurance,
+        unemployment_insurance,
+        injury_insurance,
+        maternity_insurance,
+        accumulation_fund,
+        year_fund,
+        topic_wages_salary,
+        topic_endowment_insurance,
+        topic_medical_insurance,
+        topic_unemployment_insurance,
+        topic_injury_insurance,
+        topic_maternity_insurance,
+        topic_accumulation_fund,
+        topic_year_fund,
+        topic_insurance_sum
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.number},#{item.userName},#{item.idCard},#{item.postName},#{item.weekDay},#{item.type},#{item.day1},#{item.day2}
+            ,#{item.day3},#{item.day4},#{item.day5},#{item.day6},#{item.day7},#{item.day8},#{item.day9},#{item.day10},#{item.day11},#{item.day12},#{item.day13}
+            ,#{item.day14},#{item.day15},#{item.day16},#{item.day17},#{item.day18},#{item.day19},#{item.day20},#{item.day21},#{item.day22},#{item.day23},#{item.day24}
+            ,#{item.day25},#{item.day26},#{item.day27},#{item.day28},#{item.day29},#{item.day30},#{item.day31}
+            ,#{item.days},#{item.dayssum},#{item.attendrate},#{item.wagessalary, jdbcType=DECIMAL},#{item.endowmentinsurance, jdbcType=DECIMAL}
+            ,#{item.medicalinsurance, jdbcType=DECIMAL},#{item.unemploymentinsurance, jdbcType=DECIMAL},#{item.injuryinsurance, jdbcType=DECIMAL},#{item.maternityinsurance, jdbcType=DECIMAL}
+            ,#{item.accumulationfund, jdbcType=DECIMAL},#{item.yearfund, jdbcType=DECIMAL},#{item.topicwagessalary, jdbcType=DECIMAL},#{item.topicendowmentinsurance, jdbcType=DECIMAL}
+            ,#{item.topicmedicalinsurance, jdbcType=DECIMAL},#{item.topicunemploymentinsurance, jdbcType=DECIMAL},#{item.topicinjuryinsurance, jdbcType=DECIMAL},#{item.topicmaternityinsurance, jdbcType=DECIMAL}
+            ,#{item.topicaccumulationfund, jdbcType=DECIMAL},#{item.topicyearfund, jdbcType=DECIMAL},#{item.topicinsurancesum, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="queryDetail" parameterType="pd" resultType="pd">
+        SELECT
+        id,business_id as businessId,serial_number as serialNumber,creator_org_id as creatorOrgId,creator_org_name as creatorOrgName,
+               creator_user_id as creatorUserId ,creator_user as creatorUserName,created_date as createdDate,project_name as projectName,
+         project_id as projectId,unit_name as unitName,project_leader as projectLeader,attendance_month as attendanceMonth,
+               create_time as createTime,update_time as updateTime,update_user as updateUser,update_user_id as updateUserId,
+         attend_unit as attendUnit,attend_date as attendDate,attend_days as attendDays,attend_peoples as attendPeoples,attend_project as attendProject,
+               salary_unit as salaryUnit,salary_date as salaryDate,salary_project as salaryProject,process_status as processStatus
+        FROM
+            researcher_manage_main
+        WHERE  business_id = #{businessId}
+    </select>
+
+
+    <update id="updateMain" parameterType="pd">
+        update researcher_manage_main
+        set project_name = #{projectName},
+            unit_name = #{unitName},
+            project_id = #{projectId},
+            project_leader = #{projectLeader},
+            attendance_month = #{attendanceMonth, jdbcType=DECIMAL},
+            attend_unit = #{attendUnit},
+            attend_date = #{attendDate},
+            attend_days = #{attendDays},
+            attend_peoples = #{attendPeoples},
+            attend_project = #{attendProject},
+            salary_unit = #{salaryUnit},
+            salary_date = #{salaryDate},
+            salary_project = #{salaryProject},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <delete id="deleteResearchUser" parameterType="java.util.List">
+        delete from researcher_manage_user_info
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAttendanceList" parameterType="java.util.List">
+        delete from researcher_manage_attendance_info
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteSalaryList" parameterType="java.util.List">
+        delete from researcher_manage_salary_info
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteShareList" parameterType="java.util.List">
+        delete from researcher_manage_share_info
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="selectByBusinessId" parameterType="java.util.List" resultType="pd">
+        SELECT
+        business_id as businessId,
+        process_status as processStatus
+        FROM  researcher_manage_main
+        where business_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <delete id="deleteMain" parameterType="java.util.List">
+        delete from researcher_manage_main
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="queryResearchUser" parameterType="pd" resultType="pd">
+        SELECT id,
+               business_id as businessId,
+               user_name as userName,
+               id_card as idCard,
+               age,
+               gender,
+               education,
+               belong_department as belongDepartment,
+               belong_post as belongPost,
+               major_studied as majorStudied,
+               major_worked as majorWorked,
+               belong_unit as belongUnit,
+               task_division as taskDivision,
+               work_rate as workRate,
+               telephone,
+               create_time as createTime,
+               creator_user as creatorUser,
+               creator_user_id as creatorUserId,
+               start_date as startDate,
+               end_date as endDate
+        FROM researcher_manage_user_info
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryAttendanceList" parameterType="pd" resultType="pd">
+        SELECT id,
+               business_id as businessId,
+               number,
+               id_card as idCard,
+               user_name as userName,
+               post_name as postName,
+               week_day as weekDay,
+               type,
+               day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12
+                ,day13,day14,day15,day16,day17,day18,day19,day20,day21,day22,day23,day24,day25,day26,day27,day28,day29,day30,day31
+        FROM researcher_manage_attendance_info
+        where business_id = #{businessId} order by id asc
+    </select>
+
+
+    <select id="querySalaryList" parameterType="pd" resultType="pd">
+        SELECT id,
+               business_id as businessId,
+               number,
+               id_card as idCard,
+               user_name as userName,
+               post_name as postName,
+               salary,endowment_insurance as endowmentInsurance,medical_insurance as medicalInsurance,unemployment_insurance as unemploymentInsurance,
+               injury_insurance as injuryInsurance,maternity_insurance as maternityInsurance,accumulation_fund as accumulationFund,
+               year_fund as yearFund
+        FROM researcher_manage_salary_info
+        where business_id = #{businessId} order by id asc
+    </select>
+
+
+    <select id="queryShareList" parameterType="pd" resultType="pd">
+        SELECT id,
+               business_id as businessId,
+               number,
+               id_card as idCard,
+               user_name as userName,
+               post_name as postName,
+               week_day as weekDay,
+               type,
+               day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12
+                ,day13,day14,day15,day16,day17,day18,day19,day20,day21,day22,day23,day24,day25,day26,day27,day28,day29,day30,day31,
+               days,
+               days_sum as daysSum,
+            attend_rate as attendRate,
+            wages_salary as wagesSalary,
+            endowment_insurance as endowmentInsurance,
+            medical_insurance as medicalInsurance,
+            unemployment_insurance as unemploymentInsurance,
+            injury_insurance as injuryInsurance,
+            maternity_insurance as maternityInsurance,
+            accumulation_fund as accumulationFund,
+            year_fund as yearFund,
+            topic_wages_salary as topicWagesSalary,
+            topic_endowment_insurance as topicEndowmentInsurance,
+            topic_medical_insurance as topicMedicalInsurance,
+            topic_unemployment_insurance as topicUnemploymentInsurance,
+            topic_injury_insurance as topicInjuryInsurance,
+            topic_maternity_insurance as topicMaternityInsurance,
+            topic_accumulation_fund as topicAccumulationFund,
+            topic_year_fund as topicYearFund,
+            topic_insurance_sum as topicInsuranceSum
+
+        FROM researcher_manage_share_info
+        where business_id = #{businessId} order by id asc
+    </select>
+
+
+    <select id="queryProjectList" parameterType="pd" resultType="pd">
+        select
+        id as projectId,business_id as businessId,serial_number as serialNumber,creator_user as createUser,project_name as projectName,
+        unit_name as unitName,apply_user_id as applyUserId,apply_user_name as applyUserName,post_name as postName,apply_amount as applyAmount,
+        start_year as startYear,end_year as endYear,professional_category as professionalCategory,project_type as projectType,
+               research_contents as researchContents,created_date as createdDate
+        from project_apply_main
+        <where>
+            process_status = 'DICT10171005'
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                and creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="approveUserName!=null and approveUserName!=''">
+                and next_approve_user_name LIKE concat ('%',#{approveUserName},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and apply_user_name LIKE concat ('%',#{applyUserName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and post_name like concat('%',#{postName},'%')
+            </if>
+
+            <if test="unitName!=null and unitName!=''">
+                and unit_name LIKE concat('%',#{unitName},'%')
+            </if>
+            <if test="researchContents!=null and researchContents!=''">
+                and research_contents LIKE concat('%',#{researchContents},'%')
+            </if>
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and creator_user LIKE concat ('%',#{creatorUserName},'%')
+            </if>
+
+            <if test="startYear!=null and startYear!=''">
+                and start_year <![CDATA[ >= ]]> #{startYear} and end_year <![CDATA[ >= ]]> #{startYear}
+            </if>
+            <if test="endYear!=null and endYear!=''">
+                and end_year <![CDATA[ <= ]]> #{endYear} and start_year <![CDATA[ <= ]]> #{endYear}
+            </if>
+
+
+            <if test="projectTypeCodeList != null and projectTypeCodeList.size()>0">
+                and project_type_code in
+                <foreach item="item" index="index" collection="projectTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="professionalCategoryCodeList != null and professionalCategoryCodeList.size()>0">
+                and professional_category_code in
+                <foreach item="item" index="index" collection="professionalCategoryCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
+
+    <select id="queryUserList" parameterType="pd" resultType="pd">
+        SELECT
+        u.id,
+        u.business_id as businessId,
+        u.user_name as userName,
+        u.id_card as idCard,
+        u.age,
+        u.gender,
+        u.education,
+        u.belong_department as belongDepartment,
+        u.belong_post as belongPost,
+        u.major_studied as majorStudied,
+        u.major_worked as majorWorked,
+        u.belong_unit as belongUnit,
+        u.task_division as taskDivision,
+        u.work_rate as workRate,
+        u.telephone,
+        u.start_date as startDate,
+        u.end_date as endDate
+        FROM project_apply_main m
+        LEFT JOIN project_apply_research_user u ON m.business_id = u.business_id
+        <where>
+            m.id = #{projectId}
+            <if test="attendanceMonth!=null and attendanceMonth!=''">
+                AND (
+                SUBSTRING ( CONVERT ( VARCHAR ( 30 ), u.start_date, 120 ), 1, 7 ) <![CDATA[ <= ]]> #{attendanceMonth} AND
+                SUBSTRING ( CONVERT ( VARCHAR ( 30 ), u.end_date, 120 ), 1, 7 ) <![CDATA[ >= ]]> #{attendanceMonth} )
+            </if>
+
+        </where>
+    </select>
+
+
+    <select id="queryChangeUserList" parameterType="pd" resultType="pd">
+
+        SELECT
+            u.id,
+            u.user_name as userName,
+            u.id_card as idCard,
+            u.age,
+            u.gender,
+            u.education,
+            u.belong_department as belongDepartment,
+            u.belong_post as belongPost,
+            u.major_studied as majorStudied,
+            u.major_worked as majorWorked,
+            u.belong_unit as belongUnit,
+            u.task_division as taskDivision,
+            u.work_rate as workRate,
+            u.telephone,
+            u.start_date as startDate,
+            u.end_date as endDate
+        FROM
+        item_change c
+                LEFT JOIN item_change_research_user u ON c.business_id = u.business_id
+        <where>
+            u.id is not null AND u.user_status = 1 AND
+            c.id in  (select max(id) from item_change where project_apply_main_id = #{businessId} AND change_type_code = '3' AND process_status = 'DICT10171005')
+            <if test="attendanceMonth!=null and attendanceMonth!=''">
+                AND (
+                SUBSTRING ( CONVERT ( VARCHAR ( 30 ), u.start_date, 120 ), 1, 7 ) <![CDATA[ <= ]]> #{attendanceMonth} AND
+                SUBSTRING ( CONVERT ( VARCHAR ( 30 ), u.end_date, 120 ), 1, 7 ) <![CDATA[ >= ]]> #{attendanceMonth} )
+            </if>
+
+        </where>
+
+    </select>
+
+
+    <select id="queryUserCost" parameterType="pd" resultType="pd">
+        SELECT
+--             ISNULL( topic_wages_salary , 0 ) + ISNULL( topic_insurance_sum, 0 ) AS userCost
+            ISNULL( topic_wages_salary , 0 ) AS topicWagesSalary,
+            ISNULL( topic_insurance_sum, 0 ) AS topicInsuranceSum
+        FROM
+            researcher_manage_share_info
+        WHERE
+            business_id = #{businessId} and number like '%合计%'
+
+    </select>
+
+
+    <select id="queryUserCosts" parameterType="java.util.List" resultType="pd">
+        SELECT
+            SUM(ISNULL( topic_wages_salary , 0 ) + ISNULL( topic_insurance_sum, 0 )) AS userCost,business_id as businessId
+        FROM
+            researcher_manage_share_info
+        where number like '%合计%' and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+        group by business_id
+
+    </select>
+
+
+
+    <select id="queryUserCostTotal" parameterType="pd" resultType="pd">
+        SELECT
+                ISNULL( SUM(i.topic_wages_salary ), 0 ) + ISNULL( SUM(i.topic_insurance_sum), 0 ) AS userCost
+        FROM
+            researcher_manage_main m
+                left join researcher_manage_share_info i on m.business_id = i.business_id
+        WHERE
+            m.project_id = #{projectId} and m.process_status = 'DICT10171005' and i.number like '%合计%'
+
+    </select>
+
+    <select id="queryBudgetList" parameterType="pd" resultType="pd">
+        SELECT
+            january,february,march,april,may,june,
+            july,august,september,october,november,december,years
+        FROM
+            project_apply_main m
+                LEFT JOIN project_apply_budget_month b ON m.business_id = b.business_id
+                LEFT JOIN project_apply_budget_month_detail d ON b.expense_account = d.expense_account
+                AND m.business_id = d.business_id
+        WHERE
+            m.id = #{projectId}
+          AND ( b.expense_account_code = '102311' OR b.expense_account LIKE '%人员费%' )
+
+    </select>
+
+    <select id="queryByProjectId" parameterType="pd" resultType="pd">
+        SELECT
+            business_id as businessId
+        FROM
+            project_apply_main
+        WHERE
+            id = #{projectId}
+
+    </select>
+
+</mapper>

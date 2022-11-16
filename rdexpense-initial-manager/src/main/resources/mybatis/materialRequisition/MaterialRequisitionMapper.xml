@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MaterialRequisitionMapper">
+
+
+    <sql id="record">
+                id,business_id,serial_number,creator_org_id,creator_org_name,creator_user_id,creator_user,created_date,project_name,project_id,
+                apply_date,project_leader,belong_month,create_time,update_time,bill_month,bill_project,
+                update_user,update_user_id,process_status,remark
+    </sql>
+
+    <sql id="recordAndDic">
+        r.id,r.business_id as businessId,r.serial_number as serialNumber,r.creator_org_id as creatorOrgId,r.creator_org_name as creatorOrgName ,
+         r.creator_user_id as createUserId,r.creator_user as createUser,r.created_date as createdDate,r.project_name as projectName,
+        r.apply_date as applyDate,r.project_leader as projectLeader,r.belong_month as belongMonth,r.project_id as projectId,r.create_time as createTime,r.update_time as updateTime ,r.update_user as updateUser,
+         r.update_user_id as updateUserId,process_status as processStatus,d.dic_enum_name as processName,r.remark
+        ,r.bill_month as billMonth,r.bill_project as billProject
+    </sql>
+
+
+    <select id="queryByParams" parameterType="pd" resultType="pd">
+        select
+        <include refid="recordAndDic"></include>
+        FROM (
+        select
+        <include refid="record"></include>
+        from project_material_equisition
+        where (process_status != #{processStatus} and process_status != #{processStatus1} ) or creator_user_id=#{createUserId}) as r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                r.creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="projectLeader!=null and projectLeader!=''">
+                and r.project_leader like concat('%',#{projectLeader},'%')
+            </if>
+
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and r.creator_user LIKE concat ('%',#{creatorUserName},'%')
+            </if>
+
+            <if test="remark!=null and remark!=''">
+                and r.remark LIKE concat ('%',#{remark},'%')
+            </if>
+
+
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and r.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and r.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and r.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and r.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+            <if test="belongMonth!=null and belongMonth!=''">
+                and convert(varchar,r.belong_month,120) LIKE concat('%',#{belongMonth},'%')
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        ORDER BY r.update_time DESC
+    </select>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into project_material_equisition
+        (business_id,serial_number,process_status,creator_org_id,creator_org_name,creator_user_id,creator_user,created_date,project_name,
+         project_id,project_leader,belong_month,apply_date,create_time,update_time,update_user,update_user_id,remark,bill_month,bill_project)
+        values (#{businessId},#{serialNumber},#{processStatus},#{creatorOrgId},#{creatorOrgName} ,
+                #{creatorUserId},#{creatorUserName},#{createdDate,jdbcType=DATE},#{projectName},
+                #{projectId},#{projectLeader},#{belongMonth,jdbcType=DATE},#{applyDate,jdbcType=DATE},getDate(),getDate() ,
+                #{creatorUserName},#{creatorUserId},#{remark},#{billMonth,jdbcType=DATE},#{billProject}
+               )
+    </insert>
+
+
+    <insert id="batchInsertDetail" parameterType="java.util.List">
+        INSERT INTO project_material_requisition_detail
+        (  business_id,material_name,specifications,unit,number,no_tax_price,no_tax_amount,remark,param_source
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.materialName},#{item.specifications},#{item.unit},#{item.number, jdbcType=DECIMAL}
+            ,#{item.noTaxPrice, jdbcType=DECIMAL},#{item.noTaxAmount, jdbcType=DECIMAL},#{item.remark},#{item.paramSource}
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryProject" parameterType="pd" resultType="pd">
+        select id         as projectId,
+               business_id as businessId,
+               start_year as startYear,
+               end_year   as endYear,
+               bureau_level as bureauLevel
+        from project_apply_main
+        where id = #{projectId, jdbcType=BIGINT}
+    </select>
+
+    <update id="updateMain" parameterType="pd">
+        update project_material_equisition
+        set project_name = #{projectName},
+            project_id = #{projectId},
+            project_leader = #{projectLeader},
+            belong_month = #{belongMonth, jdbcType=DATE},
+            apply_date = #{applyDate, jdbcType=DATE},
+            remark = #{remark},
+            bill_project = #{billProject},
+            bill_month = #{billMonth, jdbcType=DATE},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <select id="queryRuleData" parameterType="pd" resultType="pd">
+        select top 1 rule_value as ruleValue
+        from sys_rule_config
+        where rule_type = 1 and status = 1
+    </select>
+
+
+    <delete id="deleteDetail" parameterType="java.util.List">
+        delete from project_material_requisition_detail
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMain" parameterType="java.util.List">
+        delete from project_material_equisition
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="selectByBusinessId" parameterType="java.util.List" resultType="pd">
+        SELECT
+        business_id as businessId,
+        process_status as processStatus
+        FROM  project_material_equisition
+        where business_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryDetail" parameterType="pd" resultType="pd">
+        SELECT
+            id,business_id as businessId,serial_number as serialNumber,creator_org_id as creatorOrgId,creator_org_name as creatorOrgName,
+            creator_user_id as creatorUserId ,creator_user as creatorUserName,created_date as createdDate,project_name as projectName,
+            project_id as projectId,apply_date as applyDate,project_leader as projectLeader,belong_month as belongMonth,
+            create_time as createTime,update_time as updateTime,update_user as updateUser,update_user_id as updateUserId,
+            process_status as processStatus,remark,bill_month as billMonth,bill_project as billProject
+        FROM
+            project_material_equisition
+        WHERE  business_id = #{businessId}
+    </select>
+
+    <select id="queryDetailList" parameterType="pd" resultType="pd">
+        SELECT
+            id,business_id as businessId,material_name as materialName,specifications,unit,number,
+            no_tax_price as noTaxPrice,no_tax_amount as noTaxAmount,remark,param_source as paramSource
+        FROM
+            project_material_requisition_detail
+        WHERE  business_id = #{businessId}
+    </select>
+
+    <select id="queryAmountList" parameterType="java.util.List" resultType="pd">
+        SELECT
+        SUM(ISNULL( no_tax_amount , 0 )) AS amount,business_id as businessId
+        FROM
+        project_material_requisition_detail
+        where  business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+        group by business_id
+
+    </select>
+
+    <select id="queryAmountData" parameterType="pd" resultType="pd">
+        SELECT
+        SUM(ISNULL( no_tax_amount , 0 )) AS amount
+        FROM
+        project_material_requisition_detail
+        where business_id = #{businessId}
+
+    </select>
+
+
+    <select id="queryByBusinessIdList" parameterType="pd" resultType="pd">
+        SELECT
+            e.id,e.business_id as businessId,e.serial_number as serialNumber,
+        e.creator_user as creatorUserName,e.project_name as projectName,
+        e.apply_date as applyDate,e.project_leader as projectLeader,e.belong_month as belongMonth,
+        e.create_time as createTime,e.update_time as updateTime,d.material_name as materialName,d.specifications,d.unit,d.number,
+        d.no_tax_price as noTaxPrice,d.no_tax_amount as noTaxAmount,d.remark,e.bill_month as billMonth,e.bill_project as billProject
+        FROM
+            project_material_equisition e
+        LEFT JOIN
+            project_material_requisition_detail d ON e.business_id = d.business_id
+        WHERE  e.business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY e.update_time DESC
+    </select>
+
+    <delete id="batchDeleteFile" parameterType="java.util.List">
+        delete from uq_attachment
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

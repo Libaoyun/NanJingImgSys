@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DisclosurePaperMapper">
+
+    <sql id="Base_Column">
+        id,
+        creator_org_id as creatorOrgId,
+            created_date as createdDate,
+        creator_org_name as creatorOrgName,creator_user_id as creatorUserId,
+        project_id as projectId,unit_id as unitId,unit_name as unitName,project_leader_id as projectLeaderId,leader_post_id as leaderPostId,
+        prepared_id as preparedId,key_technology as keyTechnology,work_plan as workPlan,
+        artificial_plan as artificialPlan,equipment_plan as equipmentPlan,
+        cost_plan as costPlan,
+        test_plan as testPlan,other_plan as otherPlan,
+        business_id as businessId,
+        serial_number as serialNumber,
+        project_name as projectName,
+        project_leader_name as projectLeaderName,
+        leader_post_name as leaderPostName,
+        contact_number as contactNumber,
+        prepared_name as preparedName,
+        prepared_date as preparedDate,
+        prepared_year as preparedYear,
+        prepared_quarter as preparedQuarter,
+        creator_user_name as creatorUserName,
+        create_time as createTime,
+        update_time as updateTime
+    </sql>
+
+    <select id="selectDisclosurePaperInfoAll" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_disclosure_paper
+        <where>
+            <if test="creatorOrgId!=null and creatorOrgId!=''">
+                and creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="businessId!=null and businessId!=''">
+                and business_id LIKE concat('%',#{businessId},'%')
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="projectLeaderName!=null and projectLeaderName!=''">
+                and project_leader_name LIKE concat('%',#{projectLeaderName},'%')
+            </if>
+            <if test="leaderPostName!=null and leaderPostName!=''">
+                and leader_post_name LIKE concat('%',#{leaderPostName},'%')
+            </if>
+            <if test="contactNumber!=null and contactNumber!=''">
+                and contact_number LIKE concat('%',#{contactNumber},'%')
+            </if>
+            <if test="preparedName!=null and preparedName!=''">
+                and prepared_name LIKE concat('%',#{preparedName},'%')
+            </if>
+            <if test="beginPreparedDate!=null and beginPreparedDate!=''">
+                and prepared_date <![CDATA[ >= ]]> #{beginPreparedDate}
+            </if>
+            <if test="lastPreparedDate!=null and lastPreparedDate!=''">
+                and prepared_date <![CDATA[ <= ]]> #{lastPreparedDate}
+            </if>
+
+
+            <if test="preparedYear!=null and preparedYear!=''">
+                and prepared_year LIKE concat('%',#{preparedYear},'%')
+            </if>
+            <if test="preparedQuarter!=null and preparedQuarter!=''">
+                and prepared_quarter LIKE concat('%',#{preparedQuarter},'%')
+            </if>
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and creator_user_name LIKE concat('%',#{creatorUserName},'%')
+            </if>
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+
+    <insert id="insertDisclosurePaper" parameterType="pd">
+        INSERT INTO project_disclosure_paper
+        (business_id,serial_number,creator_user_id,creator_user_name,created_date,project_name,unit_name,project_leader_name,leader_post_name,
+         contact_number,prepared_name,prepared_date,prepared_year,prepared_quarter,key_technology,work_plan,artificial_plan,
+         equipment_plan,cost_plan,test_plan,other_plan,update_time,create_time,creator_org_id,creator_org_name)
+         VALUES (#{businessId},#{serialNumber},#{creatorUserId},#{creatorUserName},#{createdDate,jdbcType=DATE},#{projectName},#{unitName},#{projectLeaderName},#{leaderPostName},
+                         #{contactNumber},#{preparedName},#{preparedDate,jdbcType=DATE},#{preparedYear},#{preparedQuarter},#{keyTechnology},#{workPlan},
+                             #{artificialPlan},#{equipmentPlan},#{costPlan},#{testPlan},#{otherPlan},getDate(),getDate(),#{creatorOrgId},#{creatorOrgName})
+
+    </insert>
+
+
+
+    <delete id="deleteDisclosurePaper" parameterType="java.util.List">
+        delete from
+        project_disclosure_paper
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="updateDisclosurePaper" parameterType="pd">
+        update project_disclosure_paper
+        set
+            unit_name        =#{unitName},
+            creator_user_name        =#{creatorUserName},
+            created_date = #{createdDate,jdbcType=DATE},
+            project_leader_name    = #{projectLeaderName},
+            leader_post_name = #{leaderPostName},
+            contact_number = #{contactNumber},
+            prepared_name = #{preparedName},
+            prepared_date = #{preparedDate,jdbcType=DATE},
+            prepared_year = #{preparedYear},
+            prepared_quarter = #{preparedQuarter},
+            key_technology = #{keyTechnology},
+            work_plan = #{workPlan},
+            artificial_plan = #{artificialPlan},
+            equipment_plan = #{equipmentPlan},
+            cost_plan = #{costPlan},
+            test_plan = #{testPlan},
+            other_plan = #{otherPlan},
+            update_time    = getdate()
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="queryById" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_disclosure_paper
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="queryByBusinessId" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_disclosure_paper
+        where business_id = #{businessId}
+    </select>
+
+
+
+    <select id="queryByIds" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_disclosure_paper
+        where id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

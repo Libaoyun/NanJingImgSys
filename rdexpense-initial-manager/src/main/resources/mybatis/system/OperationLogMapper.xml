@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OperationLogMapper">
+
+    <sql id="BaseRecord">
+        a.id,
+        a.user_id as userId,
+        a.user_name as userName,
+        a.user_position_id as userPositionId,
+        a.user_position_name as userPositionName,
+        a.login_ip as loginIp,
+        d.dic_enum_name as operateType,
+        a.operate_content as operateContent,
+        a.menu_id as menuId,
+        a.menu_name as menuName,
+        a.user_org_id as userOrgId,
+        a.user_org_name as userOrgName,
+        a.user_depart_id as userDepartId,
+        a.user_depart_name as userDepartName,
+        a.create_time as createTime
+    </sql>
+
+
+    <select id="queryMenuInfo" parameterType="pd" resultType="pd">
+        SELECT
+            id,menu_code as menuCode,title
+        FROM uq_function_menu
+        where menu_code = #{menuId}
+    </select>
+
+    <insert id="insertOperationLog" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_operation_log
+        (
+            user_id,
+            user_name,
+            user_position_id,
+            user_position_name,
+            login_ip,
+            operate_type,
+            operate_content,
+            menu_id,
+            menu_name,
+            user_org_id,
+            user_org_name,
+            user_depart_id,
+            user_depart_name,
+            create_time
+        )values
+        (
+            #{userId},
+            #{userName},
+            #{userPositionId},
+            #{userPositionName},
+            #{loginIp},
+            #{operateType},
+            #{operateContent},
+            #{menuId},
+            #{menuName},
+            #{userOrgId},
+            #{userOrgName},
+            #{userDepartId},
+            #{userDepartName},
+            getDate()
+        )
+    </insert>
+
+    <select id="queryOperationLogList" parameterType="pd" resultType="pd">
+        SELECT
+          <include refid="BaseRecord"></include>
+        FROM uq_operation_log a
+        LEFT JOIN uq_dictionary d ON a.operate_type = d.dic_enum_id
+        <where>
+            <if test="userName !=null and userName !=''">
+                a.user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="userDepartName !=null and userDepartName !=''">
+                and a.user_depart_name like concat('%',#{userDepartName},'%')
+            </if>
+            <if test="userOrgName !=null and userOrgName !=''">
+                and a.user_org_name like concat('%',#{userOrgName},'%')
+            </if>
+            <if test="userPositionName !=null and userPositionName !=''">
+                and a.user_position_name like concat('%',#{userPositionName},'%')
+            </if>
+
+            <if test="loginIp !=null and loginIp !=''">
+                and a.login_ip like concat('%',#{loginIp},'%')
+            </if>
+            <if test="operateType !=null and operateType !=''">
+                and a.operate_type = #{operateType}
+            </if>
+            <if test="operateContent !=null and operateContent !=''">
+                and a.operate_content like concat('%',#{operateContent},'%')
+            </if>
+            <if test="beginTime !=null and beginTime !=''">
+                and CONVERT ( VARCHAR ( 10 ), a.create_time, 20 )  <![CDATA[ >= ]]> #{beginTime}
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                and CONVERT ( VARCHAR ( 10 ), a.create_time, 20 ) <![CDATA[ <= ]]> #{endTime}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC;
+    </select>
+
+
+    <select id="queryOperationLogById"  resultType="pd" parameterType="pd">
+        SELECT
+          <include refid="BaseRecord"></include>
+        FROM uq_operation_log a
+        LEFT JOIN uq_dictionary d ON a.operate_type = d.dic_enum_id
+        where a.id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <!--namespace根据自己需要创建的的mapper的路径和名称填写-->
+<mapper namespace="PhotoMainMapper">
+    <sql id="Base_Column">
+        id, img_laser_id as imgLaserId, img_serial_num as imgSerialNum, img_name as imgName,
+        original_file as originalFile, modified_file as modifiedFile, thumbnail_file as thumbnailFile,
+        department_code as departmentCode, patient_id_card_no as patientIdCardNo, grapher_code as grapherCode,
+        graphing_time as graphingTime, graphing_device_code as graphingDeviceCode, img_modified_time as imgModifiedTime,
+        exam_form_serial_num as examFormSerialNum, create_by as createBy, create_time as createTime,
+        modified_by as modifiedBy, modified_time as modifiedTime, body_part_property as bodyPartProperty,
+        diagnostic_item_property as diagnosticItemProperty, graphing_angle_property as graphingAngleProperty,
+        comment_property as commentProperty
+    </sql>
+
+    <select id="queryByDeviceCode" parameterType="pd" resultType="pd">
+        select <include refid="Base_Column"/>
+        from imgsys_img_main
+        where graphing_device_code = #{graphingDeviceCode}
+        and datediff(second, graphing_time, #{graphingStartTime}) <![CDATA[ < ]]> 0
+        order by graphing_time ASC;
+    </select>
+
+    <select id="queryBySerialNum" parameterType="pd" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from
+             imgsys_img_main
+        where
+            img_serial_num = #{imgSerialNum}
+    </select>
+
+    <select id="queryBySerialNumList" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from imgsys_img_main
+        where serial_num IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryList" parameterType="pd" resultType="pd">
+        select
+            img_serial_num as imgSerialNum, img_name as imgName, thumbnail_file as thumbnailFile,
+            graphing_time as graphingTime
+        from imgsys_img_main
+        where
+            <if test="imgLaserId!=null and imgLaserId!=''">
+                and img_laser_id LIKE concat('%',#{imgLaserId},'%')
+            </if>
+            <if test="patientIdCardNo!=null and patientIdCardNo!=''">
+                and patient_id_card_no LIKE concat('%',#{patientIdCardNo},'%')
+            </if>
+            <if test="departmentCode!=null and departmentCode!=''">
+                and and department_code LIKE concat('%',#{departmentCode},'%')
+            </if>
+            <if test="bodyPartProperty!=null and bodyPartProperty!=''">
+                and body_part_property LIKE concat('%',#{bodyPartProperty},'%')
+            </if>
+            <if test="diagnosticItemProperty!=null and diagnosticItemProperty!=''">
+                and diagnostic_item_property LIKE concat('%',#{diagnosticItemProperty},'%')
+            </if>
+            <if test="keyWord!=null and keyWord!=''">
+                and comment_property LIKE concat('%',#{keyWord},'%')
+            </if>
+            <if test="startDate !=null and startDate !=''">
+                and graphing_time <![CDATA[ >= ]]> #{startDate}
+            </if>
+            <if test="endDate !=null and endDate !=''">
+                and graphing_time <![CDATA[ <= ]]> #{endDate}
+            </if>
+        ORDER BY graphing_time DESC;
+    </select>
+
+    <insert id="insert" parameterType="pd">
+        INSERT INTO imgsys_img_main
+        (img_laser_id, img_serial_num, img_name, original_file, modified_file, thumbnail_file, department_code,
+         patient_id_card_no, grapher_code, graphing_time, graphing_device_code, img_modified_time, exam_form_serial_num,
+         create_by, create_time, modified_by, modified_time)
+        VALUES (#{imgLaserId}, #{imgSerialNum}, #{imgName}, #{originalFile}, #{modifiedFile}, #{thumbnailFile},
+                #{departmentCode}, #{patientIdCardNo}, #{grapherCode}, #{graphingTime}, #{graphingDeviceCode},
+                #{imgModifiedTime}, #{examFormSerialNum}, #{createBy}, getDate(), #{modifiedBy}, getDate())
+    </insert>
+
+    <update id="edit" parameterType="pd">
+        update  imgsys_img_main
+        set     modified_file           = #{modifiedFile},
+                thumbnail_file          = #{thumbnailFile},
+                modified_by             = #{modifiedBy},
+                modified_by             = getDate()
+        where img_serial_num            = #{imgSerialNum}
+    </update>
+
+    <delete id="delete" parameterType="java.util.List">
+        delete from
+        imgsys_img_main
+        where img_serial_num in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.img_serial_num}
+        </foreach>
+    </delete>
+
+    <insert id="infoAppSubmit" parameterType="pd">
+        INSERT INTO imgsys_img_main
+        (img_laser_id, img_serial_num, original_file, thumbnail_file, graphing_time, graphing_device_code,
+         create_time)
+        VALUES (#{imgLaserId}, #{imgSerialNum}, #{originalFile}, #{thumbnailFile},  #{graphingTime},
+                #{graphingDeviceCode}, getDate())
+    </insert>
+
+
+</mapper>

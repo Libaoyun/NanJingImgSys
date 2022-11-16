@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>rdexpense-initial-back</groupId>
+	<artifactId>rdexpense-initial-back</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>rdexpense-initial-back</name>
+	<description>研发费用辅助管理系统</description>
+	<modules>
+		<!-- Redis配置 -->
+		<module>rdexpense-redis</module>
+		<!-- 公共配置 -->
+		<module>rdexpense-common</module>
+		<!-- 业务逻辑 -->
+		<module>rdexpense-initial-manager</module>
+    </modules>
+
+</project>

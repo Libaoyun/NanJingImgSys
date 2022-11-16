@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemChangeMapper">
+
+    <sql id="Base_Column">
+        id,
+        serial_number as serialNumber ,
+        create_user_id as createUserId ,
+        create_user as createUser ,
+        created_date as createdDate ,
+        creator_org_id as creatorOrgId ,
+        creator_org_name as creatorOrgName ,
+        create_time as createTime ,
+        update_time as updateTime ,
+        update_user as updateUser ,
+        update_user_id as updateUserId ,
+        project_name as projectName ,
+        apply_user_id as applyUserId ,
+        apply_user_name as applyUserName ,
+        change_type_code as changeTypeCode ,
+        change_type as changeType ,
+        telephone ,
+        part_content as partContent ,
+        change_advise as changeAdvise ,
+        change_reason as changeReason ,
+        implementation ,
+        funds_use as fundsUse ,
+        approve_user_id as approveUser_id ,
+        approve_user_name as approveUserName ,
+        approve_time as approveTime ,
+        process_inst_id as processInstId ,
+        process_status as processStatus ,
+        business_id as businessId ,
+        belonging_month as belongingMonth ,
+        project_apply_main_id as projectApplyMainId
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        r.id,
+        r.serial_number as serialNumber ,
+        r.create_user_id as createUserId ,
+        r.create_user as createUser ,
+        r.created_date as createdDate ,
+        r.creator_org_id as creatorOrgId ,
+        r.creator_org_name as creatorOrgName ,
+        r.create_time as createTime ,
+        r.update_time as updateTime ,
+        r.update_user as updateUser ,
+        r.update_user_id as updateUserId ,
+        r.project_name as projectName ,
+        r.apply_user_id as applyUserId ,
+        r.apply_user_name as applyUserName ,
+        r.change_type_code as changeTypeCode ,
+        r.change_type as changeType ,
+        r.telephone ,
+        r.part_content as partContent ,
+        r.change_advise as changeAdvise ,
+        r.change_reason as changeReason ,
+        r.implementation ,
+        r.funds_use as fundsUse ,
+        r.approve_user_id as approveUser_id ,
+        r.approve_user_name as approveUserName ,
+        r.approve_time as approveTime ,
+        r.process_inst_id as processInstId ,
+        r.process_status as processStatus ,
+        r.business_id as businessId ,
+        r.project_apply_main_id as projectApplyMainId ,
+        r.next_approve_user_id as nextApproveUserId,
+        r.next_approve_user_name as nextApproveUserName,
+        r.belonging_month as belongingMonth ,
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="queryList" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column_Dic"/>
+        from item_change r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            ((r.process_status != #{processStatus} and r.process_status != #{processQuitStatus}) or r.create_user_id=#{createUserId})
+            and r.creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="nextApproveUserName!=null and nextApproveUserName!=''">
+                and r.next_approve_user_name LIKE concat('%',#{nextApproveUserName},'%')
+            </if>
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and r.create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+            <if test="createdDate!=null and createdDate!=''">
+                and r.created_date LIKE concat('%',#{createdDate},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and r.apply_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="telephone!=null and telephone!=''">
+                and r.telephone LIKE concat('%',#{telephone},'%')
+            </if>
+            <if test="startYear!=null and startYear!=''">
+                and r.start_year <![CDATA[ >= ]]> #{startYear}
+            </if>
+            <if test="endYear!=null and endYear!=''">
+                and r.end_year <![CDATA[ <= ]]> #{endYear}
+            </if>
+
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and r.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and r.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and r.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and r.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+            <if test="beginStartDate!=null and beginStartDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), r.start_year, 23 ) <![CDATA[ >= ]]> #{beginStartDate}
+            </if>
+            <if test="lastStartDate!=null and lastStartDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), r.start_year, 23 ) <![CDATA[ <= ]]> #{lastStartDate}
+            </if>
+
+            <if test="beginEndDate!=null and beginEndDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), r.end_year, 23 ) <![CDATA[ >= ]]> #{beginEndDate}
+            </if>
+            <if test="lastEndDate!=null and lastEndDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), r.end_year, 23 ) <![CDATA[ <= ]]> #{lastEndDate}
+            </if>
+
+            <if test="beginEndDate!=null and beginEndDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), r.check_date, 23 ) <![CDATA[ >= ]]> #{beginCheckDate}
+            </if>
+            <if test="lastEndDate!=null and lastEndDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), r.check_date, 23 ) <![CDATA[ <= ]]> #{lastCheckDate}
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC;
+    </select>
+
+    <delete id="deleteItemChange" parameterType="java.util.List">
+        delete from
+        item_change
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteItemChangeCycle" parameterType="java.util.List">
+        delete from item_change_cycle
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteItemChangeResearchUser" parameterType="java.util.List">
+        delete from
+        item_change_research_user
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteItemChangeFundsBudget" parameterType="java.util.List">
+        delete from item_change_funds_budget
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteItemChangeCycleByBusinessId" parameterType="java.util.List">
+        delete from item_change_cycle
+        where business_id = #{businessId}
+    </delete>
+
+    <delete id="deleteItemChangeFundsBudgetByBusinessId" parameterType="java.util.List">
+        delete from
+            item_change_funds_budget
+        where business_id = #{businessId}
+    </delete>
+
+    <delete id="deleteItemChangeUserInfoByBusinessId" parameterType="java.util.List">
+        delete from
+            item_change_research_user
+        where business_id = #{businessId}
+    </delete>
+
+
+    <select id="queryItemChangeDetail" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column"/>
+        from item_change
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryProjectApplyDetail" resultType="pd" parameterType="pd">
+        SELECT
+            bureau_level as bureauLevel,
+            start_year as startYear,
+            end_year as endYear
+        FROM  project_apply_main
+        where business_id = #{projectApplyMainId}
+    </select>
+
+    <select id="queryCycleDetailByBusinessId" resultType="pd" parameterType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            data_status as dataStatus,
+            start_year as startYear,
+            end_year as endYear,
+            cycle_update_user_id as cycleUpdateUserId,
+            cycle_update_user as cycleUpdateUser,
+            cycle_update_time as cycleUpdateTime
+        FROM  item_change_cycle
+        where business_id = #{businessId} and data_status = 1
+    </select>
+
+    <select id="queryCycleList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            data_status as dataStatus,
+            start_year as startYear,
+            end_year as endYear,
+            cycle_update_user_id as cycleUpdateUserId,
+            cycle_update_user as cycleUpdateUser,
+            cycle_update_time as cycleUpdateTime
+        FROM  item_change_cycle
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryCycleListByDataStatus" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            data_status as dataStatus,
+            start_year as startYear,
+            end_year as endYear,
+            cycle_update_user_id as cycleUpdateUserId,
+            cycle_update_user as cycleUpdateUser,
+            cycle_update_time as cycleUpdateTime
+        FROM  item_change_cycle
+        where business_id = #{businessId} AND data_status = 1
+    </select>
+
+    <select id="queryFundsList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            source_budget_change as sourceBudgetChange,
+            expense_account as expenseAccount,
+            expense_budget as expenseBudget,
+            expense_budget_change as expenseBudgetChange,
+            expense_account_code as expenseAccountCode
+        FROM  item_change_funds_budget
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryItemChangeUserList" resultType="pd" parameterType="pd">
+        select
+            id,
+            business_id as businessId,
+            user_name as userName,
+            id_card as idCard,
+            age,
+            gender,
+            education,
+            belong_department as belongDepartment,
+            belong_post as belongPost,
+            major_studied as majorStudied,
+            major_worked as majorWorked,
+            belong_unit as belongUnit,
+            task_division as taskDivision,
+            work_rate as workRate,
+            telephone,
+            start_date as startDate,
+            end_date as endDate,
+            user_type as userType,
+            user_status as userStatus,
+            create_time as createTime,
+            creator_user as creatorUser,
+            is_original as isOriginal
+        from item_change_research_user
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryItemChangeExportExcel" resultType="pd" parameterType="java.util.List">
+        select
+        <include refid="Base_Column"/>
+        from item_change
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into item_change(
+             serial_number,business_id,creator_org_id,creator_org_name,create_user_id,
+             create_user,created_date,create_time,update_time,apply_user_id,apply_user_name,
+             approve_user_id,approve_user_name,process_status,project_apply_main_id,project_name,
+             change_type_code,change_type,telephone,part_content,change_advise,change_reason,
+             implementation,funds_use,belonging_month
+        )
+        values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName} ,
+                #{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
+                getDate(),getDate(),#{applyUserId},#{applyUserName},#{approveUserId},#{approveUserName},
+                #{processStatus},#{projectApplyMainId},#{projectName},#{changeTypeCode},#{changeType},
+                #{telephone},#{partContent},#{changeAdvise},#{changeReason},
+                #{implementation},#{fundsUse},#{belongingMonth})
+    </insert>
+
+    <insert id="insertCycle" parameterType="java.util.List">
+        insert into item_change_cycle(
+            business_id,data_status,start_year,end_year,
+            cycle_update_user_id,cycle_update_user,cycle_update_time
+        )
+        values
+        <foreach collection="list" item="item" index="index"
+                 separator=",">
+        (
+            #{item.businessId},#{item.dataStatus},#{item.startYear,jdbcType=DATE} ,
+            #{item.endYear,jdbcType=DATE},#{item.cycleUpdateUserId},#{item.cycleUpdateUser},getDate()
+        )
+        </foreach>
+    </insert>
+
+    <insert id="insertBudget" parameterType="java.util.List">
+        INSERT INTO item_change_funds_budget
+        (  business_id,source_account,source_budget,expense_account,expense_budget,source_budget_change,expense_budget_change,
+         expense_account_code
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.sourceAccount},#{item.sourceBudget, jdbcType=DECIMAL},#{item.expenseAccount},
+             #{item.expenseBudget, jdbcType=DECIMAL},#{item.sourceBudgetChange},#{item.expenseBudgetChange},#{item.expenseAccountCode}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertUserInfo" parameterType="java.util.List">
+        INSERT INTO item_change_research_user
+        (  business_id,user_name,id_card,age,gender,education,belong_department,belong_post,major_studied,
+        major_worked,belong_unit,task_division,work_rate,telephone,create_time,creator_user,creator_user_id,
+        start_date,end_date,user_type,user_status,is_original
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.userName},#{item.idCard},#{item.age},#{item.gender},#{item.education},#{item.belongDepartment},#{item.belongPost},
+            #{item.majorStudied}, #{item.majorWorked},#{item.belongUnit},#{item.taskDivision},#{item.workRate},#{item.telephone},#{item.createTime,jdbcType=DATE},
+            #{item.creatorUser},#{item.creatorUserId}, #{item.startDate,jdbcType=DATE},#{item.endDate,jdbcType=DATE},#{item.userType},#{item.userStatus},
+            #{item.isOriginal}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateMain" parameterType="pd">
+        update item_change
+        set update_time= getdate(),
+            update_user = #{createUser},
+            update_user_id = #{createUserId},
+            project_name = #{projectName},
+            apply_user_id = #{applyUserId},
+            apply_user_name = #{applyUserName},
+            change_type_code = #{changeTypeCode},
+            change_type = #{changeType},
+            telephone = #{telephone},
+            part_content = #{partContent},
+            change_advise = #{changeAdvise},
+            change_reason = #{changeReason},
+            implementation = #{implementation},
+            funds_use = #{fundsUse},
+            belonging_month = #{belongingMonth},
+            project_apply_main_id = #{projectApplyMainId}
+        where business_id = #{businessId}
+    </update>
+
+    <update id="updateMainProcessStatus" parameterType="pd">
+        update item_change
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <update id="updateMainApproveProcessStatus" parameterType="pd">
+        update item_change
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            <if test="nextApproveUserId!='' and nextApproveUserId!=null">
+                next_approve_user_id = #{nextApproveUserId},
+            </if>
+            <if test="nextApproveUserName!='' and nextApproveUserName!=null">
+                next_approve_user_name = #{nextApproveUserName},
+            </if>
+            update_user          = #{approveUserName},
+            update_user_id       = #{approveUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <update id="updateProjectApplyCycle" parameterType="pd">
+        update project_apply_main
+        set
+            start_year = #{startYear,jdbcType=DATE},
+            end_year = #{endYear,jdbcType=DATE},
+            cycle_update_user_id = #{cycleUpdateUserId},
+            cycle_update_user = #{cycleUpdateUser},
+            cycle_update_time = getdate()
+        where business_id = #{projectApplyMainId}
+    </update>
+
+    <update id="updateProjectApplyBudget" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" >
+            update project_apply_funds_budget
+            set
+                source_budget_change = #{item.sourceBudgetChange},
+                expense_budget_change = #{item.expenseBudgetChange}
+            where business_id = #{item.projectApplyMainId} and expense_account_code = #{item.expenseAccountCode}
+        </foreach>
+    </update>
+
+    <update id="updateProjectApplyBudgetMonth" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" >
+            update project_apply_budget_month
+            set
+            source_budget = #{item.sourceBudgetChange},
+            expense_budget = #{item.expenseBudgetChange}
+            where business_id = #{item.projectApplyMainId} and expense_account_code = #{item.expenseAccountCode}
+        </foreach>
+    </update>
+
+    <update id="updateUserInfoOriginal" parameterType="pd">
+        update item_change_research_user
+        set
+            is_original = 2
+        where business_id = #{businessId} and is_original = 1
+    </update>
+
+
+    <select id="querySecondarySubjectCodeMonthsList" parameterType="String" resultType="pd">
+        SELECT
+               MAX(belonging_month) AS belongingMonth,
+               secondary_subject_code,
+               SUM(amount) AS sumAmount
+        FROM item_expenses
+        WHERE project_apply_main_id = #{projectApplyMainId}
+        AND process_status IN ('DICT10171005','DICT10171002','DICT10171006')
+        GROUP BY secondary_subject_code
+    </select>
+
+    <select id="querySecondarySubjectCodeMaxMonths" parameterType="pd" resultType="pd">
+        SELECT TOP 1
+            MAX(belonging_month) AS belongingMonth,secondary_subject_code
+        FROM item_expenses
+        WHERE project_apply_main_id = #{projectApplyMainId}
+          AND process_status IN ('DICT10171005','DICT10171002','DICT10171006')
+        GROUP BY secondary_subject_code ORDER BY belongingMonth DESC
+    </select>
+
+    <select id="querySubToDicTypeList" parameterType="java.util.List" resultType="pd">
+        SELECT
+        dic_type_id,
+        dic_type_name,
+        dic_enum_id,
+        dic_enum_name,
+        remark,
+        is_show
+        FROM  uq_dictionary
+        where is_valid = 1
+        and dic_type_id in
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item.dic_type_id}
+            </foreach>
+    </select>
+
+
+    <!--列转行-->
+    <!--budget_share,months 列名自定义，可以是任何想要的名字 Score1，Score2...Subject1,Subject2...
+        in里面的字段为表字段
+    -->
+    <select id="queryBudgetAccumulated" parameterType="pd" resultType="pd">
+        select business_id,years,expense_account,expense_account_code,budget_share,months
+        from project_apply_budget_month_detail a
+            unpivot (budget_share for months in (
+            january,
+            february,march,april,may,june,july,august,september,october,november,december)) b
+        WHERE business_id = #{projectApplyMainId}
+            <if test="maxMonthsList != null and maxMonthsList.size()>0">
+                and expense_account_code in
+                <foreach item="item" index="index" collection="maxMonthsList" open="(" separator="," close=")">
+                    #{item.dic_type_id}
+                </foreach>
+            </if>
+    </select>
+
+    <select id="queryMonthList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            expense_account as expenseAccount,
+            expense_account_code as expenseAccountCode,
+            expense_budget as expenseBudget
+        FROM  project_apply_budget_month
+        where business_id = #{projectApplyMainId}
+        order by id
+    </select>
+
+    <select id="queryMonthDetailList" parameterType="pd" resultType="pd">
+        SELECT
+            business_id as businessId,
+            january,february,march,april,may,june,
+            july,august,september,october,november,december,years,
+            expense_account_code as expenseAccountCode,
+            expense_account as expenseAccount
+        FROM  project_apply_budget_month_detail
+        where business_id = #{projectApplyMainId}
+        order by id
+    </select>
+
+    <select id="queryMonthDetailGroupByYearsList" parameterType="pd" resultType="pd">
+        SELECT years FROM project_apply_budget_month_detail
+        WHERE business_id = #{projectApplyMainId}
+        GROUP BY years
+    </select>
+
+
+    <select id="querySumDicEnumList" parameterType="java.util.List" resultType="pd">
+        SELECT
+        dic_type_id,
+        dic_type_name,
+        dic_enum_id,
+        dic_enum_name,
+        remark,
+        is_valid,
+        is_show
+        FROM  uq_dictionary
+        where is_valid = 1
+            <foreach item="item" index="index" collection="list" open=" and (" separator="or" close=")">
+                dic_enum_id LIKE concat('',#{item.dic_type_id},'-%')
+            </foreach>
+
+    </select>
+
+    <delete id="deleteBudgetMonthDetail" parameterType="java.util.List">
+        delete from project_apply_budget_month_detail
+        where business_id = #{projectApplyMainId}
+    </delete>
+
+    <insert id="batchInsertBudgetMonthDetail" parameterType="java.util.List">
+        INSERT INTO project_apply_budget_month_detail
+        (  business_id,january,february,march,april,may,june,
+        july,august,september,october,november,december,years,expense_account,expense_account_code
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.january, jdbcType=DECIMAL},#{item.february, jdbcType=DECIMAL},#{item.march, jdbcType=DECIMAL},
+            #{item.april, jdbcType=DECIMAL},#{item.may, jdbcType=DECIMAL},#{item.june, jdbcType=DECIMAL},#{item.july, jdbcType=DECIMAL}
+            ,#{item.august, jdbcType=DECIMAL},#{item.september, jdbcType=DECIMAL},#{item.october, jdbcType=DECIMAL},#{item.november, jdbcType=DECIMAL}
+            ,#{item.december, jdbcType=DECIMAL},#{item.years},#{item.expenseAccount},#{item.expenseAccountCode}
+            )
+        </foreach>
+    </insert>
+
+
+
+
+</mapper>

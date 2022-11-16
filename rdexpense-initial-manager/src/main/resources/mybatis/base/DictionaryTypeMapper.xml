@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DictionaryTypeMapper">
+
+    <select id="selectDictionaryTypeByTypeIdOrTypeName" resultType="pd" parameterType="pd">
+        select id from uq_dictionary_type
+        where
+         dic_type_name = #{dicTypeName} or dic_type_id = #{dicTypeId}
+    </select>
+
+    <select id="selectList" resultType="pd" parameterType="pd">
+        select id, dic_type_id AS dicTypeId, dic_type_name AS dicTypeName, dic_type_parent_id AS dicTypeParentId,
+                dic_type_flag as dicTypeFlag
+        from uq_dictionary_type
+    </select>
+
+    <select id="selectListByDicTypeId" resultType="pd" parameterType="pd">
+        select id, dic_type_id AS dicTypeId, dic_type_name AS dicTypeName, dic_type_parent_id AS dicTypeParentId,
+               dic_type_flag as dicTypeFlag
+        from uq_dictionary_type
+        where dic_type_name <![CDATA[ = ]]> #{dicTypeName} and dic_type_id <![CDATA[ != ]]> #{dicTypeId}
+    </select>
+
+
+
+    <select id="selectListByParentId" parameterType="pd" resultType="pd">
+        select id, dic_type_id AS dicTypeId, dic_type_name AS dicTypeName, dic_type_parent_id AS dicTypeParentId,
+        dic_type_flag as dicTypeFlag
+        from uq_dictionary_type
+        where  dic_type_parent_id = #{dicTypeParentId}
+    </select>
+
+    <insert id="insertDictionTypeData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_dictionary_type
+        (
+        dic_type_id,
+        dic_type_name,
+        dic_type_parent_id,
+        dic_type_flag
+        )values
+        (
+        #{dicTypeId},
+        #{dicTypeName},
+        #{dicTypeParentId},
+        #{dicTypeFlag}
+        )
+    </insert>
+
+    <update id="updateDictionTypeData" parameterType="pd">
+       update uq_dictionary_type
+       set
+       dic_type_id = #{dicTypeId},
+       dic_type_name = #{dicTypeName}
+       where id = #{id}
+    </update>
+
+
+    <delete id="deleteDictionaryType" parameterType="java.util.List">
+        delete from  uq_dictionary_type
+        where  dic_type_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteDictionary" parameterType="java.util.List">
+        delete from uq_dictionary
+        where dic_type_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="selectListByParentIds" parameterType="java.util.List" resultType="pd">
+        select id, dic_type_id AS dicTypeId, dic_type_name AS dicTypeName, dic_type_parent_id AS dicTypeParentId,
+        dic_type_flag as dicTypeFlag
+        from uq_dictionary_type
+        where 1=1 and dic_type_parent_id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+</mapper>

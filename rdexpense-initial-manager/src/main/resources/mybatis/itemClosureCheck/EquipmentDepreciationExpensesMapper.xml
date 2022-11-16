@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EquipmentDepreciationExpensesMapper">
+
+    <sql id="Base_Column">
+        id,
+        serial_number as serialNumber,
+        create_user_id as createUserId ,
+        create_user as createUser ,
+        created_date as createdDate ,
+        creator_org_id as creatorOrgId ,
+        creator_org_name as creatorOrgName ,
+        create_time as createTime ,
+        update_time as updateTime ,
+        update_user as updateUser ,
+        update_user_id as updateUserId ,
+        project_name as projectName ,
+        apply_user_id as applyUserId ,
+        apply_user_name as applyUserName ,
+        belonging_month as belongingMonth ,
+        project_apply_main_id as projectApplyMainId ,
+        apply_date as applyDate ,
+        remark,
+        process_status as processStatus ,
+        start_year as startYear,
+        end_year  as endYear,
+        next_approve_user_id as nextApproveUserId ,
+        next_approve_user_name as nextApproveUserName ,
+        business_id as businessId
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        r.id,
+        r.serial_number as serialNumber,
+        r.create_user_id as createUserId ,
+        r.create_user as createUser ,
+        r.created_date as createdDate ,
+        r.creator_org_id as creatorOrgId ,
+        r.creator_org_name as creatorOrgName ,
+        r.create_time as createTime ,
+        r.update_time as updateTime ,
+        r.update_user as updateUser ,
+        r.update_user_id as updateUserId ,
+        r.project_name as projectName ,
+        r.apply_user_id as applyUserId ,
+        r.apply_user_name as applyUserName ,
+        r.belonging_month as belongingMonth ,
+        r.apply_date as applyDate ,
+        r.remark,
+        r.process_status as processStatus ,
+        r.start_year as startYear,
+        r.end_year  as endYear,
+        r.business_id as businessId,
+        r.next_approve_user_id as nextApproveUserId ,
+        r.next_approve_user_name as nextApproveUserName ,
+        r.contract_add_amount_without_tax as contractAddAmountWithoutTax ,
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="queryList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column_Dic"/>
+        from equipment_depreciation_expenses r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            ((r.process_status != #{processStatus} and r.process_status != #{processQuitStatus}) or r.create_user_id=#{createUserId})
+            and r.creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName !=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+
+            <if test="belongingMonth!=null and belongingMonth!=''">
+                and r.belonging_month LIKE concat('%',#{belongingMonth},'%')
+            </if>
+
+            <if test="applyUserName!=null and applyUserName!=''">
+                and r.apply_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="remark!=null and remark!=''">
+                and r.remark LIKE concat('%',#{remark},'%')
+            </if>
+
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and r.create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and r.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and r.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and r.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and r.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC;
+    </select>
+
+
+    <delete id="deleteEquipmentDepreciationExpenses" parameterType="java.util.List">
+        delete from
+        equipment_depreciation_expenses
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteEquipmentDepreciationExpensesDetail" parameterType="java.util.List">
+        delete from
+        equipment_depreciation_expenses_detail
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteDetailByBusinessId" parameterType="java.util.List">
+        delete from
+            equipment_depreciation_expenses_detail
+        where business_id =  #{businessId}
+    </delete>
+
+
+    <select id="queryDetail" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from equipment_depreciation_expenses
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryDepreciationExpensesDetail" resultType="pd" parameterType="pd">
+        select
+            id,business_id as businessId,equipment_name as equipmentName,
+            type_code as typeCode,financial_code as financialCode,original_value as originalValue,
+            this_month_depreciation as thisMonthDepreciation,accumulated_depreciation as accumulatedDepreciation,
+            asset_number as assetNumber,asset_original_value as assetOriginalValue,this_year_depreciation as thisYearDepreciation,
+            asset_net_value as assetNetValue,residual_value as residualValue,date_in as dateIn,this_year_accumulated as thisYearAccumulated,
+            org_code as orgCode,equip_code as equipCode,org_use as orgUse,use_department as useDepartment,use_department_code as useDepartmentCode,
+            param_source as paramSource
+        from equipment_depreciation_expenses_detail
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryDetailExportExcel" resultType="pd" parameterType="java.util.List">
+        select a.serial_number,a.project_name,a.apply_user_name,a.belonging_month,a.apply_date,a.create_user,a.create_time,a.update_time,
+        b.business_id,b.equipment_name,
+        b.type_code,b.financial_code,b.original_value,
+        b.this_month_depreciation,b.accumulated_depreciation,
+        b.asset_number,b.asset_original_value,b.this_year_depreciation,
+        b.asset_net_value,b.residual_value,b.date_in,b.this_year_accumulated,
+        b.org_code,b.equip_code,b.org_use,b.use_department,b.use_department_code
+        from equipment_depreciation_expenses a
+        left join equipment_depreciation_expenses_detail b
+        on a.business_id = b.business_id
+        where a.business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into equipment_depreciation_expenses(
+            serial_number,business_id,creator_org_id,creator_org_name,create_user_id,create_user,created_date,
+            create_time,update_time,project_name,apply_user_id,apply_user_name,belonging_month,update_user,update_user_id  ,
+            project_apply_main_id ,apply_date ,remark,process_status ,start_year,
+            end_year,contract_add_amount_without_tax
+        )
+        values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName},#{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
+                getDate(),getDate(),#{projectName},#{applyUserId},#{applyUserName},#{belongingMonth},#{createUserId},#{createUser},
+                #{projectApplyMainId},#{applyDate,jdbcType=DATE},#{remark},
+                #{processStatus},#{startYear,jdbcType=DATE},#{endYear,jdbcType=DATE},#{contractAddAmountWithoutTax}
+               )
+    </insert>
+
+    <update id="updateMain" parameterType="pd">
+        update equipment_depreciation_expenses
+        set update_time= getdate(),
+            update_user = #{createUser},
+            update_user_id = #{createUserId},
+            project_name = #{projectName},
+            apply_user_id = #{applyUserId},
+            apply_user_name = #{applyUserName},
+            belonging_month = #{belongingMonth},
+            start_year = #{startYear,jdbcType=DATE},
+            end_year = #{endYear,jdbcType=DATE},
+            apply_date = #{applyDate,jdbcType=DATE},
+            remark = #{remark},
+            project_apply_main_id = #{projectApplyMainId},
+            contract_add_amount_without_tax = #{contractAddAmountWithoutTax}
+        where business_id = #{businessId}
+    </update>
+
+    <insert id="insertDepreciationExpensesDetail" parameterType="java.util.List"  useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO equipment_depreciation_expenses_detail
+        (business_id,equipment_name,type_code,financial_code,original_value,
+        this_month_depreciation,accumulated_depreciation,asset_number,asset_original_value,this_year_depreciation,
+        asset_net_value,residual_value,date_in,this_year_accumulated,org_code,equip_code,org_use,use_department,use_department_code,param_source
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.equipmentName},#{item.typeCode},#{item.financialCode},#{item.originalValue},#{item.thisMonthDepreciation},
+            #{item.accumulatedDepreciation},#{item.assetNumber}, #{item.assetOriginalValue},
+            #{item.thisYearDepreciation},#{item.assetNetValue},#{item.residualValue},#{item.dateIn,jdbcType=DATE},#{item.thisYearAccumulated},
+            #{item.orgCode},#{item.equipCode}, #{item.orgUse},#{item.useDepartment},#{item.useDepartmentCode},#{item.paramSource}
+            )
+        </foreach>
+    </insert>
+
+
+
+
+
+</mapper>

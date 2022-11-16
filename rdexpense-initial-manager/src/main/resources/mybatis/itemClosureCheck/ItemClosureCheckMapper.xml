@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemClosureCheckMapper">
+
+    <sql id="Base_Column">
+        id,
+        business_id as businessId,
+        serial_number as serialNumber,
+        create_user_id as createUserId,
+        create_user as createUser,
+        created_date as createdDate,
+        creator_org_id as creatorOrgId,
+        creator_org_name as creatorOrgName,
+        create_time as createTime,
+        update_time as updateTime,
+        update_user as updateUser,
+        update_user_id as updateUserId,
+        job_title as jobTitle,
+        apply_user_id  as applyUserId,
+        apply_user_name as applyUserName,
+        post_code as postCode,
+        post_name as postName,
+        telephone as telephone,
+        unit_name as unitName,
+        start_year as startYear,
+        end_year  as endYear,
+        check_date as checkDate,
+        task_source as taskSource,
+        project_abstract as projectAbstract,
+        directory_and_unit as directoryAndUnit,
+        check_remark as checkRemark,
+        approve_user_id as approveUserId,
+        approve_user_name as approveUserName,
+        approve_time as approveTime,
+        process_inst_id as processInstId,
+        process_status as processStatus,
+        next_approve_user_id as nextApproveUserId,
+        next_approve_user_name as nextApproveUserName
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        r.id,
+        r.business_id as businessId,
+        r.serial_number as serialNumber,
+        r.create_user_id as createUserId,
+        r.create_user as createUser,
+        r.created_date as createdDate,
+        r.creator_org_id as creatorOrgId,
+        r.creator_org_name as creatorOrgName,
+        r.create_time as createTime,
+        r.update_time as updateTime,
+        r.update_user as updateUser,
+        r.update_user_id as updateUserId,
+        r.job_title as jobTitle,
+        r.apply_user_id  as applyUserId,
+        r.apply_user_name as applyUserName,
+        r.post_code as postCode,
+        r.post_name as postName,
+        r.telephone as telephone,
+        r.start_year as startYear,
+        r.unit_name as unitName,
+        r.end_year  as endYear,
+        r.check_date as checkDate,
+        r.task_source as taskSource,
+        r.project_abstract as projectAbstract,
+        r.directory_and_unit as directoryAndUnit,
+        r.check_remark as checkRemark,
+        r.approve_user_id as approveUserId,
+        r.approve_user_name as approveUserName,
+        r.approve_time as approveTime,
+        r.process_inst_id as processInstId,
+        r.process_status as processStatus,
+        r.next_approve_user_id as nextApproveUserId,
+        r.next_approve_user_name as nextApproveUserName,
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="queryItemClosureCheckList" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column_Dic"/>
+        from item_closure_check r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            ((r.process_status != #{processStatus} and r.process_status != #{processQuitStatus}) or r.create_user_id=#{createUserId})
+            and r.creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="jobTitle!=null and jobTitle!=''">
+                and r.job_title LIKE concat('%',#{jobTitle},'%')
+            </if>
+            <if test="nextApproveUserName!=null and nextApproveUserName!=''">
+                and r.next_approve_user_name LIKE concat('%',#{nextApproveUserName},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and r.apply_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and r.create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+            <if test="createdDate!=null and createdDate!=''">
+                and r.created_date LIKE concat('%',#{createdDate},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and r.apply_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and r.post_name LIKE concat('%',#{postName},'%')
+            </if>
+            <if test="projectAbstract!=null and projectAbstract!=''">
+                and r.project_abstract LIKE concat('%',#{projectAbstract},'%')
+            </if>
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and r.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and r.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and r.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and r.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+            <if test="beginStartDate!=null and beginStartDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), r.start_year, 23 ) <![CDATA[ >= ]]> #{beginStartDate}
+            </if>
+            <if test="lastStartDate!=null and lastStartDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), r.start_year, 23 ) <![CDATA[ <= ]]> #{lastStartDate}
+            </if>
+
+            <if test="beginEndDate!=null and beginEndDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), r.end_year, 23 ) <![CDATA[ >= ]]> #{beginEndDate}
+            </if>
+            <if test="lastEndDate!=null and lastEndDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), r.end_year, 23 ) <![CDATA[ <= ]]> #{lastEndDate}
+            </if>
+
+            <if test="beginCheckDate!=null and beginCheckDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), r.check_date, 23 ) <![CDATA[ >= ]]> #{beginCheckDate}
+            </if>
+            <if test="lastCheckDate!=null and lastCheckDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), r.check_date, 23 ) <![CDATA[ <= ]]> #{lastCheckDate}
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC;
+    </select>
+
+    <select id="queryProjectApplyList" resultType="pd" parameterType="pd">
+        select
+            id,
+            business_id as businessId,
+            serial_number as serialNumber,
+            project_name as projectName,
+            apply_user_name as applyUserName,
+            apply_user_id as applyUserId,
+            creator_user as creatorUser,
+            creator_user as createUser,
+            creator_user_id as creatorUserId,
+            post_code as postCode,
+            post_name as postName,
+            unit_name as unitName,
+            project_type_code as projectTypeCode,
+            project_type as projectType,
+            research_contents as researchContents,
+            apply_amount as applyAmount,
+            professional_category_code as professionalCategoryCode,
+            professional_category as professionalCategory,
+            telephone,
+            start_year as startYear,
+            end_year as endYear,
+            start_year_original as startYearOriginal,
+            end_year_original as endYearOriginal,
+            cycle_update_user_id as cycleUpdateUserId ,
+            cycle_update_user as cycleUpdateUser ,
+            cycle_update_time as cycleUpdateTime,
+            created_date as createdDate,
+            bureau_level as bureauLevel
+        from project_apply_main
+        <where>
+            process_status = #{processStatus}
+            <if test="creatorOrgId!=null and creatorOrgId!=''">
+                and creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="applyUserName!=null and applyUserName!=''">
+                and apply_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="postName!=null and postName!=''">
+                and post_name LIKE concat('%',#{postName},'%')
+            </if>
+            <if test="unitName!=null and unitName!=''">
+                and unit_name LIKE concat('%',#{unitName},'%')
+            </if>
+
+            <if test="researchContents!=null and researchContents!=''">
+                and research_contents LIKE concat('%',#{researchContents},'%')
+            </if>
+
+            <if test="projectTypeCodeList != null and projectTypeCodeList.size()>0">
+                and project_type_code in
+                <foreach item="item" index="index" collection="projectTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="professionalCategoryCodeList != null and professionalCategoryCodeList.size()>0">
+                and professional_category_code in
+                <foreach item="item" index="index" collection="professionalCategoryCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="telephone!=null and telephone!=''">
+                and telephone LIKE concat('%',#{telephone},'%')
+            </if>
+            <if test="startYear!=null and startYear!=''">
+                and start_year <![CDATA[ >= ]]> #{startYear}
+            </if>
+            <if test="endYear!=null and endYear!=''">
+                and end_year <![CDATA[ <= ]]> #{endYear}
+            </if>
+        </where>
+        ORDER BY update_time DESC;
+    </select>
+
+    <delete id="deleteItemClosure" parameterType="java.util.List">
+        delete from
+        item_closure_check
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteItemClosureUserInfo" parameterType="java.util.List">
+        delete from
+        item_closure_research_user
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="queryItemClosureCheckDetail" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column"/>
+        from item_closure_check
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryItemClosureCheckDetailExportExcel" resultType="pd" parameterType="java.util.List">
+        select
+        <include refid="Base_Column"/>
+        from item_closure_check
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryItemClosureUserInfoList" resultType="pd" parameterType="pd">
+        select
+            id,
+            business_id as businessId,
+            user_name as userName,
+            id_card as idCard,
+            age,
+            gender,
+            education,
+            belong_department as belongDepartment,
+            belong_post as belongPost,
+            major_studied as majorStudied,
+            major_worked as majorWorked,
+            belong_unit as belongUnit,
+            task_division as taskDivision,
+            work_rate as workRate,
+            telephone,
+            start_date as startDate,
+            end_date as endDate,
+            end_date as endDate,
+            creator_user as creatorUser,
+            creator_user_id as creatorUserId,
+            create_time as createTime,
+            user_status as userStatus
+        from item_closure_research_user
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryItemChange" resultType="pd" parameterType="pd">
+        SELECT  TOP 1 business_id as businessId
+        FROM item_change
+        where project_apply_main_id = #{businessId} AND process_status = 'DICT10171005' ORDER BY update_time DESC
+    </select>
+
+    <select id="queryItemChangeUserList" resultType="pd" parameterType="pd">
+        SELECT
+          id,
+          business_id as businessId,
+          user_name as userName,
+          id_card as idCard,
+          age,
+          gender,
+          education,
+          belong_department as belongDepartment,
+          belong_post as belongPost,
+          major_studied as majorStudied,
+          major_worked as majorWorked,
+          belong_unit as belongUnit,
+          task_division as taskDivision,
+          work_rate as workRate,
+          telephone,
+          start_date as startDate,
+          end_date as endDate,
+          user_type as userType,
+          user_status as userStatus,
+          create_time as createTime,
+          creator_user as creatorUser,
+          is_original as isOriginal
+        FROM item_change_research_user
+        where business_id = #{businessId}
+
+    </select>
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into item_closure_check(
+             serial_number,business_id,creator_org_id,creator_org_name,create_user_id,
+             create_user,created_date,create_time,update_time,job_title,apply_user_id,
+             apply_user_name,post_code,post_name,telephone,start_year,end_year,task_source,
+             project_abstract,directory_and_unit,check_remark,approve_user_id,approve_user_name,
+             process_status,project_apply_main_id,unit_name,check_date
+        )
+        values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName} ,
+                #{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
+                getDate(),getDate(),#{jobTitle},#{applyUserId},#{applyUserName},#{postCode},#{postName},#{telephone},
+                #{startYear,jdbcType=DATE},#{endYear,jdbcType=DATE},#{taskSource},#{projectAbstract},
+                #{directoryAndUnit},#{checkRemark},#{approveUserId},#{approveUserName},#{processStatus},
+                #{projectApplyMainId},#{unitName},#{checkDate,jdbcType=DATE})
+    </insert>
+
+    <update id="updateMain" parameterType="pd">
+        update item_closure_check
+        set update_time= getdate(),
+            update_user = #{createUser},
+            update_user_id = #{createUserId},
+            job_title = #{jobTitle},
+            apply_user_id = #{applyUserId},
+            apply_user_name = #{applyUserName},
+            post_code = #{postCode},
+            post_name = #{postName},
+            telephone = #{telephone},
+            unit_name = #{unitName},
+            start_year = #{startYear,jdbcType=DATE},
+            end_year = #{endYear,jdbcType=DATE},
+            task_source = #{taskSource},
+            project_abstract = #{projectAbstract},
+            directory_and_unit = #{directoryAndUnit},
+            check_remark = #{checkRemark},
+            check_date = #{checkDate,jdbcType=DATE},
+            project_apply_main_id = #{projectApplyMainId}
+        where business_id = #{businessId}
+    </update>
+
+    <delete id="deleteUserInfo" parameterType="java.util.List">
+        delete from
+        item_closure_research_user
+        where business_id = #{businessId}
+    </delete>
+
+    <insert id="batchInsertResearchUser" parameterType="java.util.List"  useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO item_closure_research_user
+        (  business_id,user_name,id_card,age,gender,education,belong_department,belong_post,major_studied,
+        major_worked,belong_unit,task_division,work_rate,telephone,create_time,creator_user,creator_user_id,
+        start_date,end_date,user_type,user_status
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.userName},#{item.idCard},#{item.age},#{item.gender},#{item.education},#{item.belongDepartment},#{item.belongPost},
+            #{item.majorStudied}, #{item.majorWorked},#{item.belongUnit},#{item.taskDivision},#{item.workRate},#{item.telephone},#{item.createTime,jdbcType=DATE},
+            #{item.creatorUser},#{item.creatorUserId}, #{item.startDate,jdbcType=DATE},#{item.endDate,jdbcType=DATE},#{item.userType},#{item.userStatus}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateMainProcessStatus" parameterType="pd">
+        update item_closure_check
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <update id="updateMainApproveProcessStatus" parameterType="pd">
+        update item_closure_check
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            <if test="nextApproveUserId!='' and nextApproveUserId!=null">
+                next_approve_user_id = #{nextApproveUserId},
+            </if>
+            <if test="nextApproveUserName!='' and nextApproveUserName!=null">
+                next_approve_user_name = #{nextApproveUserName},
+            </if>
+            update_user          = #{approveUserName},
+            update_user_id       = #{approveUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+
+</mapper>

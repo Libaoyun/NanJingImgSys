@@ -1,0 +1,35 @@
+package com.imgSys.service;
+
+import com.common.entity.PageData;
+
+import java.text.ParseException;
+import java.util.List;
+
+/**
+ * @description: 图像采集检查单信息
+ * @author: Libaoyun
+ * @date: 2022-10-31 19:19
+ **/
+public interface ExamFormService {
+    void addExamForm(PageData pd);
+
+    PageData getPatientByParams(PageData pd) throws ParseException;
+
+    List<PageData> getStandardBodyPart();
+
+    void addPartOfForm(PageData pd);
+
+ /*   List<PageData> getListOfRegister();
+
+    void updateFormList(PageData pd);*/
+
+    PageData addOrModifyPatient(PageData pd);
+
+    void addExtraBodyPart(PageData pd);
+
+    void deleteExtraBodyPart(PageData pd);
+
+    PageData getPatientOfForm(PageData pd) throws ParseException;
+
+    void registerExamForm(PageData pd);
+}

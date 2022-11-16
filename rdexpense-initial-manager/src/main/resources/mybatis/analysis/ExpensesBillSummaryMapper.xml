@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ExpensesBillSummaryMapper">
+
+
+    <select id="queryProjectData" parameterType="pd" resultType="pd">
+        SELECT
+            business_id as businessId,
+            project_name as projectName,
+            project_code as projectCode,
+            completion_status as completionStatus,
+            completion_status_code as completionStatusCode,
+            expenses_type as expensesType,
+            expenses_type_code as expensesTypeCode
+        FROM  project_expenses_bill
+        WHERE creator_org_id = #{creatorOrgId} and years = #{years}
+        ORDER BY create_time DESC
+    </select>
+
+
+
+    <select id="queryAmountList" parameterType="java.util.List" resultType="pd">
+        SELECT
+        SUM(ISNULL( record_amount , 0 )) as recordAmount,
+        SUM(ISNULL( collection_amount, 0 )) as collectionAmount,
+        SUM(ISNULL( user_amount , 0 )) as userAmount,
+        SUM(ISNULL( input_amount, 0 )) as inputAmount,
+        SUM(ISNULL( depreciation_amount , 0 )) as depreciationAmount,
+        SUM(ISNULL( amortization_amount, 0 )) as amortizationAmount,
+        SUM(ISNULL( desgin_amount , 0 )) as desginAmount,
+        SUM(ISNULL( other_amount, 0 )) as otherAmount,
+        SUM(ISNULL( territory_amount , 0 )) as territoryAmount,
+        SUM(ISNULL( abroad_amount, 0 )) AS abroadAmount,
+        business_id as businessId
+        FROM
+        project_expenses_bill_detail
+        where  business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+        group by business_id
+
+    </select>
+
+    <insert id="addData" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into project_expenses_bill_summary
+        (  creator_org_id,
+           creator_org_name,
+           creator_user_id,
+           creator_user,
+           create_time,
+           update_user_id,
+           update_user,
+           update_time,
+           years,
+           total_amount,
+           user_amount,
+           input_amount,
+           depreciation_amount,
+           amortization_amount,
+           desgin_amount,
+           item_sum_amount,
+           other_amount,
+           adjust_other_amount,
+           territory_amount,
+           adjust_territory_amount,
+           abroad_amount,
+           adjust_abroad_amount)
+        values (#{creatorOrgId},
+                #{creatorOrgName},
+                #{createUserId},
+                #{createUser},
+                getDate(),
+                #{createUserId},
+                #{createUser},
+                getDate(),
+                #{years},
+                #{totalAmount, jdbcType=DECIMAL},
+                #{userAmount, jdbcType=DECIMAL},
+                #{inputAmount, jdbcType=DECIMAL},
+                #{depreciationAmount, jdbcType=DECIMAL},
+                #{amortizationAmount, jdbcType=DECIMAL},
+                #{desginAmount, jdbcType=DECIMAL},
+                #{itemSumAmount, jdbcType=DECIMAL},
+                #{otherAmount, jdbcType=DECIMAL},
+                #{adjustOtherAmount, jdbcType=DECIMAL},
+                #{territoryAmount, jdbcType=DECIMAL},
+                #{adjustTerritoryAmount, jdbcType=DECIMAL},
+                #{abroadAmount, jdbcType=DECIMAL},
+                #{adjustAbroadAmount, jdbcType=DECIMAL})
+    </insert>
+
+
+    <update id="updateData" parameterType="pd">
+        update project_expenses_bill_summary
+        set
+            total_amount = #{totalAmount, jdbcType=DECIMAL},
+            user_amount = #{userAmount, jdbcType=DECIMAL},
+            input_amount = #{inputAmount, jdbcType=DECIMAL},
+            depreciation_amount = #{depreciationAmount, jdbcType=DECIMAL},
+            amortization_amount = #{amortizationAmount, jdbcType=DECIMAL},
+            desgin_amount = #{desginAmount, jdbcType=DECIMAL},
+            item_sum_amount = #{itemSumAmount, jdbcType=DECIMAL},
+            other_amount = #{otherAmount, jdbcType=DECIMAL},
+            adjust_other_amount = #{adjustOtherAmount, jdbcType=DECIMAL},
+            territory_amount = #{territoryAmount, jdbcType=DECIMAL},
+            adjust_territory_amount = #{adjustTerritoryAmount, jdbcType=DECIMAL},
+            abroad_amount = #{abroadAmount, jdbcType=DECIMAL},
+            adjust_abroad_amount = #{adjustAbroadAmount, jdbcType=DECIMAL},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where id = #{id}
+    </update>
+
+
+    <select id="queryOtherData" parameterType="pd" resultType="pd">
+        SELECT top 1
+            id,
+            total_amount as totalAmount,
+            user_amount as userAmount,
+            input_amount as inputAmount,
+            depreciation_amount as depreciationAmount,
+            amortization_amount as amortizationAmount,
+            desgin_amount as desginAmount,
+            item_sum_amount as itemSumAmount,
+            other_amount as otherAmount,
+            adjust_other_amount as adjustOtherAmount,
+            territory_amount as territoryAmount,
+            adjust_territory_amount as adjustTerritoryAmount,
+            abroad_amount as abroadAmount,
+            adjust_abroad_amount as adjustAbroadAmount
+        FROM  project_expenses_bill_summary
+        WHERE creator_org_id = #{creatorOrgId} and years = #{years}
+
+    </select>
+
+
+</mapper>

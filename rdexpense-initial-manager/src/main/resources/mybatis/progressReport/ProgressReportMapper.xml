@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProgressReportMapper">
+
+    <sql id="Base_Column">
+        id,
+        business_id as businessId,
+        process_inst_id as processInstId,
+        process_status as processStatus,
+        serial_number as serialNumber,
+        creator_org_id as creatorOrgId,
+        creator_org_name as creatorOrgName,
+        creator_user_id as creatorUserId,
+        creator_user_name as creatorUserName,
+        created_date as createdDate,
+        approve_user_id as approveUserId,
+        approve_user_name as approveUserName,
+        approve_time as approvetime,
+        process_inst_id as processInstId,
+        next_approve_user_id as nextApproveUserId,
+        next_approve_user_name as nextApproveUserName,
+        project_id as projectId,
+        project_name as projectName,
+        unit_id as unitId,
+        unit_name as unitName,
+        project_leader_id as projectLeaderId,
+        project_leader_name as projectLeaderName,
+        leader_post_id as leaderPostId,
+        leader_post_name as leaderPostName,
+        contact_number as contactNumber,
+        start_date as startDate,
+        end_date as endDate,
+        reporter_id as reporterId,
+        reporter_name as reporterName,
+        reporter_date as reporterDate,
+        project_overview as projectOverview,
+        development_process as developmentProcess,
+        key_technology as keyTechnology,
+        achieve_results as achieveResults,
+        beneficial_result as beneficialResult,
+        report_description as reportDescription,
+        create_time as createTime,
+        update_time as  updateTime,
+        update_user_id as updateUserId
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        ppr.id,
+        ppr.business_id as businessId,
+        ppr.process_status as processStatus,
+        ppr.serial_number as serialNumber,
+        ppr.creator_org_id as creatorOrgId,
+        ppr.creator_org_name as creatorOrgName,
+        ppr.creator_user_id as creatorUserId,
+        ppr.creator_user_name as creatorUserName,
+        ppr.created_date as createdDate,
+--         ppr.approve_user_id as approveUserId,
+--         ppr.approve_user_name as approveUserName,
+        ppr.approve_time as approvetime,
+        ppr.process_inst_id as processInstId,
+        ppr.next_approve_user_id as approveUserId,
+        ppr.next_approve_user_name as approveUserName,
+        ppr.project_id as projectId,
+        ppr.project_name as projectName,
+        ppr.unit_id as unitId,
+        ppr.unit_name as unitName,
+        ppr.project_leader_id as projectLeaderId,
+        ppr.project_leader_name as projectLeaderName,
+        ppr.leader_post_id as leaderPostId,
+        ppr.leader_post_name as leaderPostName,
+        ppr.contact_number as contactNumber,
+        ppr.start_date as startDate,
+        ppr.end_date as endDate,
+        ppr.reporter_id as reporterId,
+        ppr.reporter_name as reporterName,
+        ppr.reporter_date as reporterDate,
+        ppr.project_overview as projectOverview,
+        ppr.development_process as developmentProcess,
+        ppr.key_technology as keyTechnology,
+        ppr.achieve_results as achieveResults,
+        ppr.beneficial_result as beneficialResult,
+        ppr.report_description as reportDescription,
+        ppr.create_time as createTime,
+        ppr.update_time as  updateTime,
+        ppr.update_user_id as updateUserId,
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="selectReportInfoAll" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column_Dic"/>
+        from project_progress_report ppr
+        LEFT JOIN uq_dictionary d ON ppr.process_status = d.dic_enum_id
+        <where>
+            (ppr.process_status != #{processStatus-sql} or ppr.creator_user_id=#{createUserId})
+            and ppr.creator_org_id = #{creatorOrgId}
+            <if test="serialNumber!=null and serialNumber!=''">
+                and ppr.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and ppr.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="processStatus!=null and processStatus.size()>0">
+                and ppr.process_status in
+                <foreach item="item" index="index" collection="processStatus" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="approveUserName!=null and approveUserName!=''">
+                and ppr.approve_user_name LIKE concat('%',#{approveUserName},'%')
+            </if>
+            <if test="projectLeaderName!=null and projectLeaderName!=''">
+                and ppr.project_leader_name LIKE concat('%',#{projectLeaderName},'%')
+            </if>
+            <if test="leaderPostName!=null and leaderPostName!=''">
+                and ppr.leader_post_name LIKE concat('%',#{leaderPostName},'%')
+            </if>
+            <if test="contactNumber!=null and contactNumber!=''">
+                and ppr.contact_number LIKE concat('%',#{contactNumber},'%')
+            </if>
+            <if test="unitName!=null and unitName!=''">
+                and ppr.unit_name LIKE concat('%',#{unitName},'%')
+            </if>
+
+            <if test="beginReporterDate!=null and beginReporterDate!=''">
+                and ppr.reporter_date <![CDATA[ >= ]]> #{beginReporterDate}
+            </if>
+            <if test="lastReporterDate!=null and lastReporterDate!=''">
+                and ppr.reporter_date <![CDATA[ <= ]]> #{lastReporterDate}
+            </if>
+
+            <if test="reporterName!=null and reporterName!=''">
+                and ppr.reporter_name LIKE concat('%',#{reporterName},'%')
+            </if>
+
+            <if test="beginStartDate!=null and beginStartDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), ppr.start_date, 23 ) <![CDATA[ >= ]]> #{beginStartDate}
+            </if>
+            <if test="lastStartDate!=null and lastStartDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), ppr.start_date, 23 ) <![CDATA[ <= ]]> #{lastStartDate}
+            </if>
+
+            <if test="beginEndDate!=null and beginEndDate!=''">
+                and CONVERT ( VARCHAR ( 30 ), ppr.end_date, 23 )  <![CDATA[ >= ]]> #{beginEndDate}
+            </if>
+            <if test="lastEndDate!=null and lastEndDate!=''">
+                and  CONVERT ( VARCHAR ( 30 ), ppr.end_date, 23 ) <![CDATA[ <= ]]> #{lastEndDate}
+            </if>
+
+            <if test="reatorUserName!=null and reatorUserName!=''">
+                and ppr.reator_user_name LIKE concat('%',#{reatorUserName},'%')
+            </if>
+
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and ppr.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and ppr.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and ppr.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and ppr.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+        </where>
+        ORDER BY ppr.update_time DESC;
+    </select>
+
+    <select id="checkReport" resultType="pd" parameterType="pd">
+        select business_id
+        from project_progress_report
+        where business_id = #{businessId}
+    </select>
+
+
+    <insert id="insertReport" parameterType="pd">
+        INSERT INTO project_progress_report
+        (business_id,process_status,serial_number,creator_org_id,creator_org_name, creator_user_name, created_date, project_name, unit_name, project_leader_name, leader_post_name, start_date,
+         end_date,reporter_name, reporter_date,project_overview,development_process,key_technology,achieve_results,beneficial_result,report_description,contact_number,
+         create_time,creator_user_id,update_time,update_user,update_user_id,next_approve_user_id,next_approve_user_name,approve_user_id,approve_user_name,approve_time,process_inst_id)
+        VALUES (#{businessId},#{processStatus},#{serialNumber},#{creatorOrgId},#{creatorOrgName},#{creatorUserName},#{createdDate,jdbcType=DATE},#{projectName},#{unitName},#{projectLeaderName},#{leaderPostName},#{startDate,jdbcType=DATE},
+            #{endDate,jdbcType=DATE},#{reporterName},#{reporterDate,jdbcType=DATE},#{projectOverview},#{developmentProcess},#{keyTechnology},#{achieveResults},#{beneficialResult},#{reportDescription},#{contactNumber},
+                getDate(),#{creatorUserId},getDate(),#{creatorUserName},#{creatorUserId},#{nextApproveUserId},#{nextApproveUserName},#{approveUserId},#{approveUserName},#{approveTime},#{processInstId})
+    </insert>
+
+    <select id="getReportDetail" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_progress_report
+        where id = #{id}
+    </select>
+
+    <select id="getReportDetailByBusinessid" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_progress_report
+        where business_id = #{businessId}
+    </select>
+
+
+
+    <update id="updateReport" parameterType="pd">
+        update project_progress_report
+        set serial_number = #{serialNumber},
+            creator_user_name = #{creatorUserName},
+            create_time = #{createTime,jdbcType=DATE},
+            project_name = #{projectName},
+            unit_name = #{unitName},
+            project_leader_name = #{projectLeaderName},
+            leader_post_name = #{leaderPostName},
+            start_date = #{startDate,jdbcType=DATE},
+            end_date = #{endDate,jdbcType=DATE},
+            reporter_name = #{reporterName},
+            reporter_date = #{reporterDate,jdbcType=DATE},
+            project_overview = #{projectOverview},
+            development_process = #{developmentProcess},
+            key_technology = #{keyTechnology},
+            achieve_results = #{achieveResults},
+            beneficial_result = #{beneficialResult},
+            report_description = #{reportDescription},
+            contact_number  = #{contactNumber},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate(),
+            next_approve_user_id    =#{nextApproveUserId},
+            next_approve_user_name  =#{nextApproveUserName},
+            approve_user_id        =#{approveUserId},
+            approve_user_name       =#{approveUserName},
+            approve_time    =#{approveTime}
+        where business_id  = #{businessId}
+    </update>
+
+    <update id="updateReportStatus" parameterType="pd">
+        update project_progress_report
+        set approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            next_approve_user_id = #{nextApproveUserId},
+            next_approve_user_name = #{nextApproveUserName},
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <delete id="deleteReport" parameterType="java.util.List">
+        delete from
+        project_progress_report
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getReportDetailList" parameterType="java.util.List" resultType="pd">
+        select
+        <include refid="Base_Column"/>
+        from project_progress_report
+        where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="modifyReportState" parameterType="pd">
+        update project_progress_report
+        set process_status = #{processStatus}
+        where id = #{id};
+    </update>
+
+</mapper>

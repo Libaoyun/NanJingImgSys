@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemExpensesMapper">
+
+    <sql id="Base_Column">
+        id,
+        serial_number as serialNumber,
+        create_user_id as createUserId ,
+        create_user as createUser ,
+        created_date as createdDate ,
+        creator_org_id as creatorOrgId ,
+        creator_org_name as creatorOrgName ,
+        create_time as createTime ,
+        update_time as updateTime ,
+        update_user as updateUser ,
+        update_user_id as updateUserId ,
+        project_name as projectName ,
+        apply_user_id as applyUserId ,
+        apply_user_name as applyUserName ,
+        belonging_month as belongingMonth ,
+        start_year as startYear ,
+        end_year as endYear ,
+        first_subject_code as firstSubjectCode ,
+        first_subject as firstSubject ,
+        secondary_subject_code as secondarySubjectCode ,
+        secondary_subject as secondarySubject ,
+        pay_noted as payNoted ,
+        budget_amount as budgetAmount ,
+        accumulated_expenditure as accumulatedExpenditure ,
+        budget_balance as budgetBalance ,
+        approve_user_id as approveUserId ,
+        approve_user_name as approveUserName ,
+        approve_time as approveTime ,
+        process_inst_id as processInstId ,
+        process_status as processStatus ,
+        next_approve_user_id as nextApproveUserId ,
+        next_approve_user_name as nextApproveUserName ,
+        business_id as businessId ,
+        project_apply_main_id as projectApplyMainId ,
+        remark,
+        amount,
+        balance_amount as balanceAmount,
+        bureau_level as bureauLevel,
+        business_id_other as businessIdOther,
+        amount_type as amountType
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        r.id,
+        r.serial_number as serialNumber,
+        r.create_user_id as createUserId ,
+        r.create_user as createUser ,
+        r.created_date as createdDate ,
+        r.creator_org_id as creatorOrgId ,
+        r.creator_org_name as creatorOrgName ,
+        r.create_time as createTime ,
+        r.update_time as updateTime ,
+        r.update_user as updateUser ,
+        r.update_user_id as updateUserId ,
+        r.project_name as projectName ,
+        r.apply_user_id as applyUserId ,
+        r.apply_user_name as applyUserName ,
+        r.belonging_month as belongingMonth ,
+        r.start_year as startYear ,
+        r.end_year as endYear ,
+        r.first_subject_code as firstSubjectCode ,
+        r.first_subject as firstSubject ,
+        r.secondary_subject_code as secondarySubjectCode ,
+        r.secondary_subject as secondarySubject ,
+        r.pay_noted as payNoted ,
+        r.budget_amount as budgetAmount ,
+        r.accumulated_expenditure as accumulatedExpenditure ,
+        r.budget_balance as budgetBalance ,
+        r.approve_user_id as approveUserId ,
+        r.approve_user_name as approveUserName ,
+        r.approve_time as approveTime ,
+        r.process_inst_id as processInstId ,
+        r.process_status as processStatus ,
+        r.next_approve_user_id as nextApproveUserId ,
+        r.next_approve_user_name as nextApproveUserName ,
+        r.business_id as businessId ,
+        r.project_apply_main_id as projectApplyMainId ,
+        r.remark,
+        r.amount,
+        r.balance_amount as balanceAmount,
+        r.bureau_level as bureauLevel,
+        r.business_id_other as businessIdOther,
+        r.amount_type as amountType,
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="queryList" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column_Dic"/>
+        from item_expenses r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            ((r.process_status != #{processStatus} and r.process_status != #{processQuitStatus}) or r.create_user_id=#{createUserId})
+            and r.creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName !=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and r.create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+
+            <if test="payNoted!=null and payNoted!=''">
+                and r.pay_noted LIKE concat('%',#{payNoted},'%')
+            </if>
+<!--            <if test="createdDate!=null and createdDate!=''">-->
+<!--                and r.created_date LIKE concat('%',#{createdDate},'%')-->
+<!--            </if>-->
+
+            <if test="firstSubjectCode != null and firstSubjectCode.size()>0">
+                and r.first_subject_code in
+                <foreach item="item" index="index" collection="firstSubjectCode" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="secondarySubjectCode != null and secondarySubjectCode.size()>0">
+                and r.secondary_subject_code in
+                <foreach item="item" index="index" collection="secondarySubjectCode" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC;
+    </select>
+
+
+    <delete id="deleteItemExpenses" parameterType="java.util.List">
+        delete from
+        item_expenses
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <select id="queryDetail" resultType="pd" parameterType="pd">
+        select
+            <include refid="Base_Column"/>
+        from item_expenses
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryDetailExportExcel" resultType="pd" parameterType="java.util.List">
+        select
+        <include refid="Base_Column"/>
+        from item_expenses
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into item_expenses(
+            serial_number,business_id,creator_org_id,creator_org_name,create_user_id,create_user,created_date,
+            create_time,update_time,project_name,apply_user_id,apply_user_name,belonging_month,first_subject_code,
+            first_subject,secondary_subject_code,secondary_subject,pay_noted,budget_amount,accumulated_expenditure,
+            budget_balance,process_status,project_apply_main_id,remark,
+            amount,balance_amount,start_year,end_year,bureau_level,business_id_other,amount_type
+        )
+        values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName},#{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
+                getDate(),getDate(),#{projectName},#{applyUserId},#{applyUserName},#{belongingMonth},#{firstSubjectCode},
+                #{firstSubject},#{secondarySubjectCode},#{secondarySubject},#{payNoted},#{budgetAmount},#{accumulatedExpenditure},
+                #{budgetBalance},#{processStatus},#{projectApplyMainId},#{remark},#{amount},#{balanceAmount},#{startYear,jdbcType=DATE},
+                #{endYear,jdbcType=DATE},#{bureauLevel},#{businessIdOther},#{amountType}
+                )
+    </insert>
+
+    <update id="updateMain" parameterType="pd">
+        update item_expenses
+        set update_time= getdate(),
+            update_user = #{createUser},
+            update_user_id = #{createUserId},
+            project_name = #{projectName},
+            apply_user_id = #{applyUserId},
+            apply_user_name = #{applyUserName},
+            belonging_month = #{belongingMonth},
+            start_year = #{startYear,jdbcType=DATE},
+            end_year = #{endYear,jdbcType=DATE},
+            first_subject_code = #{firstSubjectCode},
+            first_subject = #{firstSubject},
+            secondary_subject_code = #{secondarySubjectCode},
+            secondary_subject = #{secondarySubject},
+            pay_noted = #{payNoted},
+            budget_amount = #{budgetAmount},
+            accumulated_expenditure = #{accumulatedExpenditure},
+            budget_balance = #{budgetBalance},
+            remark = #{remark},
+            amount = #{amount},
+            balance_amount = #{balanceAmount},
+            bureau_level = #{bureauLevel},
+            project_apply_main_id = #{projectApplyMainId},
+            business_id_other = #{businessIdOther},
+            amount_type = #{amountType}
+        where business_id = #{businessId}
+    </update>
+
+
+    <update id="updateMainProcessStatus" parameterType="pd">
+        update item_expenses
+        set
+            approve_user_id = #{approveUserId},
+            approve_user_name = #{approveUserName},
+            approve_time = getdate(),
+            process_inst_id = #{processInstId},
+            process_status = #{processStatus},
+            <if test="nextApproveUserId!='' and nextApproveUserId!=null">
+                next_approve_user_id = #{nextApproveUserId},
+            </if>
+            <if test="nextApproveUserName!='' and nextApproveUserName!=null">
+                next_approve_user_name = #{nextApproveUserName},
+            </if>
+            update_user          = #{createUser},
+            update_user_id       = #{createUserId},
+            update_time          = getdate()
+        where business_id = #{businessId}
+    </update>
+
+    <select id="queryBusinessIdOtherSize" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from item_expenses
+        where business_id_other = #{businessIdOther}
+    </select>
+
+    <select id="queryBusinessIdOtherProcessStatus" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from item_expenses
+        where business_id_other = #{businessIdOther} and process_status = #{processStatus}
+    </select>
+
+    <update id="updateOtherMainProcessStatus" parameterType="pd">
+        update ${table}
+        set
+        approve_user_id = #{approveUserId},
+        approve_user_name = #{approveUserName},
+        approve_time = getdate(),
+        process_inst_id = #{processInstId},
+        process_status = #{processStatus},
+        next_approve_user_id = #{nextApproveUserId},
+        next_approve_user_name = #{nextApproveUserName},
+        update_user          = #{createUser},
+        update_user_id       = #{createUserId},
+        update_time          = getdate()
+        where business_id = #{businessIdOther}
+    </update>
+
+    <update id="deleteUpdateOtherMainProcessStatus" parameterType="pd">
+        update ${table}
+        set
+            process_status = #{processStatus},
+            update_user          = #{approveUserName},
+            update_user_id       = #{approveUserId},
+            update_time          = getdate()
+        where business_id = #{businessIdOther}
+    </update>
+
+    <select id="queryDicEnum" parameterType="pd" resultType="pd">
+        SELECT
+            dic_type_id,
+            dic_type_name,
+            dic_enum_id,
+            dic_enum_name,
+            remark,
+            is_valid,
+            is_show
+        FROM  uq_dictionary
+        where is_valid = 1
+        <if test="secondarySubjectCode!=null and secondarySubjectCode!=''">
+            and dic_enum_id LIKE concat('',#{secondarySubjectCode},'-%')
+        </if>
+        <if test="dicTypeIdList != null and dicTypeIdList.size()>0">
+            and dic_type_id in
+            <foreach item="item" index="index" collection="dicTypeIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+    </select>
+
+    <select id="queryDicEnumList" parameterType="java.util.List" resultType="pd">
+        SELECT
+        dic_type_id,
+        dic_type_name,
+        dic_enum_id,
+        dic_enum_name,
+        remark,
+        is_valid,
+        is_show
+        FROM  uq_dictionary
+        where is_valid = 1
+            and dic_type_id in
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="queryDicTypeNoBureauEnumList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            dic_type_id,
+            dic_type_name,
+            dic_type_parent_id,
+            dic_type_flag
+        FROM  uq_dictionary_type
+        where dic_type_flag = 1
+          and dic_type_parent_id = '1023'
+    </select>
+
+    <select id="queryDicTypeBureauList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            dic_type_id,
+            dic_type_name,
+            dic_type_parent_id,
+            dic_type_flag
+        FROM  uq_dictionary_type
+        where dic_type_flag = 1
+          and dic_type_parent_id = '1024'
+    </select>
+
+    <select id="queryBudget" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            business_id as businessId,
+            source_account as sourceAccount,
+            source_budget as sourceBudget,
+            source_budget_change as sourceBudgetChange,
+            expense_account as expenseAccount,
+            expense_budget as expenseBudget,
+            expense_budget_change as expenseBudgetChange,
+            expense_account_code as expenseAccountCode,
+            expense_account as expenseAccount
+        FROM  project_apply_funds_budget
+        where business_id = #{projectApplyMainId} and expense_account_code = #{dicTypeId}
+    </select>
+
+    <select id="queryBudgetBYDicEnumTypeIdList" parameterType="pd" resultType="pd">
+        SELECT
+            business_id as businessId,
+            SUM(expense_budget_change) as expenseBudgetChange,
+            SUM(expense_budget) as expenseBudget
+        FROM  project_apply_funds_budget
+        where business_id = #{projectApplyMainId}
+            <if test="dicEnumTypeIdList != null and dicEnumTypeIdList.size()>0">
+                and expense_account_code in
+                <foreach item="item" index="index" collection="dicEnumTypeIdList" open="(" separator="," close=")">
+                    #{item.dic_type_id}
+                </foreach>
+            </if>
+        GROUP BY business_id
+    </select>
+
+
+    <select id="queryAmountSum" parameterType="pd" resultType="pd">
+        select
+               SUM(amount) AS accumulatedExpenditure
+        from  item_expenses
+        where project_apply_main_id = #{projectApplyMainId}
+        <if test="secondarySubjectCodeList != null and secondarySubjectCodeList.size()>0">
+            and secondary_subject_code in
+            <foreach item="item" index="index" collection="secondarySubjectCodeList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="processStatusList != null and processStatusList.size()>0">
+            and process_status in
+            <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <!--列转行-->
+    <!--budget_share,months 列名自定义，可以是任何想要的名字 Score1，Score2...Subject1,Subject2...
+        in里面的字段为表字段
+    -->
+    <select id="queryBudgetAccumulated" parameterType="pd" resultType="pd">
+        select business_id,years,expense_account,expense_account_code,budget_share,months
+        from project_apply_budget_month_detail a
+            unpivot (budget_share for months in (
+            january,
+            february,march,april,may,june,july,august,september,october,november,december)) b
+        WHERE business_id = #{projectApplyMainId}
+            <if test="dicEnumTypeIdList != null and dicEnumTypeIdList.size()>0">
+                and expense_account_code in
+                <foreach item="item" index="index" collection="dicEnumTypeIdList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="dicTypeId != null and dicTypeId!=''">
+                and expense_account_code = #{dicTypeId}
+            </if>
+    </select>
+
+</mapper>

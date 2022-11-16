@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EquipmentLeaseSettlementMapper">
+
+    <sql id="Base_Column">
+        id,
+        serial_number as serialNumber,
+        create_user_id as createUserId ,
+        create_user as createUser ,
+        created_date as createdDate ,
+        creator_org_id as creatorOrgId ,
+        creator_org_name as creatorOrgName ,
+        create_time as createTime ,
+        update_time as updateTime ,
+        update_user as updateUser ,
+        update_user_id as updateUserId ,
+        project_name as projectName ,
+        apply_user_id as applyUserId ,
+        apply_user_name as applyUserName ,
+        belonging_month as belongingMonth ,
+        project_apply_main_id as projectApplyMainId ,
+        apply_date as applyDate ,
+        remark,
+        process_status as processStatus ,
+        start_year as startYear,
+        end_year  as endYear,
+        next_approve_user_id as nextApproveUserId ,
+        next_approve_user_name as nextApproveUserName ,
+        business_id as businessId
+    </sql>
+
+    <sql id="Base_Column_Dic">
+        r.id,
+        r.serial_number as serialNumber,
+        r.create_user_id as createUserId ,
+        r.create_user as createUser ,
+        r.created_date as createdDate ,
+        r.creator_org_id as creatorOrgId ,
+        r.creator_org_name as creatorOrgName ,
+        r.create_time as createTime ,
+        r.update_time as updateTime ,
+        r.update_user as updateUser ,
+        r.update_user_id as updateUserId ,
+        r.project_name as projectName ,
+        r.apply_user_id as applyUserId ,
+        r.apply_user_name as applyUserName ,
+        r.belonging_month as belongingMonth ,
+        r.apply_date as applyDate ,
+        r.remark,
+        r.process_status as processStatus ,
+        r.start_year as startYear,
+        r.end_year  as endYear,
+        r.business_id as businessId,
+        r.next_approve_user_id as nextApproveUserId ,
+        r.next_approve_user_name as nextApproveUserName ,
+        r.contract_add_amount_without_tax as contractAddAmountWithoutTax ,
+        d.dic_enum_name as processName
+    </sql>
+
+    <select id="queryList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column_Dic"/>
+        from equipment_lease_settlement r
+        LEFT JOIN uq_dictionary d ON r.process_status = d.dic_enum_id
+        <where>
+            ((r.process_status != #{processStatus} and r.process_status != #{processQuitStatus}) or r.create_user_id=#{createUserId})
+            and r.creator_org_id = #{creatorOrgId}
+
+            <if test="serialNumber!=null and serialNumber!=''">
+                and r.serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName !=''">
+                and r.project_name LIKE concat('%',#{projectName},'%')
+            </if>
+
+            <if test="belongingMonth!=null and belongingMonth!=''">
+                and r.belonging_month LIKE concat('%',#{belongingMonth},'%')
+            </if>
+
+            <if test="applyUserName!=null and applyUserName!=''">
+                and r.apply_user_name LIKE concat('%',#{applyUserName},'%')
+            </if>
+            <if test="remark!=null and remark!=''">
+                and r.remark LIKE concat('%',#{remark},'%')
+            </if>
+
+            <if test="selectCreateUser!=null and selectCreateUser!=''">
+                and r.create_user LIKE concat('%',#{selectCreateUser},'%')
+            </if>
+
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and r.create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and r.create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="beginUpdateTime!=null and beginUpdateTime!=''">
+                and r.update_time <![CDATA[ >= ]]> #{beginUpdateTime}
+            </if>
+            <if test="lastUpdateTime!=null and lastUpdateTime!=''">
+                and r.update_time <![CDATA[ <= ]]> #{lastUpdateTime}
+            </if>
+
+            <if test="processStatusList != null and processStatusList.size()>0">
+                and r.process_status in
+                <foreach item="item" index="index" collection="processStatusList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY r.update_time DESC;
+    </select>
+
+
+    <delete id="deleteEquipmentLeaseSettlement" parameterType="java.util.List">
+        delete from
+        equipment_lease_settlement
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteEquipmentLeaseSettlementDetail" parameterType="java.util.List">
+        delete from
+        equipment_lease_settlement_detail
+        where business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteEquipmentLeaseSettlementDetailByBusinessId" parameterType="java.util.List">
+        delete from
+            equipment_lease_settlement_detail
+        where business_id =  #{businessId}
+    </delete>
+
+
+    <select id="queryDetail" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Column"/>
+        from equipment_lease_settlement
+        where business_id = #{businessId}
+    </select>
+
+    <select id="querySettlementDetail" resultType="pd" parameterType="pd">
+        select
+            id,business_id as businessId,contract_code as contractCode,equip_name as equipName,
+            spec ,rent_type as rentType,fee_type as feeType,planned_quantity as plannedQuantity,
+            settlement_start_time as settlementStartTime,settlement_end_time as settlementEndTime,
+            settlement_amount_excluding_tax as settlementAmountExcludingTax,tax_rate as taxRate,
+            other_fees as otherFees,other_fees_cost as otherFeesCost,deductions_money as deductionsMoney,
+            deductions_money_cost as deductionsMoneyCost,settlement_amount as settlementAmount,manage_code as manageCode,
+            unit_price_excluding_tax as unitPriceExcludingTax,rent_type_code as rentTypeCode,fee_type_code as feeTypeTode,
+            tax,equip_code as equipCode,price_excluding_tax as priceExcludingTax,
+            nature_payment_code as naturePaymentCode,nature_payment_name as naturePaymentName,
+            cost_item_code as costItemCode,cost_item_name as costItemName,param_source as paramSource
+        from equipment_lease_settlement_detail
+        where business_id = #{businessId}
+    </select>
+
+    <select id="queryDetailExportExcel" resultType="pd" parameterType="java.util.List">
+        select a.serial_number,a.project_name,a.apply_user_name,a.belonging_month,a.apply_date,a.create_user,a.create_time,a.update_time,
+        b.business_id,b.contract_code,b.equip_name,b.spec,b.rent_type,b.fee_type,b.rent_price_monthly,b.planned_quantity,
+        b.settlement_start_time,b.settlement_end_time,b.settlement_amount_excluding_tax,b.tax_rate,b.other_fees,
+        b.other_fees_cost,b.deductions_money,b.deductions_money_cost,b.settlement_amount,b.manage_code,
+        b.unit_price_excluding_tax,b.rent_type_code,b.fee_type_code,b.tax,b.equip_code,b.price_excluding_tax,
+        b.nature_payment_name,b.cost_item_name
+        from equipment_lease_settlement a
+        left join equipment_lease_settlement_detail b
+        on a.business_id = b.business_id
+        where a.business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into equipment_lease_settlement(
+            serial_number,business_id,creator_org_id,creator_org_name,create_user_id,create_user,created_date,
+            create_time,update_time,project_name,apply_user_id,apply_user_name,belonging_month,update_user,update_user_id  ,
+            project_apply_main_id ,apply_date ,remark,process_status ,start_year,
+            end_year,contract_add_amount_without_tax
+        )
+        values (#{serialNumber},#{businessId},#{creatorOrgId},#{creatorOrgName},#{createUserId},#{createUser},#{createdDate,jdbcType=DATE},
+                getDate(),getDate(),#{projectName},#{applyUserId},#{applyUserName},#{belongingMonth},#{createUserId},#{createUser},
+                #{projectApplyMainId},#{applyDate,jdbcType=DATE},#{remark},
+                #{processStatus},#{startYear,jdbcType=DATE},#{endYear,jdbcType=DATE},#{contractAddAmountWithoutTax}
+               )
+    </insert>
+
+    <update id="updateMain" parameterType="pd">
+        update equipment_lease_settlement
+        set update_time= getdate(),
+            update_user = #{createUser},
+            update_user_id = #{createUserId},
+            project_name = #{projectName},
+            apply_user_id = #{applyUserId},
+            apply_user_name = #{applyUserName},
+            belonging_month = #{belongingMonth},
+            start_year = #{startYear,jdbcType=DATE},
+            end_year = #{endYear,jdbcType=DATE},
+            apply_date = #{applyDate,jdbcType=DATE},
+            remark = #{remark},
+            project_apply_main_id = #{projectApplyMainId},
+            contract_add_amount_without_tax = #{contractAddAmountWithoutTax}
+        where business_id = #{businessId}
+    </update>
+
+    <insert id="insertSettlementDetail" parameterType="java.util.List"  useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO equipment_lease_settlement_detail
+        (business_id,contract_code,equip_name,spec,rent_type,fee_type,planned_quantity,
+        settlement_start_time,settlement_end_time,settlement_amount_excluding_tax,tax_rate,
+        other_fees,other_fees_cost,deductions_money,deductions_money_cost,settlement_amount,manage_code,
+        unit_price_excluding_tax,rent_type_code,fee_type_code,tax,equip_code,price_excluding_tax,
+        nature_payment_code,nature_payment_name,cost_item_code,cost_item_name,param_source
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.contractCode},#{item.equipName},#{item.spec},#{item.rentType},#{item.feeType},#{item.plannedQuantity},
+            #{item.settlementStartTime,jdbcType=DATE},#{item.settlementEndTime,jdbcType=DATE}, #{item.settlementAmountExcludingTax},
+            #{item.taxRate},#{item.otherFees},#{item.otherFeesCost},#{item.deductionsMoney},#{item.deductionsMoneyCost},
+            #{item.settlementAmount},#{item.manageCode}, #{item.unitPriceExcludingTax},#{item.rentTypeCode},#{item.feeTypeCode},
+            #{item.tax},#{item.equipCode},#{item.priceExcludingTax},#{item.naturePaymentCode},#{item.naturePaymentName},
+            #{item.costItemCode},#{item.costItemName},#{item.paramSource}
+            )
+        </foreach>
+    </insert>
+
+
+
+
+
+</mapper>

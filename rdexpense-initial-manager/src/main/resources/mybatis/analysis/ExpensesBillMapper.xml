@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ExpensesBillMapper">
+
+    <sql id="record">
+        id,business_id as businessId,serial_number as serialNumber,creator_org_id as creatorOrgId,creator_org_name as creatorOrgName ,
+         creator_user_id as createUserId,creator_user as createUser,project_name as projectName,
+        project_code as projectCode,completion_status as completionStatus,completion_status_code as completionStatusCode,
+         expenses_type as expensesType,expenses_type_code as expensesTypeCode, years, accounting_supervisor as accountingSupervisor, create_time as createTime
+    </sql>
+
+
+    <select id="queryByParams" parameterType="pd" resultType="pd">
+        select
+        <include refid="record"></include>
+        from project_expenses_bill
+        <where>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="serialNumber!=null and serialNumber!=''">
+                and serial_number LIKE concat('%',#{serialNumber},'%')
+            </if>
+            <if test="projectName!=null and projectName!=''">
+                and project_name LIKE concat('%',#{projectName},'%')
+            </if>
+
+            <if test="creatorUserName!=null and creatorUserName!=''">
+                and creator_user LIKE concat ('%',#{creatorUserName},'%')
+            </if>
+
+            <if test="years!=null and years!=''">
+                and years = #{years}
+            </if>
+
+            <if test="beginCreateTime!=null and beginCreateTime!=''">
+                and create_time <![CDATA[ >= ]]> #{beginCreateTime}
+            </if>
+            <if test="lastCreateTime!=null and lastCreateTime!=''">
+                and create_time <![CDATA[ <= ]]> #{lastCreateTime}
+            </if>
+
+            <if test="completionStatusCodeList != null and completionStatusCodeList.size()>0">
+                and completion_status_code in
+                <foreach item="item" index="index" collection="completionStatusCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="expensesTypeCodeList != null and expensesTypeCodeList.size()>0">
+                and expenses_type_code in
+                <foreach item="item" index="index" collection="expensesTypeCodeList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="queryAmountList" parameterType="java.util.List" resultType="pd">
+        SELECT
+        SUM(ISNULL( record_amount , 0 ) + ISNULL( collection_amount, 0 ) + ISNULL( user_amount , 0 ) +
+            ISNULL( input_amount, 0 ) + ISNULL( depreciation_amount , 0 ) + ISNULL( amortization_amount, 0 ) +
+            ISNULL( desgin_amount , 0 ) + ISNULL( other_amount, 0 )+ ISNULL( territory_amount , 0 ) +
+            ISNULL( abroad_amount, 0 )) AS amount,business_id as businessId
+        FROM
+        project_expenses_bill_detail
+        where  business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.businessId}
+        </foreach>
+        group by business_id
+
+    </select>
+
+    <delete id="deleteMain" parameterType="java.util.List">
+        delete from project_expenses_bill
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteDetail" parameterType="java.util.List">
+        delete from project_expenses_bill_detail
+        where 1=1 and business_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <insert id="insertMain" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into project_expenses_bill
+        (business_id,serial_number,creator_org_id,creator_org_name,creator_user_id,creator_user,project_name,
+         project_code,completion_status,completion_status_code,expenses_type,expenses_type_code,years,accounting_supervisor,create_time)
+        values (#{businessId},#{serialNumber},#{creatorOrgId},#{creatorOrgName} ,
+                #{creatorUserId},#{creatorUserName},#{projectName},
+                #{projectCode},#{completionStatus},#{completionStatusCode},#{expensesType},#{expensesTypeCode},#{years},
+                #{accountingSupervisor},getDate())
+    </insert>
+
+
+
+    <insert id="batchDetailList" parameterType="java.util.List">
+        INSERT INTO project_expenses_bill_detail
+        (business_id,expenses_date, classify,numbers,abstracts,record_amount,collection_amount,user_amount,input_amount,
+        depreciation_amount,amortization_amount,desgin_amount,other_amount,territory_amount,abroad_amount
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.expensesDate,jdbcType=DATE},#{item.classify},#{item.numbers},#{item.abstracts},#{item.recordAmount, jdbcType=DECIMAL}
+            ,#{item.collectionAmount, jdbcType=DECIMAL},#{item.userAmount, jdbcType=DECIMAL},#{item.inputAmount, jdbcType=DECIMAL},#{item.depreciationAmount, jdbcType=DECIMAL}
+            ,#{item.amortizationAmount, jdbcType=DECIMAL},#{item.desginAmount, jdbcType=DECIMAL},#{item.otherAmount, jdbcType=DECIMAL}
+            ,#{item.territoryAmount, jdbcType=DECIMAL},#{item.abroadAmount, jdbcType=DECIMAL}
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryProjectByName" parameterType="pd" resultType="pd">
+        SELECT
+        id,
+        SUBSTRING ( CONVERT ( VARCHAR ( 30 ), start_year, 120 ), 1, 4 ) AS startYear,
+        SUBSTRING ( CONVERT ( VARCHAR ( 30 ), end_year, 120 ), 1, 4 ) AS endYear
+        FROM
+        project_apply_main
+        where  project_name = #{projectName} and creator_org_id = #{creatorOrgId} and process_status = 'DICT10171005'
+    </select>
+
+    <select id="queryProjectByNameAndYear" parameterType="pd" resultType="pd">
+        SELECT
+            id
+        FROM
+            project_expenses_bill
+        where  project_name = #{projectName} and years = #{years} and creator_org_id = #{creatorOrgId}
+    </select>
+
+    <select id="queryByBusinessId" parameterType="pd" resultType="pd">
+        select
+        <include refid="record"></include>
+        from project_expenses_bill
+        where business_id = #{businessId}
+    </select>
+
+
+    <select id="queryDetailByBusinessId" parameterType="pd" resultType="pd">
+        select
+        business_id as businessId,expenses_date as expensesDate, classify,numbers,abstracts,record_amount as recordAmount,
+               collection_amount as collectionAmount,user_amount as userAmount,input_amount as inputAmount,
+        depreciation_amount as depreciationAmount,amortization_amount as amortizationAmount,desgin_amount as desginAmount,
+               other_amount as otherAmount,territory_amount as territoryAmount,abroad_amount as abroadAmount
+        from project_expenses_bill_detail
+        where business_id = #{businessId}
+    </select>
+
+
+    <select id="selectByBusinessId" parameterType="java.util.List" resultType="pd">
+        SELECT
+        business_id as businessId,
+        creator_user_id as creatorUserId
+        FROM  project_expenses_bill
+        where business_id IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+</mapper>

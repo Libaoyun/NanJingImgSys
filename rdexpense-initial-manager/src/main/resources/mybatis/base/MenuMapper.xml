@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MenuMapper">
+
+
+    <sql id="BaseMenu">
+	   id,menu_code,title,path,parent_code,menu_type,order_number,level_number,icon,name,redirect,
+	   component,is_valid,relate_flow,no_drop_down,keep_alive,hidden,is_home,path_routing,is_able,is_approve
+	</sql>
+
+    <sql id="BaseMenuButton">
+       um.id,um.menu_code as menuCode,title,path,parent_code as parentCode,menu_type as menuType,order_number as orderNumber,level_number as levelNumber,icon,
+       name,redirect,component,is_valid as isValid,relate_flow as relateFlow,no_drop_down as noDropDown,keep_alive as keepAlive,hidden,is_home as isHome,
+       path_routing as pathRouting,is_able as isAble,is_approve as isApprove,ur.auth_menu_code as authMenuCode,ur.com_button as comButton,ur.detail_button as detailButton
+    </sql>
+
+    <select id="queryAllMenu" parameterType="pd" resultType="pd">
+        select
+        <include refid="BaseMenuButton"/>
+        from uq_function_menu um left join uq_button_routing  ur on um.menu_code = ur.menu_code
+        where 1=1 and um.menu_code not in (0,-2,-1,22,2)
+          and is_valid = 1 order by order_number
+    </select>
+
+
+    <select id="queryByMenuCode" parameterType="pd" resultType="pd">
+        select
+        <include refid="BaseMenuButton"/>
+        from uq_function_menu um left join uq_button_routing  ur on um.menu_code = ur.menu_code
+        where 1=1 and um.menu_code = #{menuCode} order by order_number
+    </select>
+
+    <insert id="insertMenu" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_function_menu(
+            menu_code,title,path,parent_code,menu_type,order_number,level_number,icon,name,redirect,component,
+            is_valid,relate_flow,no_drop_down,keep_alive,hidden,is_home,path_routing,is_able,is_approve
+        )values(#{menuCode},#{title},#{path},#{parentCode},#{menuType},#{orderNumber},#{levelNumber},#{icon},
+            #{name},#{redirect},#{component},#{isValid},#{relateFlow},#{noDropDown},#{keepAlive},#{hidden},
+            #{isHome},#{pathRouting},#{isAble},#{isApprove})
+    </insert>
+
+    <insert id="insertMenuButton" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_button_routing (
+            menu_code,auth_menu_code,com_button,detail_button
+        )values(#{menuCode},#{parentCode},#{comButton},#{detailButton})
+    </insert>
+
+
+    <select id="searchByCodeOrTitle" parameterType="pd" resultType="pd">
+        select
+        <include refid="BaseMenu"/>
+        from uq_function_menu where 1=1 and menu_code = #{menuCode} or title = #{title}
+    </select>
+
+
+    <select id="queryAllMenuCount" parameterType="pd" resultType="pd">
+        select count(1) as countSize from uq_function_menu where 1=1
+    </select>
+
+
+    <update id="updateMenu" parameterType="pd">
+        update uq_function_menu
+        set menu_code = #{menuCode} ,title = #{title},path = #{path},icon = #{icon},name = #{name},hidden = #{hidden},is_approve = #{isApprove},
+            component = #{component},relate_flow = #{relateFlow},no_drop_down = #{noDropDown},keep_alive = #{keepAlive}
+        where 1=1 and id = #{id}
+    </update>
+
+    <update id="updateMenuButton" parameterType="pd">
+        update uq_button_routing
+        set com_button = #{comButton},detail_button=#{detailButton}
+        where 1=1 and menu_code = #{menuCode}
+    </update>
+
+    <delete id="deleteMenu" parameterType="java.util.List">
+        delete from uq_function_menu
+        where 1=1 and menu_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMenuButton" parameterType="java.util.List">
+        delete from uq_button_routing
+        where 1=1 and menu_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAllMenu" >
+        delete from uq_function_menu where 1=1 and menu_code not in (0,-2,-1,22,2)
+    </delete>
+
+    <delete id="deleteAllMenuButton">
+        delete from uq_button_routing  where 1=1
+    </delete>
+
+    <insert id="insertBatchMenuButton" parameterType="java.util.List">
+        INSERT INTO uq_button_routing  (menu_code,auth_menu_code,com_button,detail_button)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.menuCode},#{item.parentCode},#{item.comButton},#{item.detailButton} )
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchMenu" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO uq_function_menu (menu_code,title,path,parent_code,menu_type,order_number,
+        level_number,icon,name,redirect,component,is_valid,relate_flow,no_drop_down,keep_alive,
+        hidden,is_home,path_routing,is_able,is_approve)
+        VALUES
+            (#{menuCode},#{title},#{path},#{parentCode},#{menuType},#{orderNumber},#{levelNumber},#{icon},
+            #{name},#{redirect},#{component},#{isValid},#{relateFlow},#{noDropDown},#{keepAlive},#{hidden},
+            #{isHome},#{pathRouting},#{isAble},#{isApprove})
+    </insert>
+
+
+    <select id="searchByParentCode" parameterType="pd" resultType="pd">
+        select parent_code as parentCode,level_number as levelNumber
+        from uq_function_menu where 1=1 and menu_code = #{parentCode}
+    </select>
+
+    <insert id="batchInsertMenuButton" parameterType="java.util.List">
+        INSERT INTO uq_function_menu_button (menu_code,authority_button_code)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.menuCode},#{item.authorityButtonCode})
+        </foreach>
+    </insert>
+
+    <delete id="deleteButtonByMenuCode" >
+        delete from uq_function_menu_button  where 1=1 and menu_code = #{menuCode}
+    </delete>
+
+    <select id="queryAllMenuButton" parameterType="pd" resultType="pd">
+        select menu_code as menuCode,authority_button_code as authorityButtonCode
+        from uq_function_menu_button  where 1=1
+    </select>
+
+
+    <select id="searchMaxOrderNumber" parameterType="pd" resultType="pd">
+        select max(order_number) + 1 as orderNumber
+        from uq_function_menu where 1=1
+    </select>
+
+
+    <delete id="deleteBatchMenuButton" parameterType="java.util.List">
+        delete from uq_function_menu_button
+        where 1=1 and menu_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAuthorityMenu" parameterType="java.util.List">
+        delete from uq_authority_menu
+        where 1=1 and menu_code in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

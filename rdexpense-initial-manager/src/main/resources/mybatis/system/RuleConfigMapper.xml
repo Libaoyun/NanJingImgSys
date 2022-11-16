@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RuleConfigMapper">
+
+
+    <sql id="baseRecord">
+        id,
+        rule_type as ruleType,
+        rule_value as ruleValue,
+        status,
+        create_user as createUser,
+        create_user_id as createUserId,
+        create_time as createTime,
+        update_user as updateUser,
+        update_user_id as updateUserId,
+        update_time as updateTime
+    </sql>
+
+
+    <insert id="batchInsertRule" parameterType="java.util.List">
+        insert into sys_rule_config(rule_type,rule_value,status,
+        create_user, create_user_id, create_time, update_user, update_user_id, update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.ruleType},#{item.ruleValue},#{item.status},
+            #{item.createUser}, #{item.createUserId}, getDate(), #{item.createUser}, #{item.createUserId},getDate()
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="queryAllData" parameterType="pd" resultType="pd">
+        select
+        <include refid="baseRecord"></include>
+        from sys_rule_config
+        where 1=1
+        ORDER BY rule_type ASC;
+    </select>
+
+
+
+    <update id="updateRule" parameterType="pd">
+        update sys_rule_config
+        set rule_type = #{ruleType},
+            rule_value = #{ruleValue},
+            status = #{status},
+            update_user    = #{createUser},
+            update_user_id = #{createUserId},
+            update_time    = getdate()
+        where id = #{id}
+    </update>
+
+    <delete id="deleteData" parameterType="pd">
+        delete from
+        sys_rule_config
+
+    </delete>
+
+
+</mapper>
+
+

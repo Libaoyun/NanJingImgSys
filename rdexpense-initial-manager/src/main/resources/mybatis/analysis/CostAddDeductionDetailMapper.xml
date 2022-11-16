@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CostAddDeductionDetailMapper">
+
+    <sql id="record">
+        id,
+        business_id as businessId,
+        project_name as projectName,
+        start_month as startMonth,
+        end_month as endMonth,
+        expense_account_code as expenseAccountCode,
+        expense_account as expenseAccount,
+        expense_cost as expenseCost,
+        create_time as createTime,
+        update_user_id as updateUserId,
+        update_user as updateUser,
+        update_time as updateTime,
+        creator_org_id as creatorOrgId,
+        creator_org_name as creatorOrgName
+    </sql>
+
+
+    <select id="queryAllList" parameterType="pd" resultType="pd">
+        select
+        <include refid="record"></include>
+        from project_cost_add_deduction_detail
+        <where>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="startMonth!=null and startMonth!=''">
+                and CONVERT(varchar(7), start_month, 23) <![CDATA[ >= ]]> #{startMonth}
+            </if>
+            <if test="endMonth!=null and endMonth!=''">
+                and CONVERT(varchar(7), end_month, 23) <![CDATA[ <= ]]> #{endMonth}
+            </if>
+            <if test="endMonth==null and endMonth==''">
+                and CONVERT(varchar(7), end_month, 23) <![CDATA[ <= ]]> CONVERT(varchar(7), GETDATE(), 23)
+            </if>
+        </where>
+    </select>
+    <select id="queryList" parameterType="pd" resultType="pd">
+        select
+        <include refid="record"></include>
+        from project_cost_add_deduction_detail
+        <where>
+            <if test="businessId != null and businessId != ''">
+                business_id = #{businessId}
+            </if>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                and creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="startMonth!=null and startMonth!=''">
+                and CONVERT(varchar(7), start_month, 23) <![CDATA[ >= ]]> #{startMonth}
+            </if>
+            <if test="endMonth!=null and endMonth!=''">
+                and CONVERT(varchar(7), end_month, 23) <![CDATA[ <= ]]> #{endMonth}
+            </if>
+            <if test="endMonth==null and endMonth==''">
+                and CONVERT(varchar(7), end_month, 23) <![CDATA[ <= ]]> CONVERT(varchar(7), GETDATE(), 23)
+            </if>
+        </where>
+    </select>
+
+    <select id="queryOneList" parameterType="pd" resultType="pd">
+        select
+        <include refid="record"></include>
+        from project_cost_add_deduction_detail
+        <where>
+            <if test="businessId != null and businessId != ''">
+                business_id = #{businessId}
+            </if>
+            <if test="creatorOrgId != null and creatorOrgId != ''">
+                and creator_org_id = #{creatorOrgId}
+            </if>
+            <if test="startMonth!=null and startMonth!=''">
+                and start_month <![CDATA[ = ]]> #{startMonth}
+            </if>
+            <if test="endMonth!=null and endMonth!=''">
+                and end_month <![CDATA[ = ]]> #{endMonth}
+            </if>
+            <if test="expenseAccountCode!=null and expenseAccountCode!=''">
+                and expense_account_code <![CDATA[ = ]]> #{expenseAccountCode}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteDetail" parameterType="java.util.List">
+        delete from project_cost_add_deduction_detail
+        where business_id = #{businessId} and belonging_month = #{belongingMonth}
+    </delete>
+
+    <insert id="batchInsertDetail" parameterType="java.util.List">
+        INSERT INTO project_cost_add_deduction_detail
+        (  business_id,project_name,start_month,end_month,expense_account_code,
+        expense_account,expense_cost,create_time,update_user_id,update_user,update_time,creator_org_id,creator_org_name
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.businessId},#{item.projectName},#{item.startMonth},#{item.endMonth},#{item.expenseAccountCode},
+            #{item.expenseAccount},#{item.expenseCost, jdbcType=DECIMAL},getdate(),#{item.createUserId}
+            ,#{item.createUser},getdate(),#{item.creatorOrgId},#{item.creatorOrgName}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateDetail" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" >
+            update project_cost_add_deduction_detail
+            set
+                expense_cost = #{item.expenseCost, jdbcType=DECIMAL},
+                start_month = #{item.startMonth},
+                end_month = #{item.endMonth},
+                update_user_id = #{item.createUserId},
+                update_user = #{item.createUser},
+                creator_org_id = #{item.creatorOrgId},
+                creator_org_name = #{item.creatorOrgName},
+                update_time = getdate()
+            where business_id = #{item.businessId} and expense_account_code = #{item.expenseAccountCode}
+              AND creator_org_id = #{item.creatorOrgId}
+        </foreach>
+    </update>
+
+
+    <select id="queryProjectApplySum" resultType="pd" parameterType="String">
+        SELECT
+            COUNT(id) as projectSum
+        FROM  project_apply_main
+        where process_status = 'DICT10171005' AND creator_org_id = #{creatorOrgId}
+            <if test="startMonth!=null and startMonth!=''">
+                and CONVERT(varchar(7), create_time, 23) <![CDATA[ >= ]]> #{startMonth}
+            </if>
+            <if test="endMonth!=null and endMonth!=''">
+                and CONVERT(varchar(7), create_time, 23) <![CDATA[ <= ]]> #{endMonth}
+            </if>
+    </select>
+
+    <select id="querySecondarySubjectCodeMonthsList" parameterType="String" resultType="pd">
+        SELECT
+            secondary_subject_code,
+            SUM(amount) AS sumAmount
+        FROM item_expenses
+        WHERE project_apply_main_id = #{businessId}
+            AND process_status = 'DICT10171005' AND creator_org_id = #{creatorOrgId}
+            <if test="startMonth!=null and startMonth!=''">
+                and CONVERT(varchar(7), belonging_month, 23) <![CDATA[ >= ]]> #{startMonth}
+            </if>
+            <if test="endMonth!=null and endMonth!=''">
+                and CONVERT(varchar(7), belonging_month, 23) <![CDATA[ <= ]]> #{endMonth}
+            </if>
+            <if test="endMonth==null and endMonth==''">
+                and CONVERT(varchar(7), belonging_month, 23) <![CDATA[ <= ]]> CONVERT(varchar(7), GETDATE(), 23)
+            </if>
+        GROUP BY secondary_subject_code
+    </select>
+
+    <select id="querySecondarySubjectCodeMonthsAllList" parameterType="String" resultType="pd">
+        SELECT
+        secondary_subject_code,
+        SUM(amount) AS sumAmount
+        FROM item_expenses
+        WHERE  process_status = 'DICT10171005' AND creator_org_id = #{creatorOrgId}
+            <if test="startMonth!=null and startMonth!=''">
+                and CONVERT(varchar(7), belonging_month, 23) <![CDATA[ >= ]]> #{startMonth}
+            </if>
+            <if test="endMonth!=null and endMonth!=''">
+                and CONVERT(varchar(7), belonging_month, 23) <![CDATA[ <= ]]> #{endMonth}
+            </if>
+            <if test="endMonth==null and endMonth==''">
+                and CONVERT(varchar(7), belonging_month, 23) <![CDATA[ <= ]]> CONVERT(varchar(7), GETDATE(), 23)
+            </if>
+        GROUP BY secondary_subject_code
+    </select>
+
+    <select id="queryDicTypeList" parameterType="pd" resultType="pd">
+        SELECT
+            id,
+            dic_type_id,
+            dic_type_name,
+            dic_type_parent_id,
+            dic_type_flag
+        FROM  uq_dictionary_type
+        where dic_type_flag = 1
+          and dic_type_parent_id = '1022'
+    </select>
+
+
+    <select id="queryExpensesProjectApplyList" resultType="pd" parameterType="pd">
+        SELECT
+               b.project_name as projectName,b.business_id as businessId
+        FROM item_expenses a
+        LEFT JOIN project_apply_main b ON a.project_apply_main_id = b.business_id
+        WHERE a.process_status = 'DICT10171005' AND a.creator_org_id = #{creatorOrgId}
+        <if test="projectName!=null and projectName!=''">
+            and project_name LIKE concat('%',#{projectName},'%')
+        </if>
+        GROUP BY b.business_id,b.project_name
+    </select>
+
+    <select id="queryExpensesMaxMonths"  parameterType="pd" resultType="pd">
+        SELECT
+            MAX(belonging_month) AS belongingMonth
+        FROM item_expenses
+        WHERE process_status = 'DICT10171005' AND creator_org_id = #{creatorOrgId}
+    </select>
+
+</mapper>

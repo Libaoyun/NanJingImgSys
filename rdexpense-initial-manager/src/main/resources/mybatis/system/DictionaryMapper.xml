@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DictionaryMapper">
+    <sql id="Base_Column_List" >
+        id, dic_type_id as dicTypeId, dic_type_name as dicTypeName, dic_enum_id as dicEnumId,
+        dic_enum_name as dicEnumName,remark,is_valid as isValid,is_show as isShow,create_time as createTime,
+        update_time as updateTime,create_user as createUser,update_user as updateUser
+    </sql>
+
+    <sql id="Base_Dictionary_List" >
+        id, dic_type_id as dicTypeId, dic_type_name as dicTypeName,
+         dic_enum_id as dicEnumId,dic_enum_name as dicEnumName,
+         remark,is_valid as isValid,is_show as isShow,
+         create_time as createTime,update_time as updateTime,
+         create_user as createUser,update_user as updateUser
+    </sql>
+
+    <!-- 查询所有数据字典数据 -->
+    <select id="selectDictionaryTreeList" resultType="pd">
+		select
+		dic_type_id as dicTypeId,dic_type_name as dicTypeName
+		from uq_dictionary
+		GROUP BY dic_type_id,dic_type_name
+	</select>
+
+
+
+    <!-- 根据字典类型查询数据字典的枚举值 -->
+    <select id="queryDictionariesList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Dictionary_List" />
+        from uq_dictionary
+        <where>
+            dic_type_id=#{dicTypeId}
+        </where>
+    </select>
+
+    <select id="queryDictionariesByDicEnumName" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Dictionary_List" />
+        from uq_dictionary
+        where  id <![CDATA[ != ]]> #{id}
+    </select>
+
+
+<!-- 插入数据字典值 -->
+    <insert id="insertDictionary" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        insert into uq_dictionary
+        (
+        dic_type_id,
+        dic_type_name,
+        dic_enum_id,
+        dic_enum_name,
+        remark,
+        is_valid,
+        is_show,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+        )values
+        (
+        #{dicTypeId},
+        #{dicTypeName},
+        #{dicEnumId},
+        #{dicEnumName},
+        #{remark},
+        #{isValid},
+        #{isShow},
+        getDate(),
+        getDate(),
+        #{createUserId},
+        #{createUserId}
+        )
+    </insert>
+
+
+    <!-- 根据主键批量删除数据字典数据 -->
+    <delete id="deleteDictionaryInfo" parameterType="java.util.List">
+        DELETE  FROM  uq_dictionary
+        WHERE 1=1 and id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <!-- 下拉菜单使用：根据字典类型查询数据字典的枚举值 -->
+    <select id="selectPullDownDictionaryTreeList" resultType="pd" parameterType="java.util.List">
+        select
+        dic_type_id as dicTypeId,dic_type_name as dicTypeName,dic_enum_id as dicEnumId,dic_enum_name as dicEnumName
+        from uq_dictionary
+        where dic_type_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and is_valid = 1
+    </select>
+
+
+    <!-- 根据字典枚举ID查询数据字典的枚举值 -->
+    <select id="queryEnumList" resultType="pd" parameterType="pd">
+        select
+        <include refid="Base_Dictionary_List" />
+        from uq_dictionary
+        <where>
+            dic_enum_id=#{dicEnumId}
+        </where>
+    </select>
+
+    <select id="selectDictionaryList" resultType="pd" parameterType="pd">
+        select id,dic_enum_id as dicEnumId,dic_enum_name as dicEnumName,dic_type_id as dicTypeId
+        from uq_dictionary
+    </select>
+
+    <update id="updateDictionaryInfoByEnumId" parameterType="pd">
+        update uq_dictionary
+        set
+            <if test="dicEnumName !=null and dicEnumName !=''">
+                dic_enum_name=#{dicEnumName},
+             </if>
+            <if test="dicEnumId !=null and dicEnumId !=''">
+                dic_enum_id=#{dicEnumId},
+            </if>
+            <if test="remark !=null and remark !=''">
+                remark=#{remark},
+            </if>
+        is_valid=#{isValid},
+        update_user=#{createUserId},
+        update_time = getdate()
+        where id = #{id}
+    </update>
+
+
+    <select id="getDicValue" parameterType="java.util.List" resultType="pd">
+        select id,dic_enum_id as dicEnumId,dic_enum_name as dicEnumName
+        from uq_dictionary
+        where 1=1 and dic_type_id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DeviceMapper">
+
+    <sql id="Base">
+        id, device_name as deviceName, device_code as deviceCode, device_serial_num as deviceSerialNum, device_type as deviceType,
+            func_descrip as funcDescrip, department_code as departmentCode, device_model as deviceModel, device_status as deviceStatus
+    </sql>
+
+
+    <insert id="insertDevice" parameterType="pd">
+        insert into imgsys_device_info(id, device_name, device_code, device_serial_num, device_type,
+                                       func_descrip, department_code, device_model, device_status,
+                                       create_user, create_user_id, create_time, update_user, update_user_id,
+                                       update_time)
+        values (#{id}, #{deviceName}, #{deviceCode}, #{deviceSerialNum}, #{deviceType},
+                #{funcDescrip}, #{departmentCode}, #{deviceModel}, #{deviceStatus},
+                #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
+    </insert>
+
+    <!--    查询某设备信息是否存在-->
+    <select id="isExistDevice" parameterType="pd" resultType="pd">
+        select device_name as deviceName
+        from imgsys_device_info
+        <where>
+            <if test="deviceName!=null and deviceName!=''">
+                or device_name = #{deviceName}
+            </if>
+            <if test="deviceCode!=null and deviceCode!=''">
+                or device_code = #{deviceCode}
+            </if>
+            <if test="deviceSerialNum!=null and deviceSerialNum!=''">
+                or device_serial_num = #{deviceSerialNum}
+            </if>
+        </where>
+    </select>
+
+    <!--    查找设备表最大id-->
+    <select id="selectMaxIdAndSerialNum" parameterType="pd" resultType="pd">
+        select max(id) as id, max(device_serial_num) as deviceSerialNum
+        from imgsys_device_info
+        where 1 = 1
+    </select>
+
+    <!--    查询设备可检查部位的表的最大Id-->
+    <select id="selectPartOfDeviceMaxId" parameterType="pd" resultType="pd">
+        select max(id) as id
+        from imgsys_body_part_of_device
+        where 1 = 1
+    </select>
+
+    <!--    新增设备可检查部位    -->
+    <insert id="insertBodyPart" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO imgsys_body_part_of_device
+        (id, serial_num,part_name,part_code,part_serial_num,device_serial_num,
+        create_user, create_user_id, create_time, update_user, update_user_id, update_time
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id},
+            #{item.serialNum},#{item.partName},#{item.partCode},#{item.partSerialNum},#{item.deviceSerialNum},
+            #{item.createUser}, #{item.createUserId}, getDate(), #{item.createUser}, #{item.createUserId},getDate()
+            )
+        </foreach>
+    </insert>
+
+    <!--    删除设备-->
+    <delete id="deleteDevice" parameterType="pd">
+        delete
+        from imgsys_device_info
+        where device_serial_num = #{deviceSerialNum}
+    </delete>
+
+    <!--    删除部位-设备关联表的条目-->
+    <delete id="deleteBodyPartWithDevice" parameterType="pd">
+        delete
+        from imgsys_body_part_of_device
+        where device_serial_num = #{deviceSerialNum}
+    </delete>
+
+    <update id="updateDevice" parameterType="pd">
+        update imgsys_device_info
+        <set>
+            <if test="deviceName!=null and deviceName!=''">
+                device_name = #{deviceName},
+            </if>
+            <if test="deviceCode!=null and deviceCode!=''">
+                device_code = #{deviceCode},
+            </if>
+            <if test="deviceType!=null and deviceType!=''">
+                device_type = #{deviceType},
+            </if>
+            <if test="funcDescrip!=null and funcDescrip!=''">
+                func_descrip = #{funcDescrip},
+            </if>
+            <if test="departmentCode!=null and departmentCode!=''">
+                department_code = #{departmentCode},
+            </if>
+            <if test="deviceModel!=null and deviceModel!=''">
+                device_model = #{deviceModel},
+            </if>
+            <if test="deviceStatus!=null and deviceStatus!=''">
+                device_status = #{deviceStatus},
+            </if>
+            update_user = #{item.createUser}, update_user_id = #{item.createUserId}, update_time = getDate()
+
+        </set>
+        where device_serial_num = #{deviceSerialNum}
+    </update>
+
+    <!--    查询所有设备信息-->
+    <select id="getAllDevice" parameterType="pd" resultType="pd">
+        select
+        <include refid="Base"/>
+        from imgsys_device_info
+        <where>
+            <if test="deviceName!=null and deviceName!=''">
+                and device_name LIKE concat('%',#{deviceName},'%')
+            </if>
+            <if test="deviceCode!=null and deviceCode!=''">
+                and device_code LIKE concat('%',#{deviceCode},'%')
+            </if>
+            <if test="deviceSerialNum!=null and deviceSerialNum!=''">
+                and device_serial_num LIKE concat('%',#{deviceSerialNum},'%')
+            </if>
+            <if test="deviceType!=null and deviceType!=''">
+                and device_type LIKE concat('%',#{deviceType},'%')
+            </if>
+            <if test="departments!=null and departments.size>0">
+                AND department_code in
+                <foreach item="departmentId" collection="departments" separator="," open="(" close=")" index="">
+                    #{departmentId}
+                </foreach>
+            </if>
+            <if test="departmentId!=null and departmentId!=''">
+                AND department_code = #{departmentId}
+            </if>
+            <if test="deviceModel!=null and deviceModel!=''">
+                and device_model LIKE concat('%',#{deviceModel},'%')
+            </if>
+            <if test="deviceStatus!=null and deviceStatus!=''">
+                and device_status LIKE concat('%',#{deviceStatus},'%')
+            </if>
+        </where>
+        order by create_time asc
+    </select>
+
+
+    <!--    根据设备id查询设备原有的关联部位-->
+    <select id="findPartOfDeviceByDevice" parameterType="pd" resultType="pd">
+        SELECT b.part_name,
+               b.part_code,
+               b.part_serial_num,
+               b.part_sketch_file,
+               b.part_discription,
+               b.standard_part_flag
+        FROM imgsys_body_part_of_device bd,
+             imgsys_body_part_info b
+        WHERE bd.part_serial_num = b.part_serial_num
+          AND b.standard_part_flag = 1
+          AND bd.device_serial_num = #{deviceSerialNum}
+        ORDER BY part_code asc
+
+    </select>
+
+    <select id="getBodyPartByDevice" parameterType="pd" resultType="pd">
+        SELECT DISTINCT
+        b.part_name as partName,
+        b.part_code as partCode,
+        b.part_serial_num as partSerialNum,
+        b.part_sketch_file as partSketchFile,
+        b.part_discription as partDiscription,
+        b.standard_part_flag AS standardPartFlag,
+        b.parent_serial_num AS parentSerialNnum
+        FROM
+        imgsys_body_part_of_device bd,
+        imgsys_body_part_info b
+        <where>
+            b.standard_part_flag = 1
+            <if test="deviceSerialNum!=null and deviceSerialNum!=''">
+                AND bd.part_serial_num = b.part_serial_num
+                AND bd.device_serial_num = #{deviceSerialNum}
+            </if>
+        </where>
+        ORDER BY parent_serial_num asc, part_sketch_file desc
+    </select>
+
+
+</mapper>
