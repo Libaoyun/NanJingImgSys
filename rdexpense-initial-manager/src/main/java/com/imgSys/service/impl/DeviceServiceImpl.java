@@ -126,11 +126,11 @@ public class DeviceServiceImpl implements DeviceService {
      */
     @Override
     public List<PageData> getAllDevice(PageData pageData){
-        List<String> departments = Arrays.asList(pageData.getString("departmentId").split(","));
+        /*List<String> departments = Arrays.asList(pageData.getString("departmentId").split(","));
         if (departments.size()>1){
             pageData.put("departments", departments);
             pageData.remove("departmentId");
-        }
+        }*/
         List<PageData> pd = (List<PageData>) baseDao.findForList("DeviceMapper.getAllDevice", pageData);
         for (PageData pageData1 : pd){
             List<PageData> bodyParts = (List<PageData>) baseDao.findForList("DeviceMapper.findPartOfDeviceByDevice", pageData1.getString("deviceSerialNum"));

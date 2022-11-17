@@ -38,7 +38,7 @@
                                           create_user, create_user_id, create_time, update_user, update_user_id,
                                           update_time)
         values (#{id}, #{partName}, #{partCode}, #{partSerialNum}, #{partDiscription}, #{partSketchFile},
-                #{parentSerialNum}, #{departmentCode}, #{standardPartFlag},
+                #{parentSerialNum}, #{departmentId}, #{standardPartFlag},
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
     </insert>
 
@@ -47,12 +47,14 @@
         select part_name as partName
         from imgsys_body_part_info
         <where>
+            department_code = #{departmentId}
             <if test="partName!=null and partName!=''">
-                or part_name = #{partName}
+                AND part_name = #{partName}
             </if>
             <if test="partCode!=null and partCode!=''">
-                or part_code = #{partCode}
+                AND part_code = #{partCode}
             </if>
+
         </where>
     </select>
 
@@ -85,8 +87,8 @@
             <if test="parentSerialNum!=null and parentSerialNum!=''">
                 parent_serial_num = #{parentSerialNum},
             </if>
-            <if test="departmentCode!=null and departmentCode!=''">
-                department_code = #{departmentCode},
+            <if test="departmentId!=null and departmentId!=''">
+                department_code = #{departmentId},
             </if>
             <if test="standardPartFlag!=null and standardPartFlag!=''">
                 standard_part_flag = #{standardPartFlag},
@@ -108,7 +110,7 @@
     <select id="selectCountChild" parameterType="pd" resultType="pd">
         select count(1) as countChild
         from imgsys_body_part_info
-        where parent_serial_num = #{partSerialNum}
+        where parent_serial_num = #{partSerialNum} and department_code = #{departmentId}
     </select>
 
     <!--    根据id查询部位详细信息-->
@@ -131,10 +133,8 @@
         SELECT
         <include refid="Base"/>
         FROM imgsys_body_part_info
-        WHERE department_code in
-        <foreach item="departmentId" collection="list" separator="," open="(" close=")" index="">
-            #{departmentId}
-        </foreach>
+        WHERE
+        department_code = #{departmentId}
         order by partSerialNum asc
     </select>
 
@@ -145,12 +145,6 @@
         FROM imgsys_body_part_info
         <where>
             standard_part_flag = 1
-            <if test="departments!=null and departments.size>0">
-                AND department_code in
-                <foreach item="departmentId" collection="departments" separator="," open="(" close=")" index="">
-                    #{departmentId}
-                </foreach>
-            </if>
             <if test="departmentId!=null and departmentId!=''">
                 AND department_code = #{departmentId}
             </if>

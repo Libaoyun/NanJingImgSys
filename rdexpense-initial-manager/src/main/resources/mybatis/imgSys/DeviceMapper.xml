@@ -14,7 +14,7 @@
                                        create_user, create_user_id, create_time, update_user, update_user_id,
                                        update_time)
         values (#{id}, #{deviceName}, #{deviceCode}, #{deviceSerialNum}, #{deviceType},
-                #{funcDescrip}, #{departmentCode}, #{deviceModel}, #{deviceStatus},
+                #{funcDescrip}, #{departmentId}, #{deviceModel}, #{deviceStatus},
                 #{createUser}, #{createUserId}, getDate(), #{createUser}, #{createUserId}, getDate())
     </insert>
 
@@ -23,14 +23,15 @@
         select device_name as deviceName
         from imgsys_device_info
         <where>
+            department_code = #{departmentId}
             <if test="deviceName!=null and deviceName!=''">
-                or device_name = #{deviceName}
+                AND device_name = #{deviceName}
             </if>
             <if test="deviceCode!=null and deviceCode!=''">
-                or device_code = #{deviceCode}
+                AND device_code = #{deviceCode}
             </if>
             <if test="deviceSerialNum!=null and deviceSerialNum!=''">
-                or device_serial_num = #{deviceSerialNum}
+                AND device_serial_num = #{deviceSerialNum}
             </if>
         </where>
     </select>
@@ -94,7 +95,7 @@
                 func_descrip = #{funcDescrip},
             </if>
             <if test="departmentCode!=null and departmentCode!=''">
-                department_code = #{departmentCode},
+                department_code = #{departmentId},
             </if>
             <if test="deviceModel!=null and deviceModel!=''">
                 device_model = #{deviceModel},
@@ -126,14 +127,8 @@
             <if test="deviceType!=null and deviceType!=''">
                 and device_type LIKE concat('%',#{deviceType},'%')
             </if>
-            <if test="departments!=null and departments.size>0">
-                AND department_code in
-                <foreach item="departmentId" collection="departments" separator="," open="(" close=")" index="">
-                    #{departmentId}
-                </foreach>
-            </if>
             <if test="departmentId!=null and departmentId!=''">
-                AND department_code = #{departmentId}
+                department_code = #{departmentId},
             </if>
             <if test="deviceModel!=null and deviceModel!=''">
                 and device_model LIKE concat('%',#{deviceModel},'%')

@@ -57,7 +57,7 @@ public class DeviceController extends BaseController {
         CheckParameter.stringLengthAndEmpty(pd.getString("deviceName"), "设备名称",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("deviceCode"), "设备资产编码",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("deviceModel"), "设备型号",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "所属科室编码",128);
+//        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "所属科室编码",128);
 
         ResponseEntity result = null;
         try {
@@ -147,7 +147,7 @@ public class DeviceController extends BaseController {
      * @return
      */
     @GetMapping("/sketch")
-    @ApiOperation(value = "新增设备/修改设备时可见部位示意图")
+    @ApiOperation(value = "新增设备/修改设备时可选部位示意图")
     public ResponseEntity<List<BodyPart>> getBodyPartByDevice(Device device) {
         PageData pd = this.getParamsFormat("XML");
         try {

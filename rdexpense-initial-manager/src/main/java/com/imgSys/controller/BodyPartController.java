@@ -52,7 +52,7 @@ public class BodyPartController extends BaseController {
         CheckParameter.stringLengthAndEmpty(pd.getString("parentSerialNum"), "父部位序列号",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("partName"), "部位名称",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("partCode"), "部位编码",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "所属科室编码",128);
+//        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "所属科室编码",128);
 
         ResponseEntity result = null;
         try {
@@ -71,6 +71,8 @@ public class BodyPartController extends BaseController {
     @ApiOperation(value = "对相应部位添加(上传)示意图")
     @PostMapping(value = "/upload")
     public ResponseEntity<AttachmentDto> upload(BodyPartImgDto bodyPartImgDto) {
+        PageData pd = this.getParams();
+        CheckParameter.stringLengthAndEmpty(pd.getString("partSerialNum"), "部位序列号",128);
         try {
             MultipartFile file = bodyPartImgDto.getFile();
             String fileName = file.getOriginalFilename();
@@ -112,7 +114,7 @@ public class BodyPartController extends BaseController {
         CheckParameter.stringLengthAndEmpty(pd.getString("partSerialNum"), "部位序列号",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("partName"), "部位名称",128);
         CheckParameter.stringLengthAndEmpty(pd.getString("partCode"), "部位编码",128);
-        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "所属科室编码",128);
+//        CheckParameter.stringLengthAndEmpty(pd.getString("departmentCode"), "所属科室编码",128);
         ResponseEntity result = null;
         try {
             bodyPartService.updateBodyPart(pd);

@@ -41,9 +41,9 @@ public class BodyPartServiceImpl implements BodyPartService {
         }
         // FIXME 这里默认序列号自增，待讨论修改
         PageData maxIdData = (PageData) baseDao.findForObject("BodyPartMapper.selectMaxIdAndSerialNum", pd);
-        // FIXME 这里默认为非标准部位
+        // FIXME 这里默认为标准部位
         if (pd.getString("standardPartFlag") == null){
-            pd.put("standardPartFlag", "0");
+            pd.put("standardPartFlag", "1");
         }
         Integer maxId = (maxIdData == null || maxIdData.getInt("id") == null) ? 0 : maxIdData.getInt("id") + 1;
         // FIXME 这里待讨论序列号初始值为多少，默认300000
@@ -102,8 +102,8 @@ public class BodyPartServiceImpl implements BodyPartService {
     @Transactional
     public List<PageData> getAllBodyPart(String rootSerialNum, PageData pageData) {
         List<PageData> result = new LinkedList<>();
-        List departments = Arrays.asList(pageData.getString("departmentId").split(","));
-        List<PageData> pd = (List<PageData>) baseDao.findForList("BodyPartMapper.getAllBodyPart", departments);
+//        List departments = Arrays.asList(pageData.getString("departmentId").split(","));
+        List<PageData> pd = (List<PageData>) baseDao.findForList("BodyPartMapper.getAllBodyPart", pageData);
         // 这里暂时不需要返回base64信息
         /*for (PageData pageData : pd){
             if (pageData.getString("partSketchFile")!=null && pageData.getString("partSketchFile")!= ""){

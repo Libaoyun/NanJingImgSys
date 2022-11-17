@@ -77,10 +77,8 @@ public class DiagnosticItemServiceImpl implements DiagnosticItemService {
     @Override
     public List<PageData> getAllDiagnosticItem(String rootSerialNum, PageData pageData) {
         List<PageData> result = new LinkedList<>();
-        // 将用户所属所有部门查出
-        List departments = Arrays.asList(pageData.getString("departmentId").split(","));
 //        先找出所有项目
-        List<PageData> pd = (List<PageData>) baseDao.findForList("DiagnosticItemMapper.getAllDiagnosticItem", departments);
+        List<PageData> pd = (List<PageData>) baseDao.findForList("DiagnosticItemMapper.getAllDiagnosticItem", pageData);
         if (pd != null && pd.size() > 0) {
             // 然后将所有项目进行整理，以父-子顺序排序
             List<PageData> list = recursiveTreeDiagnosticItemList(rootSerialNum, pd);
